@@ -24,8 +24,8 @@ export default defineConfig({
         short_name: "3ducation",
         description:
           "A free, interactive 3D science lab: physics, chemistry, math and astronomy you can touch.",
-        theme_color: "#C06A12",
-        background_color: "#F6F3EC",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
         display: "standalone",
         start_url: base,
         scope: base,
