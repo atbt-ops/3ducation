@@ -14,7 +14,7 @@ app.innerHTML = `
         <ellipse cx="13" cy="13" rx="12" ry="5.2" stroke="currentColor" stroke-width="1.4"/>
         <ellipse cx="13" cy="13" rx="12" ry="5.2" stroke="currentColor" stroke-width="1.4" transform="rotate(60 13 13)"/>
       </svg>
-      <span class="brand-word">3<span>ducation</span></span>
+      <span class="brand-word"><span class="d3">3d</span>ucation</span>
     </a>
     <nav class="crumbs" id="crumbs" aria-live="polite">Workshop</nav>
   </header>
@@ -52,7 +52,7 @@ function ensureViewer() {
 }
 
 function loop(t) {
-  const dt = Math.min(0.05, (t - lastT) / 1000);
+  const dt = Math.max(0, Math.min(0.05, (t - lastT) / 1000));
   lastT = t;
   if (active && viewer) {
     active.update(dt, viewer);
@@ -107,10 +107,11 @@ function renderHome() {
 
   main.innerHTML = `
     <section class="hero">
-      <span class="eyebrow">${MODULES.length} working instruments · free forever</span>
+      <span class="eyebrow">${MODULES.length} instruments · hands-on <span class="d3">3D</span> · free forever</span>
       <h1>Science you can pick up and turn over.</h1>
-      <p>Every model runs on the same equations and measurements scientists use. Drag to orbit, tune
-      the dials, read the short lesson, then check yourself. No sign-up, works offline.</p>
+      <p>Every model is a real <span class="d3">3D</span> object running on the same equations
+      scientists use. Drag to orbit, tune the dials, read the short lesson, then check yourself.
+      No sign-up, works offline.</p>
       <p class="progress-line" role="status">
         <strong>${s.visited}</strong> of ${s.total} explored ·
         <strong>${s.mastered}</strong> mastered
@@ -142,7 +143,8 @@ function renderHome() {
     paint();
   });
 
-  main.focus();
+  window.scrollTo({ top: 0 });
+  main.focus({ preventScroll: true });
 }
 
 /* ---------------- module view ---------------- */
@@ -190,7 +192,8 @@ function renderModule(id) {
   m.onEnter?.(viewer);
   active = m;
   viewer.resize(stageWrap);
-  main.focus();
+  window.scrollTo({ top: 0 });
+  main.focus({ preventScroll: true });
 }
 
 /* ---------------- router ---------------- */

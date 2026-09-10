@@ -7,80 +7,104 @@ sceneLights(scene, { ambient: 0.62, dir: 0.8 });
 const group = new THREE.Group();
 scene.add(group);
 
-// Rounded-rectangle loop of wire.
-const W = 3.2;
-const H = 2.0;
-const pts = [];
-const seg = 24;
-const corners = [
-  [-W, H], [W, H], [W, -H], [-W, -H],
+// Rectangular loop of wire. Corners, clockwise from top-left.
+const W = 2.7;
+const H = 1.8;
+const CORNERS = [
+  new THREE.Vector3(-W, H, 0),
+  new THREE.Vector3(W, H, 0),
+  new THREE.Vector3(W, -H, 0),
+  new THREE.Vector3(-W, -H, 0),
 ];
-for (let c = 0; c < 4; c++) {
-  const [x0, y0] = corners[c];
-  const [x1, y1] = corners[(c + 1) % 4];
-  for (let i = 0; i < seg; i++) {
-    const t = i / seg;
-    pts.push(new THREE.Vector3(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 0));
-  }
-}
-const curve = new THREE.CatmullRomCurve3(pts, true, "catmullrom", 0.02);
-const wire = new THREE.Mesh(
-  new THREE.TubeGeometry(curve, 240, 0.06, 10, true),
-  new THREE.MeshStandardMaterial({ color: 0xb08d57, metalness: 0.7, roughness: 0.35 })
-);
-group.add(wire);
 
-// Battery on the bottom edge.
+// Edge list with cumulative length, for analytic travel around the loop.
+const EDGES = [];
+let perimeter = 0;
+for (let i = 0; i < 4; i++) {
+  const a = CORNERS[i];
+  const b = CORNERS[(i + 1) % 4];
+  const len = a.distanceTo(b);
+  EDGES.push({ a, b, len, start: perimeter });
+  perimeter += len;
+}
+
+/** Point at fraction f (0..1) around the loop. */
+function loopPoint(f, out = new THREE.Vector3()) {
+  let d = (((f % 1) + 1) % 1) * perimeter;
+  for (const e of EDGES) {
+    if (d <= e.len || e === EDGES[3]) {
+      return out.lerpVectors(e.a, e.b, e.len ? d / e.len : 0);
+    }
+    d -= e.len;
+  }
+  return out.copy(EDGES[0].a);
+}
+
+const wireMat = new THREE.MeshStandardMaterial({
+  color: 0xb0803f,
+  metalness: 0.7,
+  roughness: 0.35,
+});
+EDGES.forEach((e) => {
+  const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, e.len, 12), wireMat);
+  seg.position.copy(e.a).add(e.b).multiplyScalar(0.5);
+  seg.quaternion.setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    new THREE.Vector3().subVectors(e.b, e.a).normalize()
+  );
+  group.add(seg);
+});
+CORNERS.forEach((c) => {
+  const j = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 10), wireMat);
+  j.position.copy(c);
+  group.add(j);
+});
+
+// Battery straddling the bottom edge.
 const battery = new THREE.Mesh(
-  new THREE.BoxGeometry(1.1, 0.5, 0.5),
+  new THREE.BoxGeometry(1.2, 0.55, 0.55),
   new THREE.MeshStandardMaterial({ color: 0x23271f, metalness: 0.3, roughness: 0.6 })
 );
 battery.position.set(0, -H, 0);
 group.add(battery);
-const nub = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.08, 0.08, 0.18, 12),
-  new THREE.MeshStandardMaterial({ color: 0xd9a54a, metalness: 0.6, roughness: 0.3 })
-);
-nub.rotation.z = Math.PI / 2;
-nub.position.set(0.65, -H, 0);
-group.add(nub);
-
-// Bulb on the top edge.
-const bulbMat = new THREE.MeshStandardMaterial({
-  color: 0xfff0c8,
-  emissive: 0xffcf6b,
-  emissiveIntensity: 0,
-  roughness: 0.2,
+["+0.72", "-0.72"].forEach((x) => {
+  const term = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.07, 0.07, 0.2, 12),
+    new THREE.MeshStandardMaterial({ color: 0xd9a54a, metalness: 0.6, roughness: 0.3 })
+  );
+  term.rotation.z = Math.PI / 2;
+  term.position.set(parseFloat(x), -H, 0);
+  group.add(term);
 });
-const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.42, 24, 18), bulbMat);
+
+// Bulb straddling the top edge.
+const bulbMat = new THREE.MeshStandardMaterial({
+  color: 0xfff2d2,
+  emissive: 0xffc860,
+  emissiveIntensity: 0,
+  roughness: 0.18,
+});
+const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.44, 24, 18), bulbMat);
 bulb.position.set(0, H, 0);
 group.add(bulb);
-const glow = new THREE.PointLight(0xffce7a, 0, 6);
+const glow = new THREE.PointLight(0xffce7a, 0, 7);
 glow.position.copy(bulb.position);
 group.add(glow);
 
-// Electron markers.
-const N = 40;
+// Electron markers spread evenly around the loop.
+const N = 44;
+const electronMat = new THREE.MeshBasicMaterial({ color: 0x54c7b4 });
 const electronGeo = new THREE.SphereGeometry(0.07, 10, 8);
-const electronMat = new THREE.MeshBasicMaterial({ color: 0x6fc3b4 });
 const electrons = [];
 for (let i = 0; i < N; i++) {
   const m = new THREE.Mesh(electronGeo, electronMat);
-  m.userData.t = i / N;
+  m.userData.f = i / N;
+  loopPoint(m.userData.f, m.position);
   group.add(m);
   electrons.push(m);
 }
 
-const state = { volts: 6, ohms: 8, flow: 0 };
-
-function place() {
-  electrons.forEach((m) => {
-    const p = curve.getPointAt(m.userData.t % 1);
-    m.position.copy(p);
-  });
-}
-place();
-
+const state = { volts: 6, ohms: 8, current: 0 };
 const els = {};
 
 export default {
@@ -91,7 +115,7 @@ export default {
   blurb: "Turn the dials, watch the current and the glow.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="9" width="26" height="22" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="9" r="3.4" fill="currentColor"/><path d="M13 31v3M27 31v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   scene,
-  view: { target: [0, 0, 0], radius: 8.5, theta: 0.2, phi: 1.35, minRadius: 4, maxRadius: 16 },
+  view: { target: [0, 0, 0], radius: 10.5, theta: 0.08, phi: 1.47, minRadius: 5, maxRadius: 18 },
 
   lesson: `
     <p>Push (voltage, volts) drives flow (current, amps) against opposition (resistance, ohms). Ohm
@@ -148,15 +172,15 @@ export default {
 
     const sync = () => {
       const { current, power } = ohms({ volts: state.volts, ohms: state.ohms });
+      state.current = current;
       els.vval.textContent = `${state.volts.toFixed(1)} V`;
       els.rval.textContent = `${state.ohms.toFixed(1)} Ω`;
       els.i.textContent = `${current.toFixed(2)} A`;
       els.i2.textContent = `${current.toFixed(2)} A`;
       els.p.textContent = `${power.toFixed(1)} W`;
       const lit = Math.min(1, power / 18);
-      bulbMat.emissiveIntensity = lit * 2.2;
-      glow.intensity = lit * 3;
-      state.flow = current;
+      bulbMat.emissiveIntensity = lit * 2.4;
+      glow.intensity = lit * 3.2;
     };
     els.v.addEventListener("input", () => ((state.volts = parseFloat(els.v.value)), sync()));
     els.r.addEventListener("input", () => ((state.ohms = parseFloat(els.r.value)), sync()));
@@ -164,11 +188,11 @@ export default {
   },
 
   update(dt) {
-    const v = state.flow * 0.06 * dt;
-    electrons.forEach((m) => {
-      m.userData.t = (m.userData.t + v) % 1;
-      m.position.copy(curve.getPointAt(m.userData.t));
-    });
+    const step = state.current * 0.03 * dt;
+    for (const m of electrons) {
+      m.userData.f = (m.userData.f + step) % 1;
+      loopPoint(m.userData.f, m.position);
+    }
   },
 
   onEnter() {},

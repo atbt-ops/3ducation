@@ -72,7 +72,7 @@ export default {
   blurb: "Pluck a string into its harmonics.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 20c5-12 10-12 15 0s10 12 15 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="20" r="2.4" fill="currentColor"/><circle cx="35" cy="20" r="2.4" fill="currentColor"/></svg>',
   scene,
-  view: { target: [0, 0, 0], radius: 8, theta: 0.15, phi: 1.4, minRadius: 4, maxRadius: 14 },
+  view: { target: [0, 0, 0], radius: 9, theta: 0.1, phi: 1.5, minRadius: 4, maxRadius: 15 },
 
   lesson: `
     <p>A string clamped at both ends can only vibrate in shapes that fit whole loops between the ends.

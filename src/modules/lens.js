@@ -79,15 +79,18 @@ group.add(ray1, ray2);
 
 const state = { f: 1.6, distance: 4 };
 
+const EDGE = 8.5; // where rays leave the diagram
+
 function refresh() {
   const { imageDist, magnification, real, inverted } = thinLens(state.f, state.distance);
   const objX = -state.distance;
-  const imgX = real ? imageDist : imageDist; // di<0 → left of lens (virtual)
   const imgH = magnification * OBJ_H;
+  // Near dₒ = f the image races off to infinity; keep the drawing on the canvas.
+  const onCanvas = Number.isFinite(imageDist) && Math.abs(imageDist) <= EDGE * 1.4;
 
   setArrow(objArrow, objX, OBJ_H);
-  setArrow(imgArrow, imgX, imgH || 0.001);
-  imgArrow.g.visible = Number.isFinite(imageDist);
+  if (onCanvas) setArrow(imgArrow, imageDist, imgH || 0.001);
+  else imgArrow.g.visible = false;
 
   fNear.position.set(-state.f, 0, 0);
   fFar.position.set(state.f, 0, 0);
@@ -95,17 +98,21 @@ function refresh() {
   const tip = new THREE.Vector3(objX, OBJ_H, 0);
   const lensTop = new THREE.Vector3(0, OBJ_H, 0);
   const center = new THREE.Vector3(0, 0, 0);
-  const imgTip = new THREE.Vector3(imgX, imgH, 0);
+  const imgTip = new THREE.Vector3(imageDist, imgH, 0);
 
-  // Ray 1: parallel in, through far focus (toward image tip).
+  // Ray 1: parallel to the axis, then bent through the far focus.
+  const ray1Slope = -OBJ_H / state.f; // after the lens
   ray1.geometry.setFromPoints(
-    Number.isFinite(imageDist)
+    onCanvas
       ? [tip, lensTop, imgTip]
-      : [tip, lensTop, new THREE.Vector3(8, OBJ_H - (OBJ_H / state.f) * 8, 0)]
+      : [tip, lensTop, new THREE.Vector3(EDGE, OBJ_H + ray1Slope * EDGE, 0)]
   );
-  // Ray 2: straight through lens centre.
+  // Ray 2: straight through the lens centre.
+  const ray2Slope = -OBJ_H / state.distance;
   ray2.geometry.setFromPoints(
-    Number.isFinite(imageDist) ? [tip, center, imgTip] : [tip, center, new THREE.Vector3(8, (center.y - tip.y) / (0 - objX) * (8 - 0), 0)]
+    onCanvas
+      ? [tip, center, imgTip]
+      : [tip, center, new THREE.Vector3(EDGE, ray2Slope * EDGE, 0)]
   );
 
   return { imageDist, magnification, real, inverted };
@@ -122,7 +129,7 @@ export default {
   blurb: "Slide the object and find where the image lands.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6c5 6 5 22 0 28-5-6-5-22 0-28Z" stroke="currentColor" stroke-width="2"/><path d="M4 20h32" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 3"/></svg>',
   scene,
-  view: { target: [0, 0.4, 0], radius: 10, theta: 0.35, phi: 1.3, minRadius: 5, maxRadius: 18 },
+  view: { target: [0, 0.3, 0], radius: 15, theta: 0.12, phi: 1.44, minRadius: 7, maxRadius: 30 },
 
   lesson: `
     <p>A converging lens bends parallel light to a single point — the <strong>focal point</strong>, a
