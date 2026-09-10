@@ -162,6 +162,13 @@ export default {
     },
   ],
 
+  presets: [
+    { label: "Camera", note: "Object far outside f → a small, real, inverted image on the sensor.", values: { "ln-f": 1.2, "ln-d": 6 } },
+    { label: "1:1 macro", note: "Object at 2f → image at 2f, same size, inverted.", values: { "ln-f": 1.6, "ln-d": 3.2 } },
+    { label: "At the focal point", note: "Object exactly at f → rays leave parallel, image at infinity.", values: { "ln-f": 2, "ln-d": 2 } },
+    { label: "Magnifying glass", note: "Object inside f → a large, upright, virtual image on the same side.", values: { "ln-f": 2.4, "ln-d": 1.2 } },
+  ],
+
   panelHTML() {
     return `
       <div class="formula"><span>1/f = 1/dₒ + 1/dᵢ</span><b class="mono" id="ln-di">—</b></div>

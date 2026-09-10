@@ -94,6 +94,11 @@ export class Viewer {
     );
   }
 
+  /** Flat modules (charts, diagrams) skip tone mapping so palette colours stay true. */
+  setFlat(flat) {
+    this.renderer.toneMapping = flat ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+  }
+
   applyView(v = {}) {
     this.target.set(...(v.target || [0, 0, 0]));
     this.wantTarget.copy(this.target);

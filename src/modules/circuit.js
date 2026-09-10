@@ -146,6 +146,14 @@ export default {
     },
   ],
 
+  presets: [
+    { label: "Ohm's example", note: "12 V across 4 Ω → exactly 3 A.", values: { "ci-v": 12, "ci-r": 4 } },
+    { label: "Double the volts", note: "From 6 V/6 Ω, doubling V doubles the current and quadruples the power — watch the glow jump.", values: { "ci-v": 12, "ci-r": 6 } },
+    { label: "Double the ohms", note: "From 6 V/6 Ω, doubling R halves the current.", values: { "ci-v": 6, "ci-r": 12 } },
+    { label: "Dim trickle", note: "Low voltage into high resistance: barely any current, no glow.", values: { "ci-v": 2, "ci-r": 20 } },
+    { label: "Bright & hot", note: "Max voltage, low resistance: highest power here.", values: { "ci-v": 12, "ci-r": 1.5 } },
+  ],
+
   panelHTML() {
     return `
       <div class="formula"><span>I = V / R</span><b class="mono" id="ci-i">—</b></div>

@@ -86,6 +86,13 @@ export default {
     },
   ],
 
+  presets: [
+    { label: "Wide fringes", note: "Long wavelength, close sources — only a few broad bands.", values: { "wv-l": 2.4, "wv-s": 1.0 } },
+    { label: "Tight fringes", note: "Short wavelength, wide sources — many closely-spaced bands.", values: { "wv-l": 0.6, "wv-s": 4.0 } },
+    { label: "Two-slit classic", note: "The double-slit pattern Young used to show light is a wave.", values: { "wv-l": 1.1, "wv-s": 2.6 } },
+    { label: "Point source", note: "Turn the second source off — plain circular ripples, no interference.", values: { "wv-l": 1.2, "wv-s": 2.4 } },
+  ],
+
   panelHTML() {
     return `
       <div class="control"><div class="row"><label for="wv-l">Wavelength</label><output id="wv-lval" for="wv-l"></output></div>

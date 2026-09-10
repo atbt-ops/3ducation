@@ -104,6 +104,34 @@ export default {
     },
   ],
 
+  presets: [
+    {
+      label: "Seconds pendulum",
+      note: "A rod just under 1 m long ticks once per second each way — the heart of the pendulum clock.",
+      values: { "pd-L": 0.99, "pd-g": 9.8, "pd-a": 12 },
+    },
+    {
+      label: "On the Moon",
+      note: "Same rod, one-sixth gravity: the period stretches to about 2.5× its Earth value.",
+      values: { "pd-g": 1.6 },
+    },
+    {
+      label: "On Jupiter",
+      note: "24.8 m/s² — the fastest swing available here.",
+      values: { "pd-g": 24.8 },
+    },
+    {
+      label: "Long & lazy",
+      note: "Quadruple the length and the period only doubles: T grows with √L.",
+      values: { "pd-L": 3.2, "pd-g": 9.8 },
+    },
+    {
+      label: "Wide swing",
+      note: "At 80° the true period runs noticeably longer than the small-angle formula predicts.",
+      values: { "pd-a": 80 },
+    },
+  ],
+
   panelHTML() {
     return `
       <div class="formula"><span>T = 2π√(L/g)</span><b class="mono" id="pd-period">—</b></div>

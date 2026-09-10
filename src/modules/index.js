@@ -1,10 +1,12 @@
 import pendulum from "./pendulum.js";
 import projectile from "./projectile.js";
+import spring from "./spring.js";
 import circuit from "./circuit.js";
 import waves from "./waves.js";
 import standing from "./standing.js";
 import lens from "./lens.js";
 import molecule from "./molecule.js";
+import periodic from "./periodic.js";
 import solids from "./solids.js";
 import grapher from "./grapher.js";
 import orrery from "./orrery.js";
@@ -13,11 +15,13 @@ import orrery from "./orrery.js";
 export const MODULES = [
   pendulum,
   projectile,
+  spring,
   circuit,
   waves,
   standing,
   lens,
   molecule,
+  periodic,
   solids,
   grapher,
   orrery,

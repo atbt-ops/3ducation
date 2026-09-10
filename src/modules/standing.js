@@ -106,6 +106,13 @@ export default {
     },
   ],
 
+  presets: [
+    { label: "Fundamental", note: "One loop, no interior nodes — the lowest note the string can play (110 Hz).", values: { "sw-n": 1 } },
+    { label: "Octave (2nd)", note: "Two loops, one node in the middle. 220 Hz — exactly an octave up.", values: { "sw-n": 2 } },
+    { label: "Perfect fifth (3rd)", note: "Three loops, 330 Hz — an octave and a fifth above the fundamental.", values: { "sw-n": 3 } },
+    { label: "Highest here (6th)", note: "Six loops, five nodes, 660 Hz.", values: { "sw-n": 6 } },
+  ],
+
   panelHTML() {
     return `
       <div class="formula"><span>fₙ = n · f₁</span><b class="mono" id="sw-f">—</b></div>

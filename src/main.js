@@ -3,6 +3,7 @@ import { Viewer } from "./engine/viewer.js";
 import { MODULES, MODULE_IDS, SUBJECTS, getModule } from "./modules/index.js";
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
+import { mountPresets } from "./learn/presets.js";
 
 const app = document.getElementById("app");
 
@@ -109,11 +110,11 @@ function renderHome() {
 
   main.innerHTML = `
     <section class="hero">
-      <span class="eyebrow">${MODULES.length} instruments · hands-on <span class="d3">3D</span> · free forever</span>
+      <span class="eyebrow">${MODULES.length} instruments · 118 elements · any formula · free</span>
       <h1>Science you can pick up and turn over.</h1>
       <p>Every model is a real <span class="d3">3D</span> object running on the same equations
-      scientists use. Drag to orbit, tune the dials, read the short lesson, then check yourself.
-      No sign-up, works offline.</p>
+      scientists use — with dozens of guided experiments and a formula box that plots whatever you
+      type. Drag to orbit, tune the dials, check yourself. No sign-up, works offline.</p>
       <p class="progress-line" role="status">
         <strong>${s.visited}</strong> of ${s.total} explored ·
         <strong>${s.mastered}</strong> mastered
@@ -183,6 +184,7 @@ function renderModule(id) {
           <summary>Learn</summary>
           <div class="lesson-body">${m.lesson}</div>
         </details>
+        <div class="presets" id="presets" hidden></div>
         <div class="panel" id="panel"></div>
         <div class="quiz-slot" id="quiz"></div>
       </aside>
@@ -205,9 +207,11 @@ function renderModule(id) {
   panel.innerHTML = m.panelHTML();
   m.wire(panel);
 
+  mountPresets(main.querySelector("#presets"), m.presets, panel);
   mountQuiz(main.querySelector("#quiz"), m.id, m.quiz);
 
   viewer.applyView(m.view);
+  viewer.setFlat(!!m.flat);
   m.onEnter?.(viewer);
   active = m;
   viewer.resize(stageWrap);

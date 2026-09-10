@@ -1,71 +1,69 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
+import { compile, isValidExpr } from "../lib/expr.js";
 
 const scene = new THREE.Scene();
-sceneLights(scene, { ambient: 0.7, dir: 0.85 });
+sceneLights(scene, { ambient: 0.72, dir: 0.9 });
 
 const RANGE = 3;
-const SEG = 80;
+const SEG = 84;
 const geo = new THREE.PlaneGeometry(RANGE * 2, RANGE * 2, SEG, SEG);
 geo.rotateX(-Math.PI / 2);
 const base = geo.attributes.position.array.slice();
 const pos = geo.attributes.position;
-const colors = new Float32Array((pos.count) * 3);
+const colors = new Float32Array(pos.count * 3);
 geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
 const surface = new THREE.Mesh(
   geo,
-  new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.05, side: THREE.DoubleSide })
+  new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.5,
+    metalness: 0.04,
+    side: THREE.DoubleSide,
+  })
 );
 scene.add(surface);
 
-const axesMat = new THREE.LineBasicMaterial({ color: 0x63665a });
-const axes = new THREE.LineSegments(
-  new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-RANGE, 0, 0), new THREE.Vector3(RANGE, 0, 0),
-    new THREE.Vector3(0, 0, -RANGE), new THREE.Vector3(0, 0, RANGE),
-    new THREE.Vector3(0, -RANGE, 0), new THREE.Vector3(0, RANGE, 0),
-  ]),
-  axesMat
+scene.add(
+  new THREE.LineSegments(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-RANGE, 0, 0), new THREE.Vector3(RANGE, 0, 0),
+      new THREE.Vector3(0, 0, -RANGE), new THREE.Vector3(0, 0, RANGE),
+      new THREE.Vector3(0, -RANGE, 0), new THREE.Vector3(0, RANGE, 0),
+    ]),
+    new THREE.LineBasicMaterial({ color: 0x9a9a94 })
+  )
 );
-scene.add(axes);
 
-const FUNCS = {
-  saddle: { label: "Saddle", expr: "z = k·(x² − y²)", f: (x, y, k) => k * (x * x - y * y) },
-  paraboloid: { label: "Bowl", expr: "z = k·(x² + y²)", f: (x, y, k) => k * (x * x + y * y) },
-  ripple: { label: "Ripple", expr: "z = k·sin(x² + y²)", f: (x, y, k) => k * Math.sin(x * x + y * y) * 1.6 },
-  gaussian: { label: "Bell", expr: "z = k·e^−(x² + y²)", f: (x, y, k) => k * Math.exp(-(x * x + y * y)) * 2.4 },
-  monkey: { label: "Monkey saddle", expr: "z = k·(x³ − 3xy²)", f: (x, y, k) => k * (x * x * x - 3 * x * y * y) * 0.4 },
-  waves: { label: "Egg carton", expr: "z = k·sin(2x)·cos(2y)", f: (x, y, k) => k * Math.sin(2 * x) * Math.cos(2 * y) * 1.6 },
-};
-const order = ["saddle", "paraboloid", "ripple", "gaussian", "monkey", "waves"];
-let current = "saddle";
-let k = 0.6;
-let spin = false;
+const DEFAULT = "k*(x^2 - y^2)";
+const state = { expr: DEFAULT, k: 0.6, fn: compile(DEFAULT, ["x", "y", "k"]), spin: false };
 
-const lo = new THREE.Color(0x2c6e6b);
-const mid = new THREE.Color(0xf3eedf);
-const hi = new THREE.Color(0xa9762e);
+const lo = new THREE.Color(0x0f6b63);
+const mid = new THREE.Color(0xf1ede1);
+const hi = new THREE.Color(0xb1520b);
 const tmp = new THREE.Color();
 
 function rebuild() {
-  const fn = FUNCS[current].f;
   const arr = pos.array;
   let minH = Infinity;
   let maxH = -Infinity;
+  const scope = { x: 0, y: 0, k: state.k };
   for (let i = 0; i < arr.length; i += 3) {
-    const x = base[i];
-    const y = base[i + 2];
-    const h = fn(x, y, k);
+    scope.x = base[i];
+    scope.y = base[i + 2];
+    let h = state.fn(scope);
+    if (!Number.isFinite(h)) h = 0;
+    h = Math.max(-4.5, Math.min(4.5, h));
     arr[i + 1] = h;
     if (h < minH) minH = h;
     if (h > maxH) maxH = h;
   }
   const span = maxH - minH || 1;
   for (let i = 0, c = 0; i < arr.length; i += 3, c += 3) {
-    const t = (arr[i + 1] - minH) / span;
-    if (t < 0.5) tmp.copy(lo).lerp(mid, t * 2);
-    else tmp.copy(mid).lerp(hi, (t - 0.5) * 2);
+    const f = (arr[i + 1] - minH) / span;
+    if (f < 0.5) tmp.copy(lo).lerp(mid, f * 2);
+    else tmp.copy(mid).lerp(hi, (f - 0.5) * 2);
     colors[c] = tmp.r;
     colors[c + 1] = tmp.g;
     colors[c + 2] = tmp.b;
@@ -80,22 +78,23 @@ const els = {};
 
 export default {
   id: "grapher",
-  name: "Surface grapher",
+  name: "Surface studio",
   tag: "Math · Functions",
   subject: "Math",
-  blurb: "Plot z = f(x, y) and walk around the result.",
+  blurb: "Type any z = f(x, y) and walk around it.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 28c6 0 6-14 14-14s8 12 14 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 34h28M8 34V12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/></svg>',
   scene,
-  view: { target: [0, 0.3, 0], radius: 8, theta: 0.8, phi: 1.0, minRadius: 3.5, maxRadius: 16 },
+  view: { target: [0, 0, 0], radius: 11.5, theta: 0.8, phi: 0.92, minRadius: 4, maxRadius: 20 },
 
   lesson: `
     <p>A function of two variables assigns a height <span class="mono">z</span> to every point
-    <span class="mono">(x, y)</span> on the floor. Plot all those heights and you get a
+    <span class="mono">(x, y)</span> on the floor. Plot every height and you get a
     <strong>surface</strong>.</p>
-    <p>The shapes tell a story. A bowl <span class="mono">x² + y²</span> has one lowest point. A saddle
-    <span class="mono">x² − y²</span> curves up one way and down the other — it has a critical point
-    that is neither a peak nor a valley. Colour here runs low → high, so you can read the terrain at a
-    glance.</p>
+    <p>Type your own formula below — it may use <span class="mono">x</span>, <span class="mono">y</span>,
+    the slider <span class="mono">k</span>, the constants <span class="mono">pi</span> and
+    <span class="mono">e</span>, and functions like <span class="mono">sin</span>,
+    <span class="mono">cos</span>, <span class="mono">exp</span>, <span class="mono">sqrt</span>,
+    <span class="mono">abs</span>, <span class="mono">atan2</span>. Colour runs low → high.</p>
   `,
 
   quiz: [
@@ -117,62 +116,75 @@ export default {
       explain: "Opposite curvature in the two axes gives the saddle (or Pringle) shape.",
     },
     {
-      q: "Increasing the coefficient k in z = k·(x² + y²) makes the bowl…",
+      q: "Increasing k in z = k·(x² + y²) makes the bowl…",
       choices: ["wider and flatter", "steeper", "upside down", "unchanged"],
       answer: 1,
       explain: "k scales every height, so the walls rise faster — a steeper bowl.",
     },
   ],
 
+  presets: [
+    { label: "Bowl", note: "z = k·(x² + y²) — one minimum at the origin.", values: { "gr-expr": "k*(x^2 + y^2)" } },
+    { label: "Saddle", note: "z = k·(x² − y²) — up along x, down along y.", values: { "gr-expr": "k*(x^2 - y^2)" } },
+    { label: "Bell", note: "A Gaussian bump: z = 3k·e^−(x² + y²).", values: { "gr-expr": "3*k*exp(-(x^2 + y^2))" } },
+    { label: "Ripple", note: "Concentric rings: z = 1.6k·sin(x² + y²).", values: { "gr-expr": "1.6*k*sin(x^2 + y^2)" } },
+    { label: "Egg carton", note: "z = 1.6k·sin(2x)·cos(2y).", values: { "gr-expr": "1.6*k*sin(2*x)*cos(2*y)" } },
+    { label: "Monkey saddle", note: "Three ways down: z = 0.4k·(x³ − 3xy²).", values: { "gr-expr": "0.4*k*(x^3 - 3*x*y^2)" } },
+    { label: "Cone", note: "z = 1.4k·√(x² + y²) — a sharp point at the origin.", values: { "gr-expr": "1.4*k*sqrt(x^2 + y^2)" } },
+    { label: "Rose", note: "A polar flower: z = 2k·sin(3·atan2(y, x)).", values: { "gr-expr": "2*k*sin(3*atan2(y, x))" } },
+  ],
+
   panelHTML() {
-    const chips = order
-      .map(
-        (key) =>
-          `<button class="chip" data-fn="${key}" aria-pressed="${key === current}">${FUNCS[key].label}</button>`
-      )
-      .join("");
     return `
-      <div class="chip-row" id="gr-chips" role="group" aria-label="Choose a function">${chips}</div>
-      <div class="formula"><span>Plot</span><b class="mono" id="gr-expr">${FUNCS[current].expr}</b></div>
+      <div class="control">
+        <label for="gr-expr">z = f(x, y)</label>
+        <input type="text" id="gr-expr" class="text-input mono" spellcheck="false"
+          autocapitalize="off" autocomplete="off" value="${state.expr}">
+        <p class="fact" id="gr-err" role="status" hidden></p>
+      </div>
       <div class="control"><div class="row"><label for="gr-k">Coefficient k</label><output id="gr-kval" for="gr-k"></output></div>
-        <input type="range" id="gr-k" min="0.1" max="1.4" step="0.05" value="${k}"></div>
-      <div class="btn-row"><button class="btn" id="gr-spin" type="button" aria-pressed="false">Spin: off</button></div>
+        <input type="range" id="gr-k" min="0.1" max="1.4" step="0.05" value="${state.k}"></div>
+      <div class="btn-row"><button class="btn" id="gr-spin" type="button" aria-pressed="${state.spin}">Spin: ${state.spin ? "on" : "off"}</button></div>
     `;
   },
 
   wire(root) {
-    els.chips = root.querySelector("#gr-chips");
     els.expr = root.querySelector("#gr-expr");
+    els.err = root.querySelector("#gr-err");
     els.k = root.querySelector("#gr-k");
     els.kval = root.querySelector("#gr-kval");
     els.spin = root.querySelector("#gr-spin");
 
-    const sync = () => (els.kval.textContent = k.toFixed(2));
-    els.chips.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-fn]");
-      if (!btn) return;
-      current = btn.dataset.fn;
-      els.chips.querySelectorAll(".chip").forEach((c) =>
-        c.setAttribute("aria-pressed", c === btn ? "true" : "false")
-      );
-      els.expr.textContent = FUNCS[current].expr;
-      rebuild();
-    });
+    const apply = () => {
+      const src = els.expr.value.trim();
+      if (isValidExpr(src, ["x", "y", "k"])) {
+        state.expr = src;
+        state.fn = compile(src, ["x", "y", "k"]);
+        els.err.hidden = true;
+        els.expr.removeAttribute("aria-invalid");
+        rebuild();
+      } else {
+        els.err.textContent = "Can't read that formula — check the syntax.";
+        els.err.hidden = false;
+        els.expr.setAttribute("aria-invalid", "true");
+      }
+    };
+    els.expr.addEventListener("input", apply);
     els.k.addEventListener("input", () => {
-      k = parseFloat(els.k.value);
-      sync();
+      state.k = parseFloat(els.k.value);
+      els.kval.textContent = state.k.toFixed(2);
       rebuild();
     });
     els.spin.addEventListener("click", () => {
-      spin = !spin;
-      els.spin.textContent = `Spin: ${spin ? "on" : "off"}`;
-      els.spin.setAttribute("aria-pressed", String(spin));
+      state.spin = !state.spin;
+      els.spin.textContent = `Spin: ${state.spin ? "on" : "off"}`;
+      els.spin.setAttribute("aria-pressed", String(state.spin));
     });
-    sync();
+    els.kval.textContent = state.k.toFixed(2);
   },
 
   update(dt, viewer) {
-    if (spin && !viewer.dragging) surface.rotation.y += dt * 0.3;
+    if (state.spin && !viewer.dragging) surface.rotation.y += dt * 0.3;
     else surface.rotation.y *= 0.92;
   },
 

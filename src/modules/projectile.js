@@ -133,6 +133,14 @@ export default {
     },
   ],
 
+  presets: [
+    { label: "45° — max range", note: "The sweet spot: sin(2θ) peaks at θ = 45°.", values: { "pj-a": 45, "pj-v": 14, "pj-g": 9.8 } },
+    { label: "30° vs 60°", note: "Fire this, then set the angle to 60° — the range is identical (sin 60° = sin 120°).", values: { "pj-a": 30, "pj-v": 14, "pj-g": 9.8 } },
+    { label: "Steep lob", note: "75° trades range for height and a long hang time.", values: { "pj-a": 75, "pj-v": 16 } },
+    { label: "Flat & fast", note: "A low angle gets there quickly but doesn't travel far.", values: { "pj-a": 12, "pj-v": 18 } },
+    { label: "Moon shot", note: "One-sixth gravity — the same launch flies about six times as far.", values: { "pj-g": 1.6, "pj-a": 45, "pj-v": 12 } },
+  ],
+
   panelHTML() {
     return `
       <div class="formula"><span>R = v²·sin(2θ) / g</span><b class="mono" id="pj-range">—</b></div>
