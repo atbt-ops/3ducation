@@ -1,11 +1,11 @@
 import * as THREE from "three";
-import { sceneLights, bondMesh } from "../engine/helpers.js";
+import { sceneLights, bondMesh, prefersReducedMotion } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.6, dir: 0.85 });
 const group = new THREE.Group();
 scene.add(group);
-let autorotate = true;
+let autorotate = !prefersReducedMotion;
 
 const ELEMENTS = {
   O: { color: 0xd9503f, r: 0.34 },
@@ -152,7 +152,7 @@ export default {
       <p class="fact" id="mol-note">${d.note}</p>
       <div class="section-label">Geometry</div>
       <div class="formula"><span id="mol-geom">${d.geom}</span><b class="mono" id="mol-angle">${d.angle}</b></div>
-      <div class="btn-row"><button class="btn" id="mol-spin" type="button" aria-pressed="true">Auto-rotate: on</button></div>
+      <div class="btn-row"><button class="btn" id="mol-spin" type="button" aria-pressed="${autorotate}">Auto-rotate: ${autorotate ? "on" : "off"}</button></div>
     `;
   },
 

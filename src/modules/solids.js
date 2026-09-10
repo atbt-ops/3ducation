@@ -1,11 +1,11 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, prefersReducedMotion } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.6, dir: 0.85 });
 const group = new THREE.Group();
 scene.add(group);
-let spin = true;
+let spin = !prefersReducedMotion;
 
 const SHAPES = {
   cube: { label: "Cube", vef: [8, 12, 6], fact: "Volume = a³", geo: () => new THREE.BoxGeometry(1.6, 1.6, 1.6) },
@@ -106,7 +106,7 @@ export default {
       <p class="fact" id="sh-euler">${eulerLine(s.vef)}</p>
       <div class="btn-row">
         <button class="btn" id="sh-wire" type="button" aria-pressed="${showWire}">Edges: on</button>
-        <button class="btn" id="sh-spin" type="button" aria-pressed="${spin}">Spin: on</button>
+        <button class="btn" id="sh-spin" type="button" aria-pressed="${spin}">Spin: ${spin ? "on" : "off"}</button>
       </div>
     `;
   },

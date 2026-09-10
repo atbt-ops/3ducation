@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights, groundGrid } from "../engine/helpers.js";
+import { pendulumPeriod } from "../lib/physics.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.6, dir: 0.85 });
@@ -142,7 +143,7 @@ export default {
       els.Lval.textContent = `${state.L.toFixed(2)} m`;
       els.gval.textContent = `${state.g.toFixed(1)} m/s²`;
       els.aval.textContent = `${Math.round(state.theta0)}°`;
-      els.period.textContent = `${(2 * Math.PI * Math.sqrt(state.L / state.g)).toFixed(2)} s`;
+      els.period.textContent = `${pendulumPeriod(state.L, state.g).toFixed(2)} s`;
     };
     els.L.addEventListener("input", () => ((state.L = parseFloat(els.L.value)), sync()));
     els.g.addEventListener("input", () => ((state.g = parseFloat(els.g.value)), sync()));

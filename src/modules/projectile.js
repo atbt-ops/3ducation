@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
+import { projectile as solveProjectile } from "../lib/physics.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.62, dir: 0.85 });
@@ -44,13 +45,13 @@ const origin = new THREE.Vector3(-WORLD, 0.6, 0);
 const state = { v: 12, angle: 45, g: 9.8, t: 0, flying: false, trailPts: [] };
 
 function kinematics() {
-  const rad = (state.angle * Math.PI) / 180;
-  const vx = state.v * Math.cos(rad);
-  const vy = state.v * Math.sin(rad);
-  const tFlight = (vy + Math.sqrt(vy * vy + 2 * state.g * origin.y)) / state.g;
-  const range = vx * tFlight;
-  const hMax = origin.y + (vy * vy) / (2 * state.g);
-  return { vx, vy, tFlight, range, hMax };
+  const { vx, vy, tFlight, range, apex } = solveProjectile({
+    speed: state.v,
+    angleDeg: state.angle,
+    gravity: state.g,
+    height: origin.y,
+  });
+  return { vx, vy, tFlight, range, hMax: apex };
 }
 
 function drawPrediction() {

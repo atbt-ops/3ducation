@@ -1,6 +1,6 @@
 {
   "name": "3ducation",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "A free, interactive 3D science lab for the classroom and self-study.",
   "type": "module",
@@ -9,14 +9,23 @@
     "dev": "vite",
     "build": "node scripts/gen-icons.mjs && vite build",
     "preview": "vite preview",
-    "icons": "node scripts/gen-icons.mjs"
+    "icons": "node scripts/gen-icons.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "three": "^0.160.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "eslint": "^9.21.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.5.2",
     "sharp": "^0.33.2",
     "vite": "^5.1.4",
-    "vite-plugin-pwa": "^0.19.0"
+    "vite-plugin-pwa": "^0.19.0",
+    "vitest": "^1.6.0"
   }
 }

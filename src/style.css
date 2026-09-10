@@ -114,6 +114,8 @@ button { font: inherit; color: inherit; }
 .progress-line { color: var(--ink); font-size: 0.9rem; }
 .progress-line strong { color: var(--brass-strong); }
 
+.filter-row { margin-bottom: 20px; }
+
 .bench {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

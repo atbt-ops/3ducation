@@ -1,6 +1,6 @@
 import "./style.css";
 import { Viewer } from "./engine/viewer.js";
-import { MODULES, MODULE_IDS, getModule } from "./modules/index.js";
+import { MODULES, MODULE_IDS, SUBJECTS, getModule } from "./modules/index.js";
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
 
@@ -65,6 +65,32 @@ function loop(t) {
 requestAnimationFrame(loop);
 
 /* ---------------- home ---------------- */
+let homeFilter = "All";
+try {
+  homeFilter = localStorage.getItem("3ducation.filter") || "All";
+} catch {
+  /* ignore */
+}
+
+function moduleCard(m) {
+  const p = progress.for(m.id);
+  const mastered = p.quizCount && p.quizBest === p.quizCount;
+  const badge = mastered
+    ? '<span class="badge is-mastered">Mastered</span>'
+    : p.visited
+      ? '<span class="badge is-visited">Visited</span>'
+      : "";
+  return `
+    <a class="card" href="#/${m.id}">
+      <span class="rivet tl"></span><span class="rivet tr"></span>
+      <span class="rivet bl"></span><span class="rivet br"></span>
+      <span class="card-icon">${m.icon}</span>
+      <span class="tag">${m.tag}</span>
+      <h3>${m.name} ${badge}</h3>
+      <p>${m.blurb}</p>
+    </a>`;
+}
+
 function renderHome() {
   active?.onExit?.(viewer);
   active = null;
@@ -72,24 +98,12 @@ function renderHome() {
   crumbs.textContent = "Workshop";
 
   const s = progress.summary(MODULE_IDS);
-  const cards = MODULES.map((m) => {
-    const p = progress.for(m.id);
-    const mastered = p.quizCount && p.quizBest === p.quizCount;
-    const badge = mastered
-      ? '<span class="badge is-mastered">Mastered</span>'
-      : p.visited
-        ? '<span class="badge is-visited">Visited</span>'
-        : "";
-    return `
-      <a class="card" href="#/${m.id}">
-        <span class="rivet tl"></span><span class="rivet tr"></span>
-        <span class="rivet bl"></span><span class="rivet br"></span>
-        <span class="card-icon">${m.icon}</span>
-        <span class="tag">${m.tag}</span>
-        <h3>${m.name} ${badge}</h3>
-        <p>${m.blurb}</p>
-      </a>`;
-  }).join("");
+  const filters = ["All", ...SUBJECTS]
+    .map(
+      (name) =>
+        `<button class="chip" type="button" data-filter="${name}" aria-pressed="${name === homeFilter}">${name}</button>`
+    )
+    .join("");
 
   main.innerHTML = `
     <section class="hero">
@@ -102,8 +116,32 @@ function renderHome() {
         <strong>${s.mastered}</strong> mastered
       </p>
     </section>
-    <div class="bench">${cards}</div>
+    <div class="chip-row filter-row" role="group" aria-label="Filter by subject">${filters}</div>
+    <div class="bench" id="bench"></div>
   `;
+
+  const bench = main.querySelector("#bench");
+  const paint = () => {
+    const list = homeFilter === "All" ? MODULES : MODULES.filter((m) => m.subject === homeFilter);
+    bench.innerHTML = list.map(moduleCard).join("");
+  };
+  paint();
+
+  main.querySelector(".filter-row").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-filter]");
+    if (!btn) return;
+    homeFilter = btn.dataset.filter;
+    try {
+      localStorage.setItem("3ducation.filter", homeFilter);
+    } catch {
+      /* ignore */
+    }
+    main.querySelectorAll(".filter-row .chip").forEach((c) =>
+      c.setAttribute("aria-pressed", c === btn ? "true" : "false")
+    );
+    paint();
+  });
+
   main.focus();
 }
 
