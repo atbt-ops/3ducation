@@ -77,9 +77,11 @@ function moduleCard(m) {
   const mastered = p.quizCount && p.quizBest === p.quizCount;
   const badge = mastered
     ? '<span class="badge is-mastered">Mastered</span>'
-    : p.visited
-      ? '<span class="badge is-visited">Visited</span>'
-      : "";
+    : p.quizCount
+      ? `<span class="badge is-score">Quiz ${p.quizBest}/${p.quizCount}</span>`
+      : p.visited
+        ? '<span class="badge is-visited">Visited</span>'
+        : "";
   return `
     <a class="card" href="#/${m.id}">
       <span class="rivet tl"></span><span class="rivet tr"></span>
@@ -165,6 +167,14 @@ function renderModule(id) {
     <div class="workbench">
       <div class="stage-wrap">
         <span class="module-eyebrow">${m.tag}</span>
+        <div class="stage-tools">
+          <button class="stage-tool" id="resetView" type="button" title="Reset view" aria-label="Reset view">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.46-3.54M13 3v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="stage-tool" id="fsToggle" type="button" title="Fullscreen" aria-label="Toggle fullscreen">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
         <span class="viewport-hint">drag or arrow-keys to orbit · scroll to zoom</span>
       </div>
       <aside class="notebook">
@@ -181,6 +191,15 @@ function renderModule(id) {
 
   stageWrap = main.querySelector(".stage-wrap");
   stageWrap.insertBefore(canvas, stageWrap.firstChild);
+
+  main.querySelector("#resetView").addEventListener("click", () => {
+    viewer.applyView(m.view);
+    m.onEnter?.(viewer); // re-arms picking for modules that use it
+  });
+  main.querySelector("#fsToggle").addEventListener("click", () => {
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else stageWrap.requestFullscreen?.().then(() => viewer.resize(stageWrap), () => {});
+  });
 
   const panel = main.querySelector("#panel");
   panel.innerHTML = m.panelHTML();

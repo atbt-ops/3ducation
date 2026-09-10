@@ -201,6 +201,7 @@ button { font: inherit; color: inherit; }
   border: 1px solid var(--line);
 }
 .badge.is-visited { color: var(--ink-muted); }
+.badge.is-score { color: var(--brass-strong); border-color: var(--brass); }
 .badge.is-mastered { color: #fff; background: #15803d; border-color: #15803d; }
 
 /* ---------- Module view ---------- */
@@ -264,6 +265,36 @@ button { font: inherit; color: inherit; }
   border-radius: 999px;
   border: 1px solid var(--line);
   z-index: 1;
+}
+.stage-tools {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.stage-tool {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.stage-tool:hover {
+  border-color: var(--brass);
+  color: var(--ink);
+}
+.stage-wrap:fullscreen {
+  max-height: none;
+  aspect-ratio: auto;
+  border-radius: 0;
+  border: 0;
 }
 
 .notebook {

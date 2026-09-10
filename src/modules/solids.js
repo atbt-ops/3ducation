@@ -1,10 +1,11 @@
 import * as THREE from "three";
-import { sceneLights, prefersReducedMotion } from "../engine/helpers.js";
+import { sceneLights, prefersReducedMotion, contactShadow } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.6, dir: 0.85 });
 const group = new THREE.Group();
 scene.add(group);
+scene.add(contactShadow({ radius: 2.4, y: -1.7, opacity: 0.2 }));
 let spin = !prefersReducedMotion;
 
 const SHAPES = {

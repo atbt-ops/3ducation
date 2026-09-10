@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 import { harmonic } from "../lib/physics.js";
 
 const scene = new THREE.Scene();
@@ -32,6 +32,7 @@ const postMat = new THREE.MeshStandardMaterial({ color: 0xa9762e, metalness: 0.5
   p.position.set(x, 0, 0);
   scene.add(p);
 });
+scene.add(contactShadow({ radius: 4, y: -0.72, opacity: 0.16 }));
 
 const nodeMat = new THREE.MeshBasicMaterial({ color: 0x8a5f22 });
 const nodeGeo = new THREE.SphereGeometry(0.09, 12, 10);

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { sceneLights, groundGrid } from "../engine/helpers.js";
+import { sceneLights, groundGrid, contactShadow } from "../engine/helpers.js";
 import { pendulumPeriod } from "../lib/physics.js";
 
 const scene = new THREE.Scene();
@@ -35,6 +35,7 @@ const trailLine = new THREE.Line(
 );
 scene.add(trailLine);
 scene.add(groundGrid());
+scene.add(contactShadow({ radius: 3.2, y: -0.88, opacity: 0.22 }));
 
 const state = { L: 2.0, g: 9.8, theta0: 40, theta: 0, omega: 0, running: true };
 
