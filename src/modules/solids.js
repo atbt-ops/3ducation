@@ -59,6 +59,7 @@ export default {
   name: "Geometry set",
   tag: "Math · Solids",
   subject: "Math",
+  grades: [5, 9],
   blurb: "Count faces, edges and corners on real 3D solids.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L33 14V28L20 36L7 28V14L20 6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 6V20M20 20L33 14M20 20L7 14M20 20V36" stroke="currentColor" stroke-width="1.4" opacity="0.6"/></svg>',
   scene,

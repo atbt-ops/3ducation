@@ -143,7 +143,11 @@ button { font: inherit; color: inherit; }
 .progress-line { color: var(--ink); font-size: 0.9rem; }
 .progress-line strong { color: var(--brass-strong); }
 
-.filter-row { margin-bottom: 20px; }
+.filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+.filter-row, .band-row { margin: 0; }
+.band-row .chip { font-size: 0.76rem; padding: 5px 12px; }
+.band-row .chip[aria-pressed="true"] { background: var(--brass); border-color: var(--brass); color: var(--on-brass); }
+.bench-empty { color: var(--ink-muted); font-size: 0.9rem; padding: 24px 4px; }
 
 .bench {
   display: grid;

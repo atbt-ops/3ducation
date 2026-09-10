@@ -60,6 +60,7 @@ export default {
   name: "Mass on a spring",
   tag: "Physics · Oscillation",
   subject: "Physics",
+  grades: [9, 11],
   blurb: "Hooke's law and simple harmonic motion.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 4v4M20 8c-6 0-6 4 0 4s6 4 0 4-6 4 0 4-6 4 0 4v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="15" y="30" width="10" height="7" rx="1.5" fill="currentColor"/></svg>',
   scene,

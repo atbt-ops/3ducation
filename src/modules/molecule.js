@@ -93,6 +93,7 @@ export default {
   name: "Molecule kit",
   tag: "Chemistry · Bonding",
   subject: "Chemistry",
+  grades: [9, 12],
   blurb: "Rotate real molecules and read their bond angles.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="14" r="4.4" fill="currentColor"/><circle cx="12" cy="28" r="3.4" stroke="currentColor" stroke-width="2"/><circle cx="28" cy="28" r="3.4" stroke="currentColor" stroke-width="2"/><path d="M17.4 17.4L14 25M22.6 17.4L26 25" stroke="currentColor" stroke-width="2"/></svg>',
   scene,

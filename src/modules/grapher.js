@@ -81,6 +81,7 @@ export default {
   name: "Surface studio",
   tag: "Math · Functions",
   subject: "Math",
+  grades: [10, 12],
   blurb: "Type any z = f(x, y) and walk around it.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 28c6 0 6-14 14-14s8 12 14 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 34h28M8 34V12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/></svg>',
   scene,

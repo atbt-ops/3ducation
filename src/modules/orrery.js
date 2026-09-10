@@ -73,6 +73,7 @@ export default {
   name: "Orrery",
   tag: "Astronomy · Orbits",
   subject: "Astronomy",
+  grades: [6, 10],
   blurb: "Watch six planets keep real relative time.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="3.4" fill="currentColor"/><ellipse cx="20" cy="20" rx="15" ry="6.2" stroke="currentColor" stroke-width="1.8"/><circle cx="33" cy="20" r="2" fill="currentColor"/></svg>',
   scene,

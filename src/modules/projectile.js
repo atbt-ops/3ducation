@@ -98,6 +98,7 @@ export default {
   name: "Projectile range",
   tag: "Physics · Kinematics",
   subject: "Physics",
+  grades: [9, 11],
   blurb: "Fire a cannon and chase the 45° sweet spot.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 32C14 12 26 8 34 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3"/><circle cx="34" cy="8" r="3" fill="currentColor"/><path d="M4 33h10l-4-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
   scene,

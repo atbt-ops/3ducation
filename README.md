@@ -1,30 +1,25 @@
 # 3ducation
 
-**A free, interactive 3D science lab.** Twelve hands-on instruments across physics,
-chemistry, math and astronomy — each running on the real equations, each with a
-short lesson, guided experiments and a check-yourself quiz. Plus all 118 elements
-and a formula box that plots anything you type. No account, works offline.
+**A free, interactive 3D science lab for classes I–XII.** 24 hands-on instruments
+across physics, chemistry, biology, maths and space — each running on the real
+equations, each with a short lesson, guided experiments and a check-yourself quiz.
+Plus all 118 elements and a formula box that plots anything you type. No account,
+works offline. Filter by subject or by school level (Primary / Middle / Secondary).
 
 🔗 **Live:** https://atbt-ops.github.io/3ducation/
 
-| Module             | Subject                 | Core idea                                        |
-| ------------------ | ----------------------- | ----------------------------------------------- |
-| Pendulum           | Physics · Mechanics     | `T = 2π√(L/g)`, energy trading KE ↔ PE          |
-| Projectile range   | Physics · Kinematics    | `R = v²·sin(2θ)/g`, the 45° optimum             |
-| Mass on a spring   | Physics · Oscillation   | Hooke's `F = −kx`, `T = 2π√(m/k)`               |
-| Ohm's law loop     | Physics · Electricity   | `I = V/R`, `P = VI` drives the glow             |
-| Wave interference  | Physics · Waves         | Path difference → constructive / destructive     |
-| Standing waves     | Physics · Waves & music | `fₙ = n·f₁`, nodes, the harmonic series          |
-| Converging lens    | Physics · Optics        | `1/f = 1/dₒ + 1/dᵢ`, real vs virtual images      |
-| Molecule kit       | Chemistry · Bonding     | VSEPR: electron pairs repel → shape              |
-| Periodic table     | Chemistry · Elements    | All 118 elements, orbit the wall, tap a tile     |
-| Geometry set       | Math · Solids           | Euler's `V − E + F = 2`, volume scaling          |
-| Surface studio     | Math · Functions        | Type any `z = f(x, y)` and walk around it        |
-| Orrery             | Astronomy · Orbits      | Kepler's third law, `T² ∝ a³`                    |
+| Subject       | Instruments |
+| ------------- | ----------- |
+| **Physics**   | Pendulum · Projectile range · Mass on a spring · Ramp & friction · Ohm's law loop · Wave interference · Standing waves · Converging lens · Float or sink |
+| **Chemistry** | Molecule kit · States of matter · Atom builder · Periodic table (118 elements) |
+| **Biology**   | Cell explorer · DNA double helix |
+| **Maths**     | Geometry set · Surface studio (`z = f(x,y)`) · Fraction wall · Times table · Unit circle · Galton board |
+| **Space**     | Orrery · Moon phases · Seasons & the tilt |
 
 Most instruments ship a set of **guided experiments** — one click dials in a named
 setup and poses a question. The Surface studio uses a small safe expression engine
-(`src/lib/expr.js`) so any formula in `x`, `y`, `k` plots live.
+(`src/lib/expr.js`) so any formula in `x`, `y`, `k` plots live. Each module declares
+a `grades: [min, max]` range that drives the school-level filter.
 
 ## Develop
 

@@ -126,6 +126,7 @@ export default {
   name: "Converging lens",
   tag: "Physics · Optics",
   subject: "Physics",
+  grades: [8, 12],
   blurb: "Slide the object and find where the image lands.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6c5 6 5 22 0 28-5-6-5-22 0-28Z" stroke="currentColor" stroke-width="2"/><path d="M4 20h32" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 3"/></svg>',
   scene,

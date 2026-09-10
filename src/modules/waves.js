@@ -50,6 +50,7 @@ export default {
   name: "Wave interference",
   tag: "Physics · Waves",
   subject: "Physics",
+  grades: [9, 12],
   blurb: "Two ripple sources, one interference pattern.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20c4-8 8-8 12 0s8 8 12 0 8-8 8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 28c4-8 8-8 12 0s8 8 12 0 8-8 8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.5"/></svg>',
   scene,

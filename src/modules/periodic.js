@@ -107,6 +107,7 @@ export default {
   name: "Periodic table",
   tag: "Chemistry · Elements",
   subject: "Chemistry",
+  grades: [7, 12],
   blurb: "All 118 elements — orbit the wall, tap one.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="7" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="27" y="7" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="5" y="19" width="30" height="8" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="9" y="31" width="22" height="5" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>',
   scene,

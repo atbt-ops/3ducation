@@ -1,35 +1,71 @@
 import pendulum from "./pendulum.js";
 import projectile from "./projectile.js";
 import spring from "./spring.js";
+import incline from "./incline.js";
 import circuit from "./circuit.js";
 import waves from "./waves.js";
 import standing from "./standing.js";
 import lens from "./lens.js";
+import buoyancy from "./buoyancy.js";
 import molecule from "./molecule.js";
+import states from "./states.js";
+import atom from "./atom.js";
 import periodic from "./periodic.js";
+import cell from "./cell.js";
+import dna from "./dna.js";
 import solids from "./solids.js";
 import grapher from "./grapher.js";
+import fractions from "./fractions.js";
+import times from "./times.js";
+import unitcircle from "./unitcircle.js";
+import galton from "./galton.js";
 import orrery from "./orrery.js";
+import moon from "./moon.js";
+import seasons from "./seasons.js";
 
 // Order shapes the workshop grid.
 export const MODULES = [
   pendulum,
   projectile,
   spring,
+  incline,
   circuit,
   waves,
   standing,
   lens,
+  buoyancy,
   molecule,
+  states,
+  atom,
   periodic,
+  cell,
+  dna,
   solids,
   grapher,
+  fractions,
+  times,
+  unitcircle,
+  galton,
   orrery,
+  moon,
+  seasons,
 ];
 
 export const MODULE_IDS = MODULES.map((m) => m.id);
 
 export const SUBJECTS = [...new Set(MODULES.map((m) => m.subject))];
+
+// Indian school bands, by class number.
+export const BANDS = [
+  { label: "Primary", min: 1, max: 5 },
+  { label: "Middle", min: 6, max: 8 },
+  { label: "Secondary", min: 9, max: 12 },
+];
+
+export function inBand(m, band) {
+  const [lo, hi] = m.grades || [1, 12];
+  return lo <= band.max && hi >= band.min;
+}
 
 export function getModule(id) {
   return MODULES.find((m) => m.id === id) || null;

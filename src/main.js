@@ -1,6 +1,6 @@
 import "./style.css";
 import { Viewer } from "./engine/viewer.js";
-import { MODULES, MODULE_IDS, SUBJECTS, getModule } from "./modules/index.js";
+import { MODULES, MODULE_IDS, SUBJECTS, BANDS, inBand, getModule } from "./modules/index.js";
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
 import { mountPresets } from "./learn/presets.js";
@@ -67,8 +67,10 @@ requestAnimationFrame(loop);
 
 /* ---------------- home ---------------- */
 let homeFilter = "All";
+let homeBand = "All";
 try {
   homeFilter = localStorage.getItem("3ducation.filter") || "All";
+  homeBand = localStorage.getItem("3ducation.band") || "All";
 } catch {
   /* ignore */
 }
@@ -101,33 +103,51 @@ function renderHome() {
   crumbs.textContent = "Workshop";
 
   const s = progress.summary(MODULE_IDS);
-  const filters = ["All", ...SUBJECTS]
+  const subjectChips = ["All", ...SUBJECTS]
     .map(
       (name) =>
         `<button class="chip" type="button" data-filter="${name}" aria-pressed="${name === homeFilter}">${name}</button>`
     )
     .join("");
+  const bandChips = ["All", ...BANDS.map((b) => b.label)]
+    .map(
+      (name) =>
+        `<button class="chip" type="button" data-band="${name}" aria-pressed="${name === homeBand}">${name}</button>`
+    )
+    .join("");
 
   main.innerHTML = `
     <section class="hero">
-      <span class="eyebrow">${MODULES.length} instruments · 118 elements · any formula · free</span>
+      <span class="eyebrow">${MODULES.length} instruments · classes I–XII · 118 elements · free</span>
       <h1>Science you can pick up and turn over.</h1>
       <p>Every model is a real <span class="d3">3D</span> object running on the same equations
-      scientists use — with dozens of guided experiments and a formula box that plots whatever you
-      type. Drag to orbit, tune the dials, check yourself. No sign-up, works offline.</p>
+      scientists use — physics, chemistry, biology, maths and space, from primary counting to
+      senior-secondary. Guided experiments, a live formula box, a check-yourself quiz. No sign-up,
+      works offline.</p>
       <p class="progress-line" role="status">
         <strong>${s.visited}</strong> of ${s.total} explored ·
         <strong>${s.mastered}</strong> mastered
       </p>
     </section>
-    <div class="chip-row filter-row" role="group" aria-label="Filter by subject">${filters}</div>
+    <div class="filters">
+      <div class="chip-row filter-row" role="group" aria-label="Filter by subject">${subjectChips}</div>
+      <div class="chip-row band-row" role="group" aria-label="Filter by school level">${bandChips}</div>
+    </div>
     <div class="bench" id="bench"></div>
+    <p class="bench-empty" id="benchEmpty" hidden>Nothing in that combination yet — try a wider filter.</p>
   `;
 
   const bench = main.querySelector("#bench");
+  const emptyEl = main.querySelector("#benchEmpty");
   const paint = () => {
-    const list = homeFilter === "All" ? MODULES : MODULES.filter((m) => m.subject === homeFilter);
+    const band = BANDS.find((b) => b.label === homeBand);
+    const list = MODULES.filter(
+      (m) =>
+        (homeFilter === "All" || m.subject === homeFilter) &&
+        (homeBand === "All" || inBand(m, band))
+    );
     bench.innerHTML = list.map(moduleCard).join("");
+    emptyEl.hidden = list.length > 0;
   };
   paint();
 
@@ -141,6 +161,21 @@ function renderHome() {
       /* ignore */
     }
     main.querySelectorAll(".filter-row .chip").forEach((c) =>
+      c.setAttribute("aria-pressed", c === btn ? "true" : "false")
+    );
+    paint();
+  });
+
+  main.querySelector(".band-row").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-band]");
+    if (!btn) return;
+    homeBand = btn.dataset.band;
+    try {
+      localStorage.setItem("3ducation.band", homeBand);
+    } catch {
+      /* ignore */
+    }
+    main.querySelectorAll(".band-row .chip").forEach((c) =>
       c.setAttribute("aria-pressed", c === btn ? "true" : "false")
     );
     paint();

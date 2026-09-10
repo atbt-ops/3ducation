@@ -112,6 +112,7 @@ export default {
   name: "Ohm's law loop",
   tag: "Physics · Electricity",
   subject: "Physics",
+  grades: [7, 10],
   blurb: "Turn the dials, watch the current and the glow.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="9" width="26" height="22" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="9" r="3.4" fill="currentColor"/><path d="M13 31v3M27 31v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   scene,
