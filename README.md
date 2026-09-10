@@ -1,39 +1,68 @@
-# 3ducation — Orbit Lab
+# 3ducation
 
-An interactive 3D educational lab. Four self-contained instruments, each running on
-real equations and measured values:
+**A free, interactive 3D science lab.** Seven hands-on instruments across physics,
+chemistry, math and astronomy — each running on the real equations, each with a
+short lesson and a check-yourself quiz. No account, works offline.
 
-| Module         | Subject               | What it does                                          |
-| -------------- | --------------------- | ---------------------------------------------------- |
-| Pendulum       | Physics · Mechanics   | Swing a bob; tune length/gravity/angle, watch KE↔PE  |
-| Molecule kit   | Chemistry · Bonding   | Rotate H₂O, CH₄, CO₂, NH₃ with real bond angles      |
-| Geometry set   | Math · Solids         | Nine solids; V − E + F and volume formulas           |
-| Orrery         | Astronomy · Orbits    | Six planets on real relative orbital periods         |
+🔗 **Live:** https://atbt-ops.github.io/3ducation/
 
-## Source
+| Module              | Subject               | Core idea                                        |
+| ------------------- | --------------------- | ----------------------------------------------- |
+| Pendulum            | Physics · Mechanics   | `T = 2π√(L/g)`, energy trading KE ↔ PE          |
+| Projectile range    | Physics · Kinematics  | `R = v²·sin(2θ)/g`, the 45° optimum             |
+| Wave interference   | Physics · Waves       | Path difference → constructive / destructive     |
+| Molecule kit        | Chemistry · Bonding   | VSEPR: electron pairs repel → shape              |
+| Geometry set        | Math · Solids         | Euler's `V − E + F = 2`, volume scaling          |
+| Surface grapher     | Math · Functions      | `z = f(x, y)` surfaces: bowls, saddles, bells    |
+| Orrery              | Astronomy · Orbits    | Kepler's third law, `T² ∝ a³`                    |
 
-Pulled from the Claude artifact **Orbit Lab**:
-https://claude.ai/code/artifact/a977440a-af96-4f84-ad69-76482af27554
-
-## Run locally
-
-It's a single static file. Any of:
+## Develop
 
 ```bash
-# Python
-python -m http.server 8000
-# then open http://localhost:8000
-
-# Node
-npx serve .
+npm install
+npm run dev        # vite dev server
+npm run build      # generates PWA icons, then builds to dist/
+npm run preview    # serve the production build
 ```
 
-Or just open `index.html` directly in a browser.
+- **Stack:** [Vite](https://vitejs.dev/) + vanilla ES modules + [three.js](https://threejs.org/) (r0.160, bundled — no CDN).
+- **Offline:** [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) precaches the app; it installs as a PWA.
+- **Progress:** stored in `localStorage` only (`src/state.js`). No backend, no tracking.
 
-## Notes
+### Project layout
 
-- [three.js](https://threejs.org/) r128 is loaded from cdnjs (needs a network connection).
-- Written as a Claude Artifact, so the `<head>` is minimal and `<title>`/font `<link>`
-  sit at the top of `<body>`. Browsers handle this fine; tidy it if you move away from
-  the artifact format.
-- `window.claude.hot.*` calls are guarded in try/catch and no-op outside the artifact runtime.
+```
+src/
+  main.js            app shell + hash router + render loop
+  style.css          design tokens + components (light/dark)
+  state.js           localStorage progress (visited / quiz best)
+  engine/
+    viewer.js        shared WebGL renderer + orbit camera (mouse + keyboard)
+    helpers.js       lights, bonds, grids, disposal
+  learn/
+    quiz.js          check-for-understanding component
+  modules/
+    index.js         registry (order = workshop grid order)
+    <module>.js       each: scene, view, lesson, quiz, panelHTML/wire, update
+```
+
+### Add a module
+
+Create `src/modules/foo.js` default-exporting an object with `id, name, tag,
+subject, blurb, icon, scene, view, lesson, quiz, panelHTML(), wire(root),
+update(dt, viewer), onEnter(viewer), onExit(viewer)`, then add it to the array in
+`src/modules/index.js`.
+
+## Deploy
+
+`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every push
+to `main`. Set **Settings → Pages → Source: GitHub Actions** once. The base path
+is `/3ducation/` (`vite.config.js`); override with `DEPLOY_BASE` for a custom domain.
+
+## License
+
+[MIT](LICENSE). Contributions welcome.
+
+---
+
+*Started from the "Orbit Lab" Claude artifact and rebuilt into a full app.*

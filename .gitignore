@@ -1,5 +1,13 @@
 node_modules/
+dist/
+dist-ssr/
 .DS_Store
 *.log
-.vscode/
-dist/
+npm-debug.log*
+.vite/
+.env
+.env.local
+.vscode/*
+!.vscode/extensions.json
+# generated PWA icons (rebuilt by `npm run icons`)
+public/icons/
