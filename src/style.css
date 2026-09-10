@@ -6,7 +6,8 @@
   --ink-strong: #0a0a0a; /* headings — near-black */
   --ink: #1c1c1f; /* body text */
   --ink-muted: #4f4f57; /* secondary text — AA+ on white */
-  --line: #e3e3e1;
+  --line: #dedede;
+  --line-strong: #d0d0cd;
   --brass: #b1520b;
   --brass-strong: #8a3f08;
   --brass-tint: rgba(177, 82, 11, 0.1);
@@ -18,7 +19,7 @@
   --violet: #5b3fb1;
   --ok: #15803d;
   --bad: #b42318;
-  --shadow: 0 16px 40px -24px rgba(15, 15, 20, 0.28);
+  --shadow: 0 1px 2px rgba(15, 15, 20, 0.05), 0 14px 30px -14px rgba(15, 15, 20, 0.22);
   --focus: #8a3f08;
 }
 
@@ -32,6 +33,7 @@
     --ink: #ececee;
     --ink-muted: #a0a0aa;
     --line: #2b2b31;
+    --line-strong: #3a3a41;
     --brass: #f0a13c;
     --brass-strong: #f8be6b;
     --brass-tint: rgba(240, 161, 60, 0.16);
@@ -151,7 +153,7 @@ button { font: inherit; color: inherit; }
 .card {
   position: relative;
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 14px;
   padding: 22px 20px 20px;
   text-decoration: none;
@@ -229,7 +231,7 @@ button { font: inherit; color: inherit; }
   max-height: 640px;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   background: radial-gradient(circle at 50% 42%, var(--surface) 0%, var(--bg-tint) 82%);
   box-shadow: var(--shadow);
 }
@@ -268,7 +270,7 @@ button { font: inherit; color: inherit; }
   flex: 1;
   min-width: 280px;
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 16px;
   padding: 22px;
   display: flex;
