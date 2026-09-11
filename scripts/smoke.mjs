@@ -84,11 +84,32 @@ const stubViewer = {
   setFlat: noop,
 };
 
+// MODULES is lightweight metadata + a lazy loader (see src/modules/registry.js)
+// — the actual scene/behavior only exists once entry.load() is awaited, same
+// as what the real app does when someone opens an instrument. Loading every
+// one here, for real, is what keeps this test meaningful despite the lazy
+// split: it still constructs every scene and exercises every update loop.
 const { MODULES } = await import("../src/modules/index.js");
 
+function metaMismatches(entry, m) {
+  const bad = [];
+  for (const field of ["id", "name", "tag", "subject", "blurb", "icon"]) {
+    if (entry[field] !== m[field]) bad.push(field);
+  }
+  if (JSON.stringify(entry.grades) !== JSON.stringify(m.grades)) bad.push("grades");
+  if (JSON.stringify(entry.video || null) !== JSON.stringify(m.video || null)) bad.push("video");
+  return bad;
+}
+
 let failed = 0;
-for (const m of MODULES) {
+for (const entry of MODULES) {
   try {
+    const loaded = await entry.load();
+    const m = loaded.default;
+    const mismatches = metaMismatches(entry, m);
+    if (mismatches.length) {
+      throw new Error(`registry.js metadata is out of sync with the module: ${mismatches.join(", ")}`);
+    }
     if (typeof m.panelHTML === "function") {
       const html = m.panelHTML();
       if (typeof html !== "string") throw new Error("panelHTML did not return a string");
@@ -105,7 +126,7 @@ for (const m of MODULES) {
     console.log(`ok   ${m.id}`);
   } catch (e) {
     failed++;
-    console.error(`FAIL ${m.id}: ${e.message}`);
+    console.error(`FAIL ${entry.id}: ${e.message}`);
   }
 }
 

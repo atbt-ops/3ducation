@@ -2,7 +2,7 @@ import "./style.css";
 import { Viewer } from "./engine/viewer.js";
 import { createHeroOrbit } from "./engine/heroOrbit.js";
 import { prefersReducedMotion } from "./engine/helpers.js";
-import { MODULES, MODULE_IDS, SUBJECTS, BANDS, inBand, getModule } from "./modules/index.js";
+import { MODULES, MODULE_IDS, SUBJECTS, BANDS, inBand, getModule, loadModule } from "./modules/index.js";
 import { SUBJECT_ACCENT } from "./lib/subjectAccent.js";
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
@@ -519,10 +519,19 @@ function videoBlock(m) {
 }
 
 /* ---------------- module view ---------------- */
-function renderModule(id) {
-  const m = getModule(id);
-  if (!m) return renderHome();
-  renderModuleObject(m);
+async function renderModule(id) {
+  const meta = getModule(id);
+  if (!meta) return renderHome();
+  leaveModule();
+  crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${meta.name}</b>`;
+  main.innerHTML = '<p class="fact">Loading…</p>';
+  try {
+    const m = await withTimeout(loadModule(id));
+    if (!m) return renderHome();
+    renderModuleObject(m);
+  } catch {
+    chunkLoadError(meta.name);
+  }
 }
 
 /** Shared by built-in modules and community formula instruments (see pages/communityModule.js). */

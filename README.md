@@ -78,7 +78,12 @@ src/
     quiz.js          check-for-understanding component
     presets.js       guided-experiment strip (applies values to a module's inputs)
   modules/
-    index.js         registry (order = workshop grid order) + SUBJECTS
+    registry.js      lightweight metadata (id..icon/video) + a lazy loader per
+                      instrument (order = workshop grid order) — importing this
+                      never triggers any instrument's own THREE.js scene code
+    index.js         re-exports registry.js as MODULES/SUBJECTS/etc., plus
+                      loadModule(id) — dynamically import()s the real file,
+                      called only when that instrument is actually opened
     <module>.js       each: scene, view, lesson, quiz, presets, panelHTML/wire, update
   pages/
     submit.js        #/submit — formula (no-code) and developer-code submission forms
@@ -95,9 +100,13 @@ test/
 Create `src/modules/foo.js` default-exporting an object with `id, name, tag,
 subject, grades: [min, max], blurb, icon, scene, view, lesson, quiz,
 panelHTML(), wire(root), update(dt, viewer), onEnter(viewer), onExit(viewer)`
-(optionally `presets`, `video: { id, title }`, `flat: true`), then add it to the
-array in `src/modules/index.js`. Run `npm run smoke` — it checks the shape and
-that 30 update frames run without throwing, before you ever open a browser.
+(optionally `presets`, `video: { id, title }`, `flat: true`), then add a matching
+entry to `src/modules/registry.js` — the same `id` through `icon`/`video` fields
+(duplicated here on purpose, so the home page never has to import your
+instrument's actual scene code just to show its card) plus
+`load: () => import("./foo.js")`. Run `npm run smoke` — it loads every
+instrument for real (catching both a bad scene/update and any mismatch between
+the registry's metadata and the module's own), before you ever open a browser.
 
 ## Community submissions
 
@@ -126,7 +135,8 @@ To ship an approved **code** submission:
    (treat it like any external PR — check it against the module interface,
    the existing safety patterns, and the a11y/perf conventions elsewhere in
    `src/modules/`).
-3. Add it to `MODULES` in `src/modules/index.js`.
+3. Add a matching entry (metadata + `load: () => import("./<id>.js")`) to
+   `src/modules/registry.js`.
 4. Run `npm run lint && npm test && npm run smoke && npm run build`, then commit
    and push — CI deploys it like any other change.
 

@@ -1,129 +1,13 @@
-import pendulum from "./pendulum.js";
-import projectile from "./projectile.js";
-import spring from "./spring.js";
-import incline from "./incline.js";
-import cradle from "./cradle.js";
-import levers from "./levers.js";
-import circuit from "./circuit.js";
-import resistors from "./resistors.js";
-import magnet from "./magnet.js";
-import electromagnet from "./electromagnet.js";
-import coulomb from "./coulomb.js";
-import waves from "./waves.js";
-import standing from "./standing.js";
-import sound from "./sound.js";
-import lens from "./lens.js";
-import refraction from "./refraction.js";
-import buoyancy from "./buoyancy.js";
-import heat from "./heat.js";
-import molecule from "./molecule.js";
-import states from "./states.js";
-import atom from "./atom.js";
-import gaslaws from "./gaslaws.js";
-import ph from "./ph.js";
-import reactionrate from "./reactionrate.js";
-import balancing from "./balancing.js";
-import periodic from "./periodic.js";
-import cell from "./cell.js";
-import dna from "./dna.js";
-import photosynthesis from "./photosynthesis.js";
-import heart from "./heart.js";
-import respiratory from "./respiratory.js";
-import foodchain from "./foodchain.js";
-import genetics from "./genetics.js";
-import plantparts from "./plantparts.js";
-import solids from "./solids.js";
-import counting from "./counting.js";
-import shapes3d from "./shapes3d.js";
-import grapher from "./grapher.js";
-import fractions from "./fractions.js";
-import times from "./times.js";
-import unitcircle from "./unitcircle.js";
-import pythagoras from "./pythagoras.js";
-import similarity from "./similarity.js";
-import linegraph from "./linegraph.js";
-import statistics from "./statistics.js";
-import galton from "./galton.js";
-import dice from "./dice.js";
-import calculus from "./calculus.js";
-import orrery from "./orrery.js";
-import moon from "./moon.js";
-import seasons from "./seasons.js";
-import eclipses from "./eclipses.js";
-import keplerorbit from "./keplerorbit.js";
-import starlife from "./starlife.js";
-import sunlayers from "./sunlayers.js";
-import daynight from "./daynight.js";
-import watercycle from "./watercycle.js";
-import earthlayers from "./earthlayers.js";
-import platetectonics from "./platetectonics.js";
-import rockcycle from "./rockcycle.js";
-import atmosphere from "./atmosphere.js";
+import { REGISTRY } from "./registry.js";
 
-// Order shapes the workshop grid: grouped roughly by subject, easy → advanced.
-export const MODULES = [
-  pendulum,
-  projectile,
-  spring,
-  incline,
-  cradle,
-  levers,
-  circuit,
-  resistors,
-  magnet,
-  electromagnet,
-  coulomb,
-  waves,
-  standing,
-  sound,
-  lens,
-  refraction,
-  buoyancy,
-  heat,
-  molecule,
-  states,
-  atom,
-  gaslaws,
-  ph,
-  reactionrate,
-  balancing,
-  periodic,
-  cell,
-  dna,
-  photosynthesis,
-  heart,
-  respiratory,
-  foodchain,
-  genetics,
-  plantparts,
-  solids,
-  counting,
-  shapes3d,
-  grapher,
-  fractions,
-  times,
-  unitcircle,
-  pythagoras,
-  similarity,
-  linegraph,
-  statistics,
-  galton,
-  dice,
-  calculus,
-  orrery,
-  moon,
-  seasons,
-  eclipses,
-  keplerorbit,
-  starlife,
-  sunlayers,
-  daynight,
-  watercycle,
-  earthlayers,
-  platetectonics,
-  rockcycle,
-  atmosphere,
-];
+// `MODULES` is lightweight metadata only (id, name, tag, subject, grades,
+// blurb, icon, video?, load) — no THREE.js scene construction happens by
+// importing this file, unlike before. The home page, subject pages, cards,
+// and badges only ever needed these fields anyway. The one thing that needs
+// a module's full behavior (scene, lesson, quiz, panelHTML, wire, update,
+// onEnter, onExit) is the instrument view itself, which calls loadModule(id)
+// to lazily import() the real file — see renderModule() in main.js.
+export const MODULES = REGISTRY;
 
 export const MODULE_IDS = MODULES.map((m) => m.id);
 
@@ -141,6 +25,15 @@ export function inBand(m, band) {
   return lo <= band.max && hi >= band.min;
 }
 
+/** The lightweight metadata for one instrument — safe to call synchronously anywhere. */
 export function getModule(id) {
   return MODULES.find((m) => m.id === id) || null;
+}
+
+/** The full instrument — scene, lesson, quiz, panel, update loop — loaded on demand. Returns null if `id` isn't a real instrument. */
+export async function loadModule(id) {
+  const entry = getModule(id);
+  if (!entry) return null;
+  const mod = await entry.load();
+  return mod.default;
 }
