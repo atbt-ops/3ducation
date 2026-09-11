@@ -3,6 +3,7 @@ import { Viewer } from "./engine/viewer.js";
 import { createHeroOrbit } from "./engine/heroOrbit.js";
 import { prefersReducedMotion } from "./engine/helpers.js";
 import { MODULES, MODULE_IDS, SUBJECTS, BANDS, inBand, getModule } from "./modules/index.js";
+import { SUBJECT_ACCENT } from "./lib/subjectAccent.js";
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
 import { mountPresets } from "./learn/presets.js";
@@ -187,17 +188,6 @@ try {
 } catch {
   /* ignore */
 }
-
-// Physics/Chemistry/Math reuse the app's existing brand colors; the rest get
-// their own, so all six subject sections read distinctly at a glance.
-const SUBJECT_ACCENT = {
-  Physics: "var(--subj-physics)",
-  Chemistry: "var(--subj-chemistry)",
-  Math: "var(--subj-math)",
-  Biology: "var(--subj-biology)",
-  "Earth Science": "var(--subj-earth)",
-  Astronomy: "var(--subj-astronomy)",
-};
 
 function badgeHTML(moduleId) {
   const p = progress.for(moduleId);

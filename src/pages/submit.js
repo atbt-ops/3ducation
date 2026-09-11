@@ -157,12 +157,22 @@ export async function renderSubmit(main, user, requestSignIn) {
   if (!user) {
     main.innerHTML = `
       ${BACK_BTN}
-      <section class="hero">
-        <span class="eyebrow">Community instruments</span>
-        <h1>Build the next instrument.</h1>
-        <p>Sign in to submit your own instrument idea — no coding required, a simple formula is
-        enough. Every submission is reviewed before it reaches other visitors.</p>
-        <div class="btn-row"><button class="btn primary" id="submitSignIn" type="button">Sign in to submit</button></div>
+      <section class="hero-panel">
+        <div class="hero hero-main">
+          <span class="eyebrow">Community instruments</span>
+          <h1>Build the next instrument.</h1>
+          <p>Sign in to submit your own instrument idea — no coding required, a simple formula is
+          enough. Every submission is reviewed before it reaches other visitors.</p>
+          <div class="btn-row"><button class="btn primary" id="submitSignIn" type="button">Sign in to submit</button></div>
+        </div>
+        <aside class="hero-spot">
+          <h2>No coding needed</h2>
+          <ul class="spot-list">
+            <li><span class="spot-emoji" aria-hidden="true">🧮</span>Type a formula, see it plot live in Surface studio, then submit it.</li>
+            <li><span class="spot-emoji" aria-hidden="true">✅</span>Approved formulas go live immediately at <span class="mono">#/community</span>.</li>
+            <li><span class="spot-emoji" aria-hidden="true">💻</span>Comfortable with JavaScript? There's an advanced developer-code track too.</li>
+          </ul>
+        </aside>
       </section>`;
     main.querySelector("#submitSignIn").addEventListener("click", requestSignIn);
     return;
@@ -170,12 +180,20 @@ export async function renderSubmit(main, user, requestSignIn) {
 
   main.innerHTML = `
     ${BACK_BTN}
-    <section class="hero">
-      <span class="eyebrow">Community instruments</span>
-      <h1>Submit an instrument.</h1>
-      <p>Two ways in: a <strong>formula</strong> (no coding — recommended for almost everyone), or
-      <strong>developer code</strong> for a fully custom instrument. Approved formulas go live right
-      away; approved code still needs a maintainer to merge it in.</p>
+    <section class="hero-panel">
+      <div class="hero hero-main">
+        <span class="eyebrow">Community instruments</span>
+        <h1>Submit an instrument.</h1>
+        <p>Two ways in: a <strong>formula</strong> (no coding — recommended for almost everyone), or
+        <strong>developer code</strong> for a fully custom instrument.</p>
+      </div>
+      <aside class="hero-spot">
+        <h2>How review works</h2>
+        <ul class="spot-list">
+          <li><span class="spot-emoji" aria-hidden="true">🧮</span><strong>Formula:</strong> validated instantly by the same safe engine Surface studio uses — approved ones publish right away, no code review needed.</li>
+          <li><span class="spot-emoji" aria-hidden="true">💻</span><strong>Developer code:</strong> saved as text, never executed — a maintainer reads it and merges it in by hand if it's a good fit.</li>
+        </ul>
+      </aside>
     </section>
     <div class="chip-row" role="group" aria-label="Submission type" style="margin-bottom:18px">
       <button class="chip" type="button" id="tabFormula" aria-pressed="true">🧮 Formula plot (no code)</button>

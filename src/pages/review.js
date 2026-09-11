@@ -1,6 +1,7 @@
 import { listAllSubmissions, reviewSubmission } from "../submissions.js";
 import { isAdmin } from "../firebase.js";
 import { escapeHtml, BACK_BTN } from "../lib/html.js";
+import { SUBJECT_ACCENT } from "../lib/subjectAccent.js";
 
 function body(s) {
   if (s.type === "formula") {
@@ -23,8 +24,9 @@ function body(s) {
 
 function card(s) {
   const kind = s.type === "formula" ? "No-code formula" : "Developer code";
+  const accent = SUBJECT_ACCENT[s.subject];
   return `
-    <div class="submission-row" data-id="${s.id}">
+    <div class="submission-row" data-id="${s.id}" ${accent ? `style="--accent:${accent}"` : ""}>
       <div>
         <b>${escapeHtml(s.name)}</b>
         <span class="badge is-visited">${escapeHtml(s.status)}</span>
@@ -61,15 +63,20 @@ export async function renderReview(main, user) {
 
   main.innerHTML = `
     ${BACK_BTN}
-    <section class="hero">
-      <span class="eyebrow">Review queue</span>
-      <h1>Community submissions.</h1>
-      <p>Approving a <strong>formula</strong> submission publishes it immediately at
-      <span class="mono">#/community</span> — it only ever runs through the same sandboxed
-      expression engine Surface studio uses, so there's nothing to execute unsafely. Approving
-      <strong>developer code</strong> does <em>not</em> publish it — copy it into
-      <span class="mono">src/modules/</span>, review it properly, add it to the registry, and
-      deploy as a normal commit.</p>
+    <section class="hero-panel">
+      <div class="hero hero-main">
+        <span class="eyebrow">Review queue</span>
+        <h1>Community submissions.</h1>
+        <p>Every submission — formula or code — is reviewed here before it reaches other
+        visitors.</p>
+      </div>
+      <aside class="hero-spot">
+        <h2>How approving each type works</h2>
+        <ul class="spot-list">
+          <li><span class="spot-emoji" aria-hidden="true">🧮</span><strong>Formula:</strong> publishes immediately at <span class="mono">#/community</span> — it only ever runs through the same sandboxed expression engine Surface studio uses, so there's nothing to execute unsafely.</li>
+          <li><span class="spot-emoji" aria-hidden="true">💻</span><strong>Developer code:</strong> approving does <em>not</em> publish it — copy it into <span class="mono">src/modules/</span>, review it properly, add it to the registry, and deploy as a normal commit.</li>
+        </ul>
+      </aside>
     </section>
     <div id="revList"><p class="fact">Loading…</p></div>
   `;
