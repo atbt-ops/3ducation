@@ -7,7 +7,13 @@ function body(s) {
     return `
       <div class="formula"><span>z = f(x, y)</span><b class="mono">${escapeHtml(s.formula)}</b></div>
       <p class="fact"><a href="#/community/${s.id}" target="_blank" rel="noopener">Preview it live →</a>
-        (you can see it as admin even before approving)</p>`;
+        (you can see it as admin even before approving)</p>
+      <p class="fact">${
+        s.quiz?.length
+          ? `🧠 Includes ${s.quiz.length} check-yourself question${s.quiz.length > 1 ? "s" : ""} —
+             visible in the live preview above.`
+          : "No check-yourself quiz was added — that's fine, quizzes are optional."
+      }</p>`;
   }
   return `
     <details><summary>View code (read-only, never executed)</summary>

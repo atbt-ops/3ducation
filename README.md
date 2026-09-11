@@ -104,10 +104,12 @@ Signed-in users can propose a new instrument at `#/submit`, in one of two tracks
 
 - **Formula plot (no code)** — a name, subject, grade range, description and a
   `z = f(x, y)` formula, validated live against the same evaluator Surface studio
-  uses (`src/lib/expr.js` — no `eval`, arithmetic only). Anyone can do this; no
-  programming knowledge needed. **Approving one publishes it immediately** at
-  `#/community/<id>` (listed on `#/community`) — there's nothing unsafe a formula
-  could do, so it doesn't need a code review or a deploy.
+  uses (`src/lib/expr.js` — no `eval`, arithmetic only), plus an optional
+  check-yourself quiz (up to 5 questions, built with a plain form — no markup or
+  code). Anyone can do this; no programming knowledge needed. **Approving one
+  publishes it immediately** at `#/community/<id>` (listed on `#/community`) —
+  there's nothing unsafe a formula or a quiz question could do, so it doesn't
+  need a code review or a deploy.
 - **Developer code** — full module code, same shape as "Add a module" above, for
   someone who wants to build a fully custom instrument. Saved as text and
   **never executed** — approving it does *not* publish it; see below.

@@ -44,7 +44,7 @@ export function buildCommunityModule(sub) {
       <p class="fact">Submitted by ${author} — a community instrument, reviewed but not
         written by the 3ducation team.</p>
     `,
-    quiz: [],
+    quiz: Array.isArray(sub.quiz) ? sub.quiz : [],
 
     panelHTML() {
       return `

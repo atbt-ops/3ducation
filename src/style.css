@@ -229,6 +229,16 @@ button { font: inherit; color: inherit; }
   flex-direction: column;
   gap: 6px;
 }
+.quiz-builder-item {
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .submission-code {
   max-height: 320px;
   overflow: auto;

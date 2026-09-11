@@ -44,7 +44,8 @@ function statusRow(s) {
         <b>${escapeHtml(s.name)}</b>
         <span class="badge is-${cls}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
       </div>
-      <p class="fact">${kind} · ${escapeHtml(s.subject)} · classes ${s.gradeMin}–${s.gradeMax}</p>
+      <p class="fact">${kind} · ${escapeHtml(s.subject)} · classes ${s.gradeMin}–${s.gradeMax}
+        ${s.quiz?.length ? `· ${s.quiz.length} quiz question${s.quiz.length > 1 ? "s" : ""}` : ""}</p>
       ${
         s.status === "approved" && s.type === "formula"
           ? `<p class="fact"><a href="#/community/${s.id}">View it live →</a></p>`
@@ -56,6 +57,34 @@ function statusRow(s) {
 
 function subjectOptions() {
   return SUBJECTS.map((s) => `<option value="${s}">${s}</option>`).join("");
+}
+
+const MAX_QUIZ = 5;
+
+function quizItemHTML(qid) {
+  return `
+    <div class="quiz-builder-item" data-qid="${qid}">
+      <div class="row" style="display:flex;justify-content:space-between;align-items:center">
+        <b>Question</b>
+        <button class="btn" type="button" data-act="remove-quiz" data-qid="${qid}">Remove</button>
+      </div>
+      <div class="control"><label for="qq-${qid}">Question text</label>
+        <input type="text" id="qq-${qid}" class="text-input" maxlength="200"
+          placeholder="e.g. What happens to z when k increases?"></div>
+      <div class="control"><label>Answer choices — pick the correct one</label>
+        ${[0, 1, 2, 3]
+          .map(
+            (ci) => `
+          <div class="row" style="justify-content:flex-start;gap:8px;align-items:center;margin-bottom:6px">
+            <input type="radio" name="qans-${qid}" id="qans-${qid}-${ci}" value="${ci}" style="flex:none" aria-label="This is the correct choice">
+            <input type="text" id="qc-${qid}-${ci}" class="text-input" maxlength="80" placeholder="Choice ${ci + 1}">
+          </div>`
+          )
+          .join("")}
+      </div>
+      <div class="control"><label for="qe-${qid}">Why is that correct? (shown after answering)</label>
+        <input type="text" id="qe-${qid}" class="text-input" maxlength="200"></div>
+    </div>`;
 }
 
 function formulaFormHTML() {
@@ -82,6 +111,14 @@ function formulaFormHTML() {
         <input type="text" id="f-formula" class="text-input mono" spellcheck="false" autocapitalize="off"
           autocomplete="off" required placeholder="e.g. k*sin(x)*cos(y)">
         <p class="fact" id="f-formula-status">Type a formula to check it.</p>
+      </div>
+      <div class="control">
+        <div class="row"><label>Check-yourself quiz (optional)</label></div>
+        <p class="fact">Add up to 5 questions so learners can test themselves after viewing your
+          instrument. Leave this empty if you'd rather skip it.</p>
+        <div id="f-quiz-list"></div>
+        <p class="fact modal-error" id="f-quiz-error" role="alert" hidden></p>
+        <div class="btn-row"><button class="btn" type="button" id="f-quiz-add">+ Add a question</button></div>
       </div>
       <p class="fact modal-error" id="f-error" role="alert" hidden></p>
       <div class="btn-row"><button class="btn primary" type="submit" id="f-submit" disabled>Submit for review</button></div>
@@ -160,6 +197,55 @@ export async function renderSubmit(main, user, requestSignIn) {
     const status = main.querySelector("#f-formula-status");
     const submitBtn = main.querySelector("#f-submit");
     const err = main.querySelector("#f-error");
+    const quizList = main.querySelector("#f-quiz-list");
+    const quizAddBtn = main.querySelector("#f-quiz-add");
+    const quizErr = main.querySelector("#f-quiz-error");
+    let quizIds = [];
+    let quizSeq = 0;
+
+    function refreshQuizAddBtn() {
+      quizAddBtn.disabled = quizIds.length >= MAX_QUIZ;
+      quizAddBtn.textContent = quizIds.length >= MAX_QUIZ ? "Maximum 5 questions" : "+ Add a question";
+    }
+
+    function addQuizBlock() {
+      if (quizIds.length >= MAX_QUIZ) return;
+      const qid = ++quizSeq;
+      quizIds.push(qid);
+      quizList.insertAdjacentHTML("beforeend", quizItemHTML(qid));
+      quizList
+        .querySelector(`[data-qid="${qid}"] [data-act="remove-quiz"]`)
+        .addEventListener("click", () => {
+          quizIds = quizIds.filter((x) => x !== qid);
+          quizList.querySelector(`.quiz-builder-item[data-qid="${qid}"]`).remove();
+          refreshQuizAddBtn();
+        });
+      refreshQuizAddBtn();
+    }
+    quizAddBtn.addEventListener("click", addQuizBlock);
+
+    // Reads every quiz block the author started; returns null (with the error
+    // message shown) if one was left half-filled, otherwise the finished list.
+    function collectQuiz() {
+      quizErr.hidden = true;
+      const quiz = [];
+      for (const qid of quizIds) {
+        const q = main.querySelector(`#qq-${qid}`).value.trim();
+        const choices = [0, 1, 2, 3].map((ci) => main.querySelector(`#qc-${qid}-${ci}`).value.trim());
+        const checked = main.querySelector(`input[name="qans-${qid}"]:checked`);
+        const explain = main.querySelector(`#qe-${qid}`).value.trim();
+        const started = q || choices.some(Boolean) || checked || explain;
+        if (!started) continue;
+        if (!q || choices.some((c) => !c) || !checked) {
+          quizErr.textContent =
+            "Finish or remove any quiz question you've started — it needs question text, all 4 choices, and a marked correct answer.";
+          quizErr.hidden = false;
+          return null;
+        }
+        quiz.push({ q, choices, answer: +checked.value, explain: explain || "That's correct." });
+      }
+      return quiz;
+    }
 
     formulaInput.addEventListener("input", () => {
       const src = formulaInput.value.trim();
@@ -187,8 +273,19 @@ export async function renderSubmit(main, user, requestSignIn) {
         err.hidden = false;
         return;
       }
+      const quiz = collectQuiz();
+      if (quiz === null) return;
       try {
-        await createSubmission(user, { type: "formula", name, subject, gradeMin, gradeMax, description, formula });
+        await createSubmission(user, {
+          type: "formula",
+          name,
+          subject,
+          gradeMin,
+          gradeMax,
+          description,
+          formula,
+          quiz,
+        });
         renderForm();
         loadMine();
       } catch {

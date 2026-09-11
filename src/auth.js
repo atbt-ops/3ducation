@@ -7,7 +7,7 @@ import {
   signInWithPopup,
   updateProfile,
 } from "firebase/auth";
-import { auth } from "./firebase.js";
+import { auth, authReady } from "./firebase.js";
 
 const FRIENDLY = {
   "auth/email-already-in-use": "That email already has an account — try signing in instead.",
@@ -27,6 +27,7 @@ function friendly(err) {
 
 export async function signUp(name, email, password) {
   try {
+    await authReady;
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     if (name) await updateProfile(cred.user, { displayName: name });
     return { user: cred.user };
@@ -37,6 +38,7 @@ export async function signUp(name, email, password) {
 
 export async function signIn(email, password) {
   try {
+    await authReady;
     const cred = await signInWithEmailAndPassword(auth, email, password);
     return { user: cred.user };
   } catch (err) {
@@ -46,6 +48,7 @@ export async function signIn(email, password) {
 
 export async function signInGoogle() {
   try {
+    await authReady;
     const cred = await signInWithPopup(auth, new GoogleAuthProvider());
     return { user: cred.user };
   } catch (err) {

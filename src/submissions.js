@@ -36,6 +36,7 @@ export async function createSubmission(user, data) {
     description: data.description.trim(),
     formula: data.type === "formula" ? data.formula.trim() : "",
     code: data.type === "code" ? data.code : "",
+    quiz: data.type === "formula" && Array.isArray(data.quiz) ? data.quiz : [],
     status: "pending",
     createdAt: serverTimestamp(),
   };
