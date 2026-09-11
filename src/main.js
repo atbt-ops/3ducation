@@ -1,5 +1,7 @@
 import "./style.css";
 import { Viewer } from "./engine/viewer.js";
+import { createHeroOrbit } from "./engine/heroOrbit.js";
+import { prefersReducedMotion } from "./engine/helpers.js";
 import { MODULES, MODULE_IDS, SUBJECTS, BANDS, inBand, getModule } from "./modules/index.js";
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
@@ -131,6 +133,29 @@ let stageWrap = null;
 let active = null;
 let lastT = performance.now();
 
+/** The home hero's decorative live scene — its own tiny renderer, only ever running on "#/". */
+let heroOrbit = null;
+function stopHeroOrbit() {
+  heroOrbit?.dispose();
+  heroOrbit = null;
+}
+
+/** Counts a stat up from 0 to `target`, skipped (jumps straight there) if the visitor prefers reduced motion. */
+function animateCount(el, target) {
+  if (prefersReducedMotion || !target) {
+    el.textContent = target;
+    return;
+  }
+  const duration = 700;
+  const t0 = performance.now();
+  function step(t) {
+    const p = Math.min(1, (t - t0) / duration);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 function ensureViewer() {
   if (viewer) return;
   canvas = document.createElement("canvas");
@@ -222,17 +247,18 @@ function renderHome() {
     <section class="hero-panel">
       <div class="hero hero-main">
         <span class="eyebrow">${MODULES.length} instruments · classes I–XII · every subject · free</span>
-        <h1>Science you can pick up and turn over.</h1>
+        <h1>Science and math you can pick up and turn over.</h1>
         <p>Every model is a real <span class="d3">3D</span> object running on the same equations
         scientists use — physics, chemistry, biology, maths and space, from primary counting to
         senior-secondary. Guided experiments, a live formula box, a check-yourself quiz.</p>
         <div class="stat-strip" role="status">
-          <div class="stat"><b>${s.visited}</b><span>of ${s.total} explored</span></div>
-          <div class="stat"><b>${s.mastered}</b><span>mastered</span></div>
-          <div class="stat"><b>${SUBJECTS.length}</b><span>subjects</span></div>
+          <div class="stat"><b data-count="${s.visited}">0</b><span>of ${s.total} explored</span></div>
+          <div class="stat"><b data-count="${s.mastered}">0</b><span>mastered</span></div>
+          <div class="stat"><b data-count="${SUBJECTS.length}">0</b><span>subjects</span></div>
         </div>
       </div>
       <aside class="hero-spot">
+        <div class="hero-orbit-wrap"><canvas class="hero-orbit-canvas" aria-hidden="true"></canvas></div>
         <h2>Not just a solo build</h2>
         <ul class="spot-list">
           <li><span class="spot-emoji" aria-hidden="true">🧪</span>${MODULES.length} hands-on instruments — no sign-up or install needed</li>
@@ -254,6 +280,13 @@ function renderHome() {
     <div id="benchWrap"></div>
     <p class="bench-empty" id="benchEmpty" hidden>Nothing matches that combination — try a wider search or filter.</p>
   `;
+
+  const orbitCanvas = main.querySelector(".hero-orbit-canvas");
+  if (orbitCanvas) {
+    heroOrbit = createHeroOrbit(orbitCanvas);
+    heroOrbit.start();
+  }
+  main.querySelectorAll(".stat b[data-count]").forEach((el) => animateCount(el, +el.dataset.count));
 
   const wrap = main.querySelector("#benchWrap");
   const emptyEl = main.querySelector("#benchEmpty");
@@ -545,6 +578,7 @@ function route() {
   const raw = location.hash;
   // Only "#/..." paths are routes; plain anchors like "#main" are left alone.
   if (raw && !raw.startsWith("#/")) return;
+  stopHeroOrbit(); // torn down on every navigation; renderHome() below recreates it if we're headed back there
   const id = raw.replace(/^#\/?/, "");
   if (id === "submit") renderSubmitPage();
   else if (id === "review") renderReviewPage();
