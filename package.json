@@ -1,6 +1,6 @@
 {
   "name": "3ducation",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "private": true,
   "description": "A free, interactive 3D science lab for the classroom and self-study.",
   "type": "module",
@@ -12,6 +12,7 @@
     "icons": "node scripts/gen-icons.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "smoke": "node scripts/smoke.mjs",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

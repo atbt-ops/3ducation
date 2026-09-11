@@ -26,13 +26,16 @@ a `grades: [min, max]` range that drives the school-level filter.
 ```bash
 npm install
 npm run dev        # vite dev server
-npm test           # vitest — pure-physics unit tests (src/lib/physics.js)
+npm test           # vitest — pure-function unit tests (physics.js, expr.js)
+npm run smoke      # construct every module + run 30 update frames, headless
 npm run lint       # eslint
 npm run build      # generates PWA icons, then builds to dist/
 npm run preview    # serve the production build
 ```
 
-CI (`.github/workflows/deploy.yml`) runs `lint` → `test` → `build` before deploying.
+CI (`.github/workflows/deploy.yml`) runs `lint` → `test` → `smoke` → `build` before deploying.
+`npm run smoke` (`scripts/smoke.mjs`) stubs the DOM and imports every module — it catches
+import errors, bad geometry arguments and throws inside `update()` without a browser.
 
 - **Stack:** [Vite](https://vitejs.dev/) + vanilla ES modules + [three.js](https://threejs.org/) (r0.160, bundled — no CDN).
 - **Offline:** [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) precaches the app; it installs as a PWA.
