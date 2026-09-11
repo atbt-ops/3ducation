@@ -17,6 +17,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "firebase": "^12.19.0",
     "three": "^0.160.1"
   },
   "devDependencies": {

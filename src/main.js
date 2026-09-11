@@ -4,6 +4,11 @@ import { MODULES, MODULE_IDS, SUBJECTS, BANDS, inBand, getModule } from "./modul
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
 import { mountPresets } from "./learn/presets.js";
+import { onAuth, signOutUser } from "./auth.js";
+import { isAdmin } from "./firebase.js";
+import { openAuthModal } from "./authModal.js";
+// Firestore (sync + submissions) is the heaviest slice of the Firebase SDK,
+// so it's only fetched once someone actually signs in or opens those pages.
 
 const app = document.getElementById("app");
 
@@ -17,23 +22,81 @@ app.innerHTML = `
       </svg>
       <span class="brand-word"><span class="d3">3d</span>ucation</span>
     </a>
-    <nav class="crumbs" id="crumbs" aria-live="polite">Workshop</nav>
+    <div class="topbar-right">
+      <nav class="crumbs" id="crumbs" aria-live="polite">Workshop</nav>
+      <div class="auth-area" id="authArea"></div>
+    </div>
   </header>
 
   <main id="main" class="view" tabindex="-1"></main>
 
   <footer class="site-foot">
     <p>Free and open source — <a href="https://github.com/atbt-ops/3ducation">github.com/atbt-ops/3ducation</a>.
-    Models run on real equations; your progress stays in this browser.</p>
+    Signed-in progress syncs across devices; signed-out progress stays in this browser.
+    <a href="#/submit">Submit an instrument</a>.</p>
     <button class="linklike" id="resetProgress" type="button">Reset my progress</button>
   </footer>
 `;
 
 const main = document.getElementById("main");
 const crumbs = document.getElementById("crumbs");
+const authArea = document.getElementById("authArea");
 
 document.getElementById("resetProgress").addEventListener("click", () => {
   if (confirm("Clear your visited/mastered marks on this device?")) progress.reset();
+});
+
+/* ---------------- auth ---------------- */
+let currentUser = null;
+
+function initials(user) {
+  const src = user.displayName || user.email || "?";
+  return src.trim().slice(0, 1).toUpperCase();
+}
+
+function renderAuthArea() {
+  if (!currentUser) {
+    authArea.innerHTML = `<button class="btn" id="signInBtn" type="button">Sign in</button>`;
+    authArea.querySelector("#signInBtn").addEventListener("click", () => requestSignIn());
+    return;
+  }
+  const admin = isAdmin(currentUser);
+  authArea.innerHTML = `
+    <a class="auth-link" href="#/submit">Submit</a>
+    ${admin ? '<a class="auth-link" href="#/review">Review</a>' : ""}
+    <span class="auth-avatar" title="${currentUser.email || ""}">${initials(currentUser)}</span>
+    <button class="btn" id="signOutBtn" type="button">Sign out</button>
+  `;
+  authArea.querySelector("#signOutBtn").addEventListener("click", () => signOutUser());
+}
+
+function requestSignIn(onSignedIn) {
+  openAuthModal((user) => {
+    currentUser = user;
+    renderAuthArea();
+    onSignedIn?.(user);
+  });
+}
+
+let syncModule = null;
+async function getSync() {
+  if (!syncModule) syncModule = await import("./sync.js");
+  return syncModule;
+}
+
+onAuth(async (user) => {
+  currentUser = user;
+  renderAuthArea();
+  if (user) {
+    const { attachSync } = await getSync();
+    attachSync(user.uid);
+  } else if (syncModule) {
+    syncModule.detachSync();
+  }
+  // Re-render a gated page once auth resolves (it's async on first load), or
+  // again whenever sign-in state changes underneath it.
+  const raw = location.hash.replace(/^#\/?/, "");
+  if (raw === "submit" || raw === "review") route();
 });
 
 /* ---------------- shared 3D viewer ---------------- */
@@ -316,13 +379,42 @@ function renderModule(id) {
   main.focus({ preventScroll: true });
 }
 
+/* ---------------- static pages (submit / review) ---------------- */
+function leaveModule() {
+  active?.onExit?.(viewer);
+  active = null;
+  if (viewer) viewer.onPick = null;
+}
+
+async function renderSubmitPage() {
+  leaveModule();
+  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Submit an instrument</b>';
+  main.innerHTML = '<p class="fact">Loading…</p>';
+  const { renderSubmit } = await import("./pages/submit.js");
+  renderSubmit(main, currentUser, () => requestSignIn(() => renderSubmitPage()));
+  window.scrollTo({ top: 0 });
+  main.focus({ preventScroll: true });
+}
+
+async function renderReviewPage() {
+  leaveModule();
+  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Review queue</b>';
+  main.innerHTML = '<p class="fact">Loading…</p>';
+  const { renderReview } = await import("./pages/review.js");
+  renderReview(main, currentUser);
+  window.scrollTo({ top: 0 });
+  main.focus({ preventScroll: true });
+}
+
 /* ---------------- router ---------------- */
 function route() {
   const raw = location.hash;
   // Only "#/..." paths are routes; plain anchors like "#main" are left alone.
   if (raw && !raw.startsWith("#/")) return;
   const id = raw.replace(/^#\/?/, "");
-  if (id && getModule(id)) renderModule(id);
+  if (id === "submit") renderSubmitPage();
+  else if (id === "review") renderReviewPage();
+  else if (id && getModule(id)) renderModule(id);
   else renderHome();
 }
 window.addEventListener("hashchange", route);

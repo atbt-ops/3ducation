@@ -4,7 +4,8 @@
 across physics, chemistry, biology, earth science, maths and space — each running
 on the real equations, each with a short lesson, guided experiments and a
 check-yourself quiz. Plus all 118 elements and a formula box that plots anything
-you type. No account, works offline. Filter by subject or by school level
+you type. Works offline; sign-in is optional and only used to sync your progress
+and to submit new instruments. Filter by subject or by school level
 (Primary / Middle / Secondary).
 
 🔗 **Live:** https://atbt-ops.github.io/3ducation/
@@ -43,7 +44,12 @@ import errors, bad geometry arguments and throws inside `update()` without a bro
 
 - **Stack:** [Vite](https://vitejs.dev/) + vanilla ES modules + [three.js](https://threejs.org/) (r0.160, bundled — no CDN).
 - **Offline:** [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) precaches the app; it installs as a PWA.
-- **Progress:** stored in `localStorage` only (`src/state.js`). No backend, no tracking.
+- **Progress:** always kept in `localStorage` (`src/state.js`) first. If you sign in,
+  `src/sync.js` mirrors it to Firestore (`progress/{uid}`, merged by best score) so it
+  follows you across devices — signing out or never signing in changes nothing else.
+- **Auth:** Firebase (`src/firebase.js`, `src/auth.js`) — email/password and Google.
+  `firebase/firestore` is only fetched on sign-in or when visiting `#/submit` /
+  `#/review`, via dynamic `import()`, so signed-out visitors never download it.
 
 ### Project layout
 
@@ -73,9 +79,46 @@ test/
 ### Add a module
 
 Create `src/modules/foo.js` default-exporting an object with `id, name, tag,
-subject, blurb, icon, scene, view, lesson, quiz, panelHTML(), wire(root),
-update(dt, viewer), onEnter(viewer), onExit(viewer)`, then add it to the array in
-`src/modules/index.js`.
+subject, grades: [min, max], blurb, icon, scene, view, lesson, quiz,
+panelHTML(), wire(root), update(dt, viewer), onEnter(viewer), onExit(viewer)`
+(optionally `presets`, `video: { id, title }`, `flat: true`), then add it to the
+array in `src/modules/index.js`. Run `npm run smoke` — it checks the shape and
+that 30 update frames run without throwing, before you ever open a browser.
+
+## Community submissions
+
+Signed-in users can propose a new instrument at `#/submit` — name, subject, grade
+range, description and module code, following the same shape as "Add a module"
+above. It's saved to Firestore (`submissions/{id}`, status `pending`) and is
+**never executed** — nothing a visitor writes runs in anyone else's browser.
+
+Admins (emails listed in `ADMIN_EMAILS` in `src/firebase.js`, matching
+`firestore.rules`) review submissions at `#/review` and mark them approved or
+rejected. Approving does **not** publish it. To actually ship an approved
+instrument:
+
+1. Read the submitted code on the review page.
+2. Copy it into a new `src/modules/<id>.js`, review and clean it up properly
+   (treat it like any external PR — check it against the module interface,
+   the existing safety patterns, and the a11y/perf conventions elsewhere in
+   `src/modules/`).
+3. Add it to `MODULES` in `src/modules/index.js`.
+4. Run `npm run lint && npm test && npm run smoke && npm run build`, then commit
+   and push — CI deploys it like any other change.
+
+### Firebase setup (for a fresh fork/deploy)
+
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com/).
+2. **Authentication → Sign-in method**: enable Email/Password (and Google, optional).
+3. **Authentication → Settings → Authorized domains**: add your GitHub Pages domain.
+4. **Firestore Database → Create database** (Standard edition, production mode).
+5. **Firestore Database → Rules**: paste in [`firestore.rules`](firestore.rules) and publish.
+6. **Project settings → General → Your apps**: register a web app, copy the config
+   into `src/firebase.js`, and list admin email(s) in `ADMIN_EMAILS` there (keep
+   `firestore.rules`' `isAdmin()` list in sync — that's the one actually enforced).
+
+These config values are public client identifiers, safe to commit — the real
+security boundary is `firestore.rules`, not the config's secrecy.
 
 ## Deploy
 

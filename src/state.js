@@ -49,6 +49,10 @@ export const progress = {
   reset() {
     write({});
   },
+  /** Wholesale replace (used by sync.js when merging in a signed-in account's data). */
+  replaceAll(data) {
+    write(data || {});
+  },
   subscribe(fn) {
     listeners.add(fn);
     return () => listeners.delete(fn);

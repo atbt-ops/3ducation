@@ -1,0 +1,50 @@
+rules_version = '2';
+
+// Paste this into Firebase console → Firestore Database → Rules, then Publish.
+// (Or deploy with `firebase deploy --only firestore:rules` if you have the CLI
+// set up locally — this repo doesn't run that automatically.)
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Keep this in sync with ADMIN_EMAILS in src/firebase.js.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email in ["thrilochanprasad@gmail.com"];
+    }
+
+    // Per-user progress mirror (visited / quiz scores). Only the owner can
+    // read or write their own doc.
+    match /progress/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Community instrument submissions. Anyone signed in can create one for
+    // themselves; only the author or an admin can read it; only an admin (or
+    // the author, while still pending) can update/delete it. Submitted code
+    // is inert text here — nothing in this app ever executes it.
+    match /submissions/{submissionId} {
+      allow create: if isSignedIn()
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.status == "pending";
+
+      allow read: if isSignedIn()
+        && (resource.data.authorUid == request.auth.uid || isAdmin());
+
+      // Only an admin may change `status` (approve/reject). An author may
+      // still edit their own submission while it's pending, but the update
+      // must leave status as "pending" — they cannot self-approve.
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && resource.data.authorUid == request.auth.uid
+            && resource.data.status == "pending"
+            && request.resource.data.status == "pending");
+
+      allow delete: if isAdmin()
+        || (isSignedIn()
+            && resource.data.authorUid == request.auth.uid
+            && resource.data.status == "pending");
+    }
+  }
+}
