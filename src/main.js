@@ -180,13 +180,63 @@ function loop(t) {
 requestAnimationFrame(loop);
 
 /* ---------------- home ---------------- */
-let homeFilter = "All";
 let homeBand = "All";
 try {
-  homeFilter = localStorage.getItem("3ducation.filter") || "All";
   homeBand = localStorage.getItem("3ducation.band") || "All";
 } catch {
   /* ignore */
+}
+
+const SUBJECT_BLURB = {
+  Physics: "Forces, energy, circuits, light and sound — push, drop, and short-circuit your way through it.",
+  Chemistry: "Atoms, reactions, gases and the periodic table — 118 elements to explore.",
+  Biology: "Cells, DNA, the heart, and how living things work and grow.",
+  "Earth Science": "Inside the planet, its plates, rocks, and the water cycle.",
+  Math: "Numbers, shapes, graphs and calculus — geometry and algebra you can turn around.",
+  Astronomy: "Orbits, eclipses, moon phases, and how stars are born and die.",
+};
+
+function subjectSlug(name) {
+  return name.toLowerCase().replace(/\s+/g, "-");
+}
+function subjectFromSlug(slug) {
+  return SUBJECTS.find((s) => subjectSlug(s) === slug) || null;
+}
+
+function inScope(m) {
+  if (homeBand === "All") return true;
+  const band = BANDS.find((b) => b.label === homeBand);
+  return inBand(m, band);
+}
+function matchesQuery(m, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return m.name.toLowerCase().includes(q) || m.blurb.toLowerCase().includes(q) || m.tag.toLowerCase().includes(q);
+}
+
+function bandChipsHTML(selected) {
+  return ["All", ...BANDS.map((b) => b.label)]
+    .map(
+      (name) =>
+        `<button class="chip" type="button" data-band="${name}" aria-pressed="${name === selected}">${name}</button>`
+    )
+    .join("");
+}
+
+/** Wires the shared grade-band chip row; `onChange` repaints whatever list is currently shown. */
+function wireBandRow(root, onChange) {
+  root.querySelector(".band-row").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-band]");
+    if (!btn) return;
+    homeBand = btn.dataset.band;
+    try {
+      localStorage.setItem("3ducation.band", homeBand);
+    } catch {
+      /* ignore */
+    }
+    root.querySelectorAll(".band-row .chip").forEach((c) => c.setAttribute("aria-pressed", c === btn ? "true" : "false"));
+    onChange();
+  });
 }
 
 function badgeHTML(moduleId) {
@@ -213,6 +263,38 @@ function moduleCard(m) {
     </a>`;
 }
 
+/** Progress bar + completion badge for one subject's `items` — shared by the home page's subject tiles and the subject page's own header. Empty string until there's any progress to show. */
+function subjectProgressHTML(subj, items) {
+  const sSummary = progress.summary(items.map((m) => m.id));
+  if (!sSummary.visited) return "";
+  const accent = SUBJECT_ACCENT[subj];
+  const allMastered = sSummary.mastered === items.length;
+  const allExplored = sSummary.visited === items.length;
+  const completionBadge = allMastered
+    ? `<span class="badge is-mastered subject-badge" title="Every instrument in ${subj} mastered">🏆 Subject mastered</span>`
+    : allExplored
+      ? `<span class="badge is-visited" title="Every instrument in ${subj} explored">✓ Fully explored</span>`
+      : "";
+  return `
+    <div class="subject-progress" style="${accent ? `--accent:${accent}` : ""}">
+      <div class="subject-progress-bar"><div class="subject-progress-fill" style="width:${Math.round((sSummary.visited / items.length) * 100)}%"></div></div>
+      <span class="subject-progress-label">${sSummary.visited}/${items.length} explored${sSummary.mastered ? ` · ${sSummary.mastered} mastered` : ""}</span>
+      ${completionBadge}
+    </div>`;
+}
+
+function subjectTile(subj, items) {
+  const accent = SUBJECT_ACCENT[subj];
+  const progressHTML = subjectProgressHTML(subj, items);
+  return `
+    <a class="subject-tile" href="#/subject/${subjectSlug(subj)}" style="${accent ? `--accent:${accent}` : ""}">
+      <span class="subject-tile-dot" aria-hidden="true"></span>
+      <h2>${subj}</h2>
+      <p class="subject-tile-blurb">${SUBJECT_BLURB[subj] || ""}</p>
+      ${progressHTML || `<p class="subject-tile-count">${items.length} instrument${items.length === 1 ? "" : "s"}</p>`}
+    </a>`;
+}
+
 function renderHome() {
   active?.onExit?.(viewer);
   active = null;
@@ -220,13 +302,6 @@ function renderHome() {
   crumbs.textContent = "Workshop";
 
   const s = progress.summary(MODULE_IDS);
-  const bandChips = ["All", ...BANDS.map((b) => b.label)]
-    .map(
-      (name) =>
-        `<button class="chip" type="button" data-band="${name}" aria-pressed="${name === homeBand}">${name}</button>`
-    )
-    .join("");
-
   const recentIds = progress.recent(MODULE_IDS, 6);
   const recentHTML = recentIds.length
     ? `
@@ -270,11 +345,10 @@ function renderHome() {
     ${recentHTML}
     <div class="filters">
       <input type="search" id="q" class="text-input search-input" placeholder="Search instruments…" aria-label="Search instruments">
-      <div class="chip-row filter-row" role="group" aria-label="Filter by subject" id="subjectChips"></div>
-      <div class="chip-row band-row" role="group" aria-label="Filter by school level">${bandChips}</div>
+      <div class="chip-row band-row" role="group" aria-label="Filter by school level">${bandChipsHTML(homeBand)}</div>
     </div>
     <div id="benchWrap"></div>
-    <p class="bench-empty" id="benchEmpty" hidden>Nothing matches that combination — try a wider search or filter.</p>
+    <p class="bench-empty" id="benchEmpty" hidden>Nothing matches that search — try a different word or level.</p>
   `;
 
   const orbitCanvas = main.querySelector(".hero-orbit-canvas");
@@ -291,112 +365,81 @@ function renderHome() {
 
   const wrap = main.querySelector("#benchWrap");
   const emptyEl = main.querySelector("#benchEmpty");
-  const subjectChipsEl = main.querySelector("#subjectChips");
   const qInput = main.querySelector("#q");
   let query = "";
 
-  const inScope = (m) => {
-    if (homeBand === "All") return true;
-    const band = BANDS.find((b) => b.label === homeBand);
-    return inBand(m, band);
-  };
-  const matchesQuery = (m) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return (
-      m.name.toLowerCase().includes(q) ||
-      m.blurb.toLowerCase().includes(q) ||
-      m.tag.toLowerCase().includes(q)
-    );
-  };
-
-  function paintChips() {
-    const counts = {};
-    MODULES.filter(inScope).forEach((m) => (counts[m.subject] = (counts[m.subject] || 0) + 1));
-    const total = MODULES.filter(inScope).length;
-    subjectChipsEl.innerHTML = ["All", ...SUBJECTS]
-      .map((name) => {
-        const n = name === "All" ? total : counts[name] || 0;
-        const accent = SUBJECT_ACCENT[name];
-        const dot = accent ? `<span class="chip-dot" style="background:${accent}" aria-hidden="true"></span>` : "";
-        return `<button class="chip" type="button" data-filter="${name}" style="${accent ? `--chip-accent:${accent}` : ""}" aria-pressed="${name === homeFilter}" ${n === 0 && name !== "All" ? "disabled" : ""}>${dot}${name}${name === "All" ? "" : ` (${n})`}</button>`;
-      })
-      .join("");
-  }
-
   function paint() {
-    const list = MODULES.filter(
-      (m) => inScope(m) && (homeFilter === "All" || m.subject === homeFilter) && matchesQuery(m)
-    );
-    emptyEl.hidden = list.length > 0;
-
-    if (query || homeFilter !== "All") {
-      // A focused set — one flat grid reads fine.
+    if (query) {
+      // Searching cuts across subjects — one flat grid of matches reads fine.
+      const list = MODULES.filter((m) => inScope(m) && matchesQuery(m, query));
+      emptyEl.hidden = list.length > 0;
       wrap.innerHTML = `<div class="bench">${list.map(moduleCard).join("")}</div>`;
-    } else {
-      // Everything — group by subject so 48+ cards stay scannable.
-      wrap.innerHTML = SUBJECTS.map((subj) => {
-        const items = list.filter((m) => m.subject === subj);
-        if (!items.length) return "";
-        const accent = SUBJECT_ACCENT[subj];
-        const sSummary = progress.summary(items.map((m) => m.id));
-        const allMastered = sSummary.mastered === items.length;
-        const allExplored = sSummary.visited === items.length;
-        const completionBadge = allMastered
-          ? `<span class="badge is-mastered subject-badge" title="Every instrument in ${subj} mastered">🏆 Subject mastered</span>`
-          : allExplored
-            ? `<span class="badge is-visited" title="Every instrument in ${subj} explored">✓ Fully explored</span>`
-            : "";
-        const progressHTML = sSummary.visited
-          ? `
-            <div class="subject-progress" style="${accent ? `--accent:${accent}` : ""}">
-              <div class="subject-progress-bar"><div class="subject-progress-fill" style="width:${Math.round((sSummary.visited / items.length) * 100)}%"></div></div>
-              <span class="subject-progress-label">${sSummary.visited}/${items.length} explored${sSummary.mastered ? ` · ${sSummary.mastered} mastered` : ""}</span>
-              ${completionBadge}
-            </div>`
-          : "";
-        return `
-          <section class="subject-group">
-            <h2 class="subject-heading" style="${accent ? `--accent:${accent}` : ""}">
-              <span class="subject-dot" aria-hidden="true"></span>${subj}
-              <span class="subject-count">${items.length}</span>
-            </h2>
-            ${progressHTML}
-            <div class="bench">${items.map(moduleCard).join("")}</div>
-          </section>`;
-      }).join("");
+      return;
     }
-    paintChips();
+    // No search — subjects as big tiles, not 50+ cards at once. Click one to open it.
+    const visibleSubjects = SUBJECTS.filter((subj) => MODULES.some((m) => m.subject === subj && inScope(m)));
+    emptyEl.hidden = visibleSubjects.length > 0;
+    wrap.innerHTML = visibleSubjects.length
+      ? `<div class="subject-tiles">${visibleSubjects
+          .map((subj) => subjectTile(subj, MODULES.filter((m) => m.subject === subj && inScope(m))))
+          .join("")}</div>`
+      : "";
   }
   paint();
 
-  subjectChipsEl.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-filter]");
-    if (!btn || btn.disabled) return;
-    homeFilter = btn.dataset.filter;
-    try {
-      localStorage.setItem("3ducation.filter", homeFilter);
-    } catch {
-      /* ignore */
-    }
+  wireBandRow(main, paint);
+
+  qInput.addEventListener("input", () => {
+    query = qInput.value.trim();
     paint();
   });
 
-  main.querySelector(".band-row").addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-band]");
-    if (!btn) return;
-    homeBand = btn.dataset.band;
-    try {
-      localStorage.setItem("3ducation.band", homeBand);
-    } catch {
-      /* ignore */
-    }
-    main.querySelectorAll(".band-row .chip").forEach((c) =>
-      c.setAttribute("aria-pressed", c === btn ? "true" : "false")
-    );
-    paint();
-  });
+  window.scrollTo({ top: 0 });
+  main.focus({ preventScroll: true });
+}
 
+/** A single subject's full instrument grid — reached from a home page tile. */
+function renderSubjectPage(subj) {
+  active?.onExit?.(viewer);
+  active = null;
+  if (viewer) viewer.onPick = null;
+  crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${subj}</b>`;
+
+  const allItems = MODULES.filter((m) => m.subject === subj);
+  const accent = SUBJECT_ACCENT[subj];
+
+  main.innerHTML = `
+    <a class="back-btn" href="#/">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L3 7L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Workshop
+    </a>
+    <section class="hero" style="${accent ? `--accent:${accent}` : ""}">
+      <span class="eyebrow" style="color:var(--accent, var(--teal))">${allItems.length} instrument${allItems.length === 1 ? "" : "s"} · ${subj}</span>
+      <h1>${subj}</h1>
+      <p>${SUBJECT_BLURB[subj] || ""}</p>
+      ${subjectProgressHTML(subj, allItems)}
+    </section>
+    <div class="filters">
+      <input type="search" id="sq" class="text-input search-input" placeholder="Search ${subj} instruments…" aria-label="Search instruments in this subject">
+      <div class="chip-row band-row" role="group" aria-label="Filter by school level">${bandChipsHTML(homeBand)}</div>
+    </div>
+    <div id="subjBenchWrap"></div>
+    <p class="bench-empty" id="subjEmpty" hidden>Nothing matches — try a wider search or a different level.</p>
+  `;
+
+  const wrap = main.querySelector("#subjBenchWrap");
+  const emptyEl = main.querySelector("#subjEmpty");
+  const qInput = main.querySelector("#sq");
+  let query = "";
+
+  function paint() {
+    const list = allItems.filter((m) => inScope(m) && matchesQuery(m, query));
+    emptyEl.hidden = list.length > 0;
+    wrap.innerHTML = `<div class="bench">${list.map(moduleCard).join("")}</div>`;
+  }
+  paint();
+
+  wireBandRow(main, paint);
   qInput.addEventListener("input", () => {
     query = qInput.value.trim();
     paint();
@@ -614,7 +657,11 @@ function route() {
   else if (id === "review") renderReviewPage();
   else if (id === "community") renderCommunityListPage();
   else if (id.startsWith("community/")) renderCommunityInstrument(id.slice("community/".length));
-  else if (id && getModule(id)) renderModule(id);
+  else if (id.startsWith("subject/")) {
+    const subj = subjectFromSlug(id.slice("subject/".length));
+    if (subj) renderSubjectPage(subj);
+    else renderHome();
+  } else if (id && getModule(id)) renderModule(id);
   else renderHome();
 }
 window.addEventListener("hashchange", route);

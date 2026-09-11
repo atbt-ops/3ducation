@@ -5,8 +5,9 @@ across physics, chemistry, biology, earth science, maths and space — each runn
 on the real equations, each with a short lesson, guided experiments and a
 check-yourself quiz. Plus all 118 elements and a formula box that plots anything
 you type. Works offline; sign-in is optional and only used to sync your progress
-and to submit new instruments. Filter by subject or by school level
-(Primary / Middle / Secondary).
+and to submit new instruments. The home page shows one tile per subject — click
+through to that subject's own page for its full instrument list — and everything
+can be filtered by school level (Primary / Middle / Secondary) or found by search.
 
 🔗 **Live:** https://atbt-ops.github.io/3ducation/
 
@@ -55,7 +56,7 @@ import errors, bad geometry arguments and throws inside `update()` without a bro
 
 ```
 src/
-  main.js            app shell + hash router + render loop + auth area + subject filter
+  main.js            app shell + hash router + render loop + auth area + subject pages
   style.css          design tokens + components (light/dark)
   state.js           localStorage progress (visited / quiz best)
   firebase.js        Firebase app + auth init, ADMIN_EMAILS/isAdmin (no firestore — see db.js)

@@ -356,7 +356,7 @@ button { font: inherit; color: inherit; }
 .continue-heading span { font-size: 0.8rem; font-weight: 500; color: var(--ink-muted); }
 
 .filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
-.filter-row, .band-row { margin: 0; }
+.band-row { margin: 0; }
 .band-row .chip { font-size: 0.76rem; padding: 5px 12px; }
 .band-row .chip[aria-pressed="true"] { background: var(--brass); border-color: var(--brass); color: var(--on-brass); }
 .chip:disabled { opacity: 0.4; cursor: default; }
@@ -368,19 +368,37 @@ button { font: inherit; color: inherit; }
 }
 .search-input::-webkit-search-cancel-button { cursor: pointer; }
 
-.subject-group { margin-bottom: 30px; }
-.subject-group:last-child { margin-bottom: 0; }
-.subject-heading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: 800;
-  margin-bottom: 14px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid var(--accent, var(--line-strong));
+/* Home page: one big tile per subject instead of a full card grid — click
+   through to that subject's own page (#/subject/<slug>) for the full list. */
+.subject-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
 }
-.subject-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent, var(--teal)); flex: none; }
+.subject-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-top: 4px solid var(--accent, var(--line-strong));
+  border-radius: 16px;
+  padding: 22px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.subject-tile:hover, .subject-tile:focus-visible { border-color: var(--accent, var(--brass)); }
+@media (prefers-reduced-motion: no-preference) {
+  .subject-tile:hover, .subject-tile:focus-visible { transform: translateY(-4px); }
+}
+.subject-tile-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--accent, var(--teal)); }
+.subject-tile h2 { font-size: 1.3rem; font-weight: 800; }
+.subject-tile-blurb { color: var(--ink-muted); font-size: 0.9rem; line-height: 1.55; margin: 0; flex: 1; }
+.subject-tile-count { font-size: 0.8rem; color: var(--ink-muted); margin: 0; }
+
 .subject-progress { display: flex; align-items: center; gap: 10px; margin: -6px 0 14px; flex-wrap: wrap; }
 .subject-progress-bar { flex: 1; max-width: 220px; height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
 .subject-progress-fill { height: 100%; background: var(--accent, var(--teal)); border-radius: 999px; transition: width 0.4s ease; }
@@ -388,16 +406,6 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: no-preference) {
   @keyframes badgePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
   .subject-badge { animation: badgePulse 2.2s ease-in-out infinite; }
-}
-.subject-count {
-  font-family: "JetBrains Mono", monospace;
-  font-weight: 500;
-  font-size: 0.78rem;
-  color: var(--ink-muted);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 1px 8px;
 }
 
 .bench {
