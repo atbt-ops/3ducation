@@ -462,7 +462,7 @@ function renderSubjectPage(subj) {
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L3 7L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Workshop
     </a>
-    <section class="hero" style="${accent ? `--accent:${accent}` : ""}">
+    <section class="hero subject-hero" style="${accent ? `--accent:${accent}` : ""}">
       <span class="eyebrow" style="color:var(--accent, var(--teal))">${allItems.length} instrument${allItems.length === 1 ? "" : "s"} · ${subj}</span>
       <h1>${subj}</h1>
       <p>${SUBJECT_BLURB[subj] || ""}</p>

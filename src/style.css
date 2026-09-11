@@ -354,6 +354,19 @@ button { font: inherit; color: inherit; }
   margin-bottom: clamp(28px, 5vw, 44px);
 }
 .hero-main.hero { max-width: none; margin-bottom: 0; }
+
+/* Subject page header — same gradient-panel treatment as the home hero, with
+   an accent-colored top edge so arriving from a colorful subject tile
+   doesn't land on a plain page. */
+.subject-hero.hero {
+  max-width: none;
+  background: linear-gradient(165deg, var(--bg-tint), var(--surface) 65%);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--accent, var(--line-strong));
+  border-radius: 20px;
+  padding: clamp(22px, 4vw, 36px);
+}
+.subject-hero p { max-width: 60ch; }
 @media (max-width: 760px) {
   .hero-panel { grid-template-columns: 1fr; padding: 20px; }
 }
