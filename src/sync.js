@@ -13,6 +13,7 @@ function mergeEntry(local, remote) {
   if (!remote) return local;
   return {
     visited: !!(local.visited || remote.visited),
+    visitedAt: Math.max(local.visitedAt || 0, remote.visitedAt || 0),
     quizCount: local.quizCount || remote.quizCount || 0,
     quizBest: Math.max(local.quizBest || 0, remote.quizBest || 0),
     quizAt: Math.max(local.quizAt || 0, remote.quizAt || 0),

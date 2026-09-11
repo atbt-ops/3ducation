@@ -163,6 +163,17 @@ try {
   /* ignore */
 }
 
+// Physics/Chemistry/Math reuse the app's existing brand colors; the rest get
+// their own, so all six subject sections read distinctly at a glance.
+const SUBJECT_ACCENT = {
+  Physics: "var(--subj-physics)",
+  Chemistry: "var(--subj-chemistry)",
+  Math: "var(--subj-math)",
+  Biology: "var(--subj-biology)",
+  "Earth Science": "var(--subj-earth)",
+  Astronomy: "var(--subj-astronomy)",
+};
+
 function moduleCard(m) {
   const p = progress.for(m.id);
   const mastered = p.quizCount && p.quizBest === p.quizCount;
@@ -198,19 +209,43 @@ function renderHome() {
     )
     .join("");
 
+  const recentIds = progress.recent(MODULE_IDS, 6);
+  const recentHTML = recentIds.length
+    ? `
+    <section class="continue-section">
+      <h2 class="continue-heading">Continue exploring <span>— picked up where you left off</span></h2>
+      <div class="bench">${recentIds.map((id) => moduleCard(getModule(id))).join("")}</div>
+    </section>`
+    : "";
+
   main.innerHTML = `
-    <section class="hero">
-      <span class="eyebrow">${MODULES.length} instruments · classes I–XII · every subject · free</span>
-      <h1>Science you can pick up and turn over.</h1>
-      <p>Every model is a real <span class="d3">3D</span> object running on the same equations
-      scientists use — physics, chemistry, biology, maths and space, from primary counting to
-      senior-secondary. Guided experiments, a live formula box, a check-yourself quiz. No sign-up,
-      works offline.</p>
-      <p class="progress-line" role="status">
-        <strong>${s.visited}</strong> of ${s.total} explored ·
-        <strong>${s.mastered}</strong> mastered
-      </p>
+    <section class="hero-panel">
+      <div class="hero hero-main">
+        <span class="eyebrow">${MODULES.length} instruments · classes I–XII · every subject · free</span>
+        <h1>Science you can pick up and turn over.</h1>
+        <p>Every model is a real <span class="d3">3D</span> object running on the same equations
+        scientists use — physics, chemistry, biology, maths and space, from primary counting to
+        senior-secondary. Guided experiments, a live formula box, a check-yourself quiz.</p>
+        <div class="stat-strip" role="status">
+          <div class="stat"><b>${s.visited}</b><span>of ${s.total} explored</span></div>
+          <div class="stat"><b>${s.mastered}</b><span>mastered</span></div>
+          <div class="stat"><b>${SUBJECTS.length}</b><span>subjects</span></div>
+        </div>
+      </div>
+      <aside class="hero-spot">
+        <h2>Not just a solo build</h2>
+        <ul class="spot-list">
+          <li><span class="spot-emoji" aria-hidden="true">🧪</span>${MODULES.length} hands-on instruments — no sign-up or install needed</li>
+          <li><span class="spot-emoji" aria-hidden="true">🎥</span>Video lectures attached to select topics</li>
+          <li><span class="spot-emoji" aria-hidden="true">👥</span>Community-submitted instruments, always growing</li>
+        </ul>
+        <div class="btn-row">
+          <a class="btn primary" href="#/community">Browse community</a>
+          <a class="btn" href="#/submit">Submit an instrument</a>
+        </div>
+      </aside>
     </section>
+    ${recentHTML}
     <div class="filters">
       <input type="search" id="q" class="text-input search-input" placeholder="Search instruments…" aria-label="Search instruments">
       <div class="chip-row filter-row" role="group" aria-label="Filter by subject" id="subjectChips"></div>
@@ -248,7 +283,9 @@ function renderHome() {
     subjectChipsEl.innerHTML = ["All", ...SUBJECTS]
       .map((name) => {
         const n = name === "All" ? total : counts[name] || 0;
-        return `<button class="chip" type="button" data-filter="${name}" aria-pressed="${name === homeFilter}" ${n === 0 && name !== "All" ? "disabled" : ""}>${name}${name === "All" ? "" : ` (${n})`}</button>`;
+        const accent = SUBJECT_ACCENT[name];
+        const dot = accent ? `<span class="chip-dot" style="background:${accent}" aria-hidden="true"></span>` : "";
+        return `<button class="chip" type="button" data-filter="${name}" style="${accent ? `--chip-accent:${accent}` : ""}" aria-pressed="${name === homeFilter}" ${n === 0 && name !== "All" ? "disabled" : ""}>${dot}${name}${name === "All" ? "" : ` (${n})`}</button>`;
       })
       .join("");
   }
@@ -267,9 +304,13 @@ function renderHome() {
       wrap.innerHTML = SUBJECTS.map((subj) => {
         const items = list.filter((m) => m.subject === subj);
         if (!items.length) return "";
+        const accent = SUBJECT_ACCENT[subj];
         return `
           <section class="subject-group">
-            <h2 class="subject-heading">${subj} <span class="subject-count">${items.length}</span></h2>
+            <h2 class="subject-heading" style="${accent ? `--accent:${accent}` : ""}">
+              <span class="subject-dot" aria-hidden="true"></span>${subj}
+              <span class="subject-count">${items.length}</span>
+            </h2>
             <div class="bench">${items.map(moduleCard).join("")}</div>
           </section>`;
       }).join("");

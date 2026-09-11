@@ -30,11 +30,10 @@ export const progress = {
   markVisited(moduleId) {
     const data = read();
     const entry = data[moduleId] || {};
-    if (!entry.visited) {
-      entry.visited = true;
-      data[moduleId] = entry;
-      write(data);
-    }
+    entry.visited = true;
+    entry.visitedAt = Date.now();
+    data[moduleId] = entry;
+    write(data);
   },
   recordQuiz(moduleId, correct, total) {
     const data = read();
@@ -56,6 +55,14 @@ export const progress = {
   subscribe(fn) {
     listeners.add(fn);
     return () => listeners.delete(fn);
+  },
+  /** Module ids with an entry in `moduleIds`, most recently visited first — for a "continue exploring" row. */
+  recent(moduleIds, limit = 6) {
+    const data = read();
+    return moduleIds
+      .filter((id) => data[id]?.visitedAt)
+      .sort((a, b) => data[b].visitedAt - data[a].visitedAt)
+      .slice(0, limit);
   },
   summary(moduleIds) {
     const data = read();
