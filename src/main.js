@@ -90,7 +90,7 @@ function moduleCard(m) {
       <span class="rivet tl"></span><span class="rivet tr"></span>
       <span class="rivet bl"></span><span class="rivet br"></span>
       <span class="card-icon">${m.icon}</span>
-      <span class="tag">${m.tag}</span>
+      <span class="tag">${m.tag}${m.video ? ' <span class="tag-video" title="Has a video lecture">▶ video</span>' : ""}</span>
       <h3>${m.name} ${badge}</h3>
       <p>${m.blurb}</p>
     </a>`;
@@ -226,6 +226,26 @@ function renderHome() {
   main.focus({ preventScroll: true });
 }
 
+/* ---------------- video lecture ---------------- */
+function videoBlock(m) {
+  if (!m.video) return "";
+  const { id, title } = m.video;
+  return `
+    <details class="lesson video-lesson">
+      <summary>Watch: ${title}</summary>
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}"
+          title="${title}"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </details>`;
+}
+
 /* ---------------- module view ---------------- */
 function renderModule(id) {
   const m = getModule(id);
@@ -260,6 +280,7 @@ function renderModule(id) {
           <summary>Learn</summary>
           <div class="lesson-body">${m.lesson}</div>
         </details>
+        ${videoBlock(m)}
         <div class="presets" id="presets" hidden></div>
         <div class="panel" id="panel"></div>
         <div class="quiz-slot" id="quiz"></div>

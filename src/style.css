@@ -223,6 +223,14 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
   color: var(--brass-strong);
 }
+.tag-video {
+  color: var(--teal-strong);
+  border: 1px solid var(--teal);
+  border-radius: 999px;
+  padding: 1px 6px;
+  margin-left: 4px;
+  letter-spacing: 0.04em;
+}
 .card p { margin: 0; color: var(--ink); font-size: 0.9rem; line-height: 1.55; }
 
 .badge {
@@ -358,6 +366,19 @@ button { font: inherit; color: inherit; }
 .lesson-body { padding: 0 14px 12px; }
 .lesson-body p { margin: 8px 0; font-size: 0.92rem; line-height: 1.62; color: var(--ink); }
 .lesson-body strong { color: var(--ink); }
+
+.video-lesson > summary { color: var(--teal-strong); }
+.video-embed {
+  padding: 0 14px 14px;
+  aspect-ratio: 16 / 9;
+}
+.video-embed iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
 
 .panel { display: flex; flex-direction: column; gap: 16px; }
 

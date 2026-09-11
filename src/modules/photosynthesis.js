@@ -50,6 +50,7 @@ export default {
   tag: "Biology · Plants",
   subject: "Biology",
   grades: [6, 11],
+  video: { id: "sQK3Yr4Sc_k", title: "Photosynthesis: Crash Course Biology #8" },
   blurb: "Light + CO₂ + water → sugar + oxygen.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 34c0-10 3-18 12-22-2 12-6 18-12 22ZM20 34c0-8-3-14-10-17 1 10 4 14 10 17Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
   scene,

@@ -50,6 +50,7 @@ export default {
   tag: "Math · Geometry",
   subject: "Math",
   grades: [7, 10],
+  video: { id: "AA6RfgP-AHU", title: "The Pythagorean theorem, intro (Khan Academy)" },
   flat: true,
   blurb: "a² + b² = c², drawn as real squares.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 30V12h18Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 30H4v6h6zM10 12v-6H4v6z" stroke="currentColor" stroke-width="1.6"/></svg>',

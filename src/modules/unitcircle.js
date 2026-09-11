@@ -70,6 +70,7 @@ export default {
   tag: "Math · Trigonometry",
   subject: "Math",
   grades: [10, 12],
+  video: { id: "1m9p9iubMLU", title: "Introduction to the unit circle (Khan Academy)" },
   flat: true,
   blurb: "Spin the radius — read sin, cos, tan.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="2"/><path d="M20 20l11-6M6 20h28M20 6v28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',

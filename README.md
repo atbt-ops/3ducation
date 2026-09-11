@@ -20,7 +20,9 @@ you type. No account, works offline. Filter by subject or by school level
 
 Most instruments ship a set of **guided experiments** — one click dials in a named
 setup and poses a question. The Surface studio uses a small safe expression engine
-(`src/lib/expr.js`) so any formula in `x`, `y`, `k` plots live. Each module declares
+(`src/lib/expr.js`) so any formula in `x`, `y`, `k` plots live. Twelve instruments
+also carry a linked **video lecture** (a "Watch" panel, privacy-mode YouTube embed) —
+add one to any module with a `video: { id, title }` field. Each module declares
 a `grades: [min, max]` range that drives the school-level filter.
 
 ## Develop

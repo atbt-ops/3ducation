@@ -101,6 +101,7 @@ for (const m of MODULES) {
     if (typeof m.onExit === "function") m.onExit(stubViewer);
     if (!m.scene || !m.scene.isScene) throw new Error("no scene");
     if (!Array.isArray(m.grades) || m.grades.length !== 2) throw new Error("bad grades");
+    if (m.video && (!m.video.id || !m.video.title)) throw new Error("video needs id + title");
     console.log(`ok   ${m.id}`);
   } catch (e) {
     failed++;

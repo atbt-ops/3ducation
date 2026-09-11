@@ -72,6 +72,7 @@ export default {
   tag: "Math · Calculus",
   subject: "Math",
   grades: [11, 12],
+  video: { id: "fqQ6sslzyhY", title: "The derivative & tangent line equations (Khan Academy)" },
   flat: true,
   blurb: "Shrink h and the secant becomes the tangent.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 32C10 12 22 10 34 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 30l20-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="18" r="2" fill="currentColor"/></svg>',

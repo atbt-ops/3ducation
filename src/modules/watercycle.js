@@ -96,6 +96,7 @@ export default {
   tag: "Earth Science · Water",
   subject: "Earth Science",
   grades: [4, 8],
+  video: { id: "z5G4NCwWUxY", title: "The Great Aqua Adventure (Crash Course Kids)" },
   blurb: "Evaporate, condense, rain, collect — round and round.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 18a6 6 0 1 1 1 12h13a5 5 0 0 0 0-10 7 7 0 0 0-13-3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 32l-1 3M20 32l-1 3M26 32l-1 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   scene,

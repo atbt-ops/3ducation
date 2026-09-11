@@ -69,6 +69,7 @@ export default {
   tag: "Physics · Mechanics",
   subject: "Physics",
   grades: [7, 11],
+  video: { id: "WPa5IgLgDyQ", title: "Pendulums (Khan Academy)" },
   blurb: "Swing a bob and read its rhythm.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 5v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="11" r="2.2" fill="currentColor"/><path d="M20 11L29 30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="29" cy="33" r="4.2" stroke="currentColor" stroke-width="2"/></svg>',
   scene,

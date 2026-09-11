@@ -47,6 +47,7 @@ export default {
   tag: "Chemistry · Particles",
   subject: "Chemistry",
   grades: [5, 9],
+  video: { id: "We7Kd4D0S90", title: "States of matter (Khan Academy)" },
   blurb: "Heat the box — solid, liquid, gas.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="26" height="26" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="14" cy="14" r="2" fill="currentColor"/><circle cx="21" cy="15" r="2" fill="currentColor"/><circle cx="27" cy="13" r="2" fill="currentColor"/><circle cx="15" cy="24" r="2" fill="currentColor"/><circle cx="24" cy="26" r="2" fill="currentColor"/></svg>',
   scene,

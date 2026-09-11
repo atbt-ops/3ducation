@@ -62,6 +62,7 @@ export default {
   tag: "Math · Statistics",
   subject: "Math",
   grades: [6, 10],
+  video: { id: "h8EYEJ32oQ8", title: "Mean, median and mode, intro (Khan Academy)" },
   blurb: "Three ways to find the 'middle' — and when they disagree.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="22" width="5" height="12" fill="currentColor"/><rect x="14" y="14" width="5" height="20" fill="currentColor"/><rect x="22" y="8" width="5" height="26" fill="currentColor"/><rect x="30" y="18" width="5" height="16" fill="currentColor"/></svg>',
   scene,

@@ -69,6 +69,7 @@ export default {
   tag: "Biology · Genetics",
   subject: "Biology",
   grades: [9, 12],
+  video: { id: "34Jr2U7KwOE", title: "DNA structure and replication (Khan Academy)" },
   blurb: "Twist the ladder, watch A pair with T.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 6c0 8 12 8 12 16s-12 8-12 16M26 6c0 8-12 8-12 16s12 8 12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 13h10M15 27h10" stroke="currentColor" stroke-width="2"/></svg>',
   scene,
