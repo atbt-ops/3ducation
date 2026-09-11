@@ -1,6 +1,6 @@
 # 3ducation
 
-**A free, interactive 3D science lab for classes I–XII.** 54 hands-on instruments
+**A free, interactive 3D science lab for classes I–XII.** 57 hands-on instruments
 across physics, chemistry, biology, earth science, maths and space — each running
 on the real equations, each with a short lesson, guided experiments and a
 check-yourself quiz. Plus all 118 elements and a formula box that plots anything

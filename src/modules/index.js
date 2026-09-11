@@ -31,6 +31,8 @@ import heart from "./heart.js";
 import foodchain from "./foodchain.js";
 import genetics from "./genetics.js";
 import solids from "./solids.js";
+import counting from "./counting.js";
+import shapes3d from "./shapes3d.js";
 import grapher from "./grapher.js";
 import fractions from "./fractions.js";
 import times from "./times.js";
@@ -48,6 +50,7 @@ import seasons from "./seasons.js";
 import eclipses from "./eclipses.js";
 import keplerorbit from "./keplerorbit.js";
 import starlife from "./starlife.js";
+import daynight from "./daynight.js";
 import watercycle from "./watercycle.js";
 import earthlayers from "./earthlayers.js";
 import platetectonics from "./platetectonics.js";
@@ -88,6 +91,8 @@ export const MODULES = [
   foodchain,
   genetics,
   solids,
+  counting,
+  shapes3d,
   grapher,
   fractions,
   times,
@@ -105,6 +110,7 @@ export const MODULES = [
   eclipses,
   keplerorbit,
   starlife,
+  daynight,
   watercycle,
   earthlayers,
   platetectonics,
