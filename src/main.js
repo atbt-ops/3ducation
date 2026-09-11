@@ -395,34 +395,68 @@ function leaveModule() {
   if (viewer) viewer.onPick = null;
 }
 
+/** Shown when a lazily-loaded page chunk fails or times out (e.g. stale service worker after a deploy). */
+function chunkLoadError(label) {
+  leaveModule();
+  main.innerHTML = `
+    <section class="hero">
+      <span class="eyebrow">Couldn't load this page</span>
+      <h1>${label} didn't load.</h1>
+      <p>This sometimes happens right after the site updates, if your browser is holding onto an
+      older cached version. Reloading usually fixes it.</p>
+      <div class="btn-row"><button class="btn primary" id="reloadBtn" type="button">Reload page</button></div>
+    </section>`;
+  main.querySelector("#reloadBtn").addEventListener("click", () => window.location.reload());
+}
+
+/** Rejects if `promise` hasn't settled within `ms` — dynamic import() can hang forever on a bad network/SW. */
+function withTimeout(promise, ms = 12000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+  ]);
+}
+
 async function renderSubmitPage() {
   leaveModule();
   crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Submit an instrument</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
-  const { renderSubmit } = await import("./pages/submit.js");
-  renderSubmit(main, currentUser, () => requestSignIn(() => renderSubmitPage()));
-  window.scrollTo({ top: 0 });
-  main.focus({ preventScroll: true });
+  try {
+    const { renderSubmit } = await withTimeout(import("./pages/submit.js"));
+    await renderSubmit(main, currentUser, () => requestSignIn(() => renderSubmitPage()));
+    window.scrollTo({ top: 0 });
+    main.focus({ preventScroll: true });
+  } catch {
+    chunkLoadError("The submission form");
+  }
 }
 
 async function renderReviewPage() {
   leaveModule();
   crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Review queue</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
-  const { renderReview } = await import("./pages/review.js");
-  renderReview(main, currentUser);
-  window.scrollTo({ top: 0 });
-  main.focus({ preventScroll: true });
+  try {
+    const { renderReview } = await withTimeout(import("./pages/review.js"));
+    await renderReview(main, currentUser);
+    window.scrollTo({ top: 0 });
+    main.focus({ preventScroll: true });
+  } catch {
+    chunkLoadError("The review queue");
+  }
 }
 
 async function renderCommunityListPage() {
   leaveModule();
   crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Community</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
-  const { renderCommunityList } = await import("./pages/communityList.js");
-  renderCommunityList(main);
-  window.scrollTo({ top: 0 });
-  main.focus({ preventScroll: true });
+  try {
+    const { renderCommunityList } = await withTimeout(import("./pages/communityList.js"));
+    await renderCommunityList(main);
+    window.scrollTo({ top: 0 });
+    main.focus({ preventScroll: true });
+  } catch {
+    chunkLoadError("The community gallery");
+  }
 }
 
 async function renderCommunityInstrument(subId) {
@@ -430,10 +464,9 @@ async function renderCommunityInstrument(subId) {
   crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Community</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
-    const [{ getSubmission }, { buildCommunityModule }] = await Promise.all([
-      import("./submissions.js"),
-      import("./pages/communityModule.js"),
-    ]);
+    const [{ getSubmission }, { buildCommunityModule }] = await withTimeout(
+      Promise.all([import("./submissions.js"), import("./pages/communityModule.js")])
+    );
     const sub = await getSubmission(subId);
     if (!sub || sub.type !== "formula" || (sub.status !== "approved" && !isAdmin(currentUser))) {
       leaveModule();
@@ -442,8 +475,7 @@ async function renderCommunityInstrument(subId) {
     }
     renderModuleObject(buildCommunityModule(sub));
   } catch {
-    leaveModule();
-    main.innerHTML = '<p class="fact">Couldn\'t load that instrument.</p>';
+    chunkLoadError("That instrument");
   }
 }
 
