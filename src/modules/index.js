@@ -28,8 +28,10 @@ import cell from "./cell.js";
 import dna from "./dna.js";
 import photosynthesis from "./photosynthesis.js";
 import heart from "./heart.js";
+import respiratory from "./respiratory.js";
 import foodchain from "./foodchain.js";
 import genetics from "./genetics.js";
+import plantparts from "./plantparts.js";
 import solids from "./solids.js";
 import counting from "./counting.js";
 import shapes3d from "./shapes3d.js";
@@ -50,11 +52,13 @@ import seasons from "./seasons.js";
 import eclipses from "./eclipses.js";
 import keplerorbit from "./keplerorbit.js";
 import starlife from "./starlife.js";
+import sunlayers from "./sunlayers.js";
 import daynight from "./daynight.js";
 import watercycle from "./watercycle.js";
 import earthlayers from "./earthlayers.js";
 import platetectonics from "./platetectonics.js";
 import rockcycle from "./rockcycle.js";
+import atmosphere from "./atmosphere.js";
 
 // Order shapes the workshop grid: grouped roughly by subject, easy → advanced.
 export const MODULES = [
@@ -88,8 +92,10 @@ export const MODULES = [
   dna,
   photosynthesis,
   heart,
+  respiratory,
   foodchain,
   genetics,
+  plantparts,
   solids,
   counting,
   shapes3d,
@@ -110,11 +116,13 @@ export const MODULES = [
   eclipses,
   keplerorbit,
   starlife,
+  sunlayers,
   daynight,
   watercycle,
   earthlayers,
   platetectonics,
   rockcycle,
+  atmosphere,
 ];
 
 export const MODULE_IDS = MODULES.map((m) => m.id);
