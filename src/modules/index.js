@@ -45,7 +45,13 @@ import calculus from "./calculus.js";
 import orrery from "./orrery.js";
 import moon from "./moon.js";
 import seasons from "./seasons.js";
+import eclipses from "./eclipses.js";
+import keplerorbit from "./keplerorbit.js";
+import starlife from "./starlife.js";
 import watercycle from "./watercycle.js";
+import earthlayers from "./earthlayers.js";
+import platetectonics from "./platetectonics.js";
+import rockcycle from "./rockcycle.js";
 
 // Order shapes the workshop grid: grouped roughly by subject, easy → advanced.
 export const MODULES = [
@@ -96,7 +102,13 @@ export const MODULES = [
   orrery,
   moon,
   seasons,
+  eclipses,
+  keplerorbit,
+  starlife,
   watercycle,
+  earthlayers,
+  platetectonics,
+  rockcycle,
 ];
 
 export const MODULE_IDS = MODULES.map((m) => m.id);
