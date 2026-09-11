@@ -13,6 +13,13 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: "autoUpdate",
+      // We register the service worker ourselves in main.js (via
+      // virtual:pwa-register) instead of the plugin's auto-injected script,
+      // because the auto-injected one only calls navigator.serviceWorker
+      // .register() — it never checks for updates or reloads a tab that's
+      // been open since before a deploy, which is what actually reloads
+      // stale content automatically. See main.js for the real logic.
+      injectRegister: false,
       includeAssets: ["favicon.svg", "icons/apple-touch-icon.png"],
       workbox: {
         // three.js bundles are large; make sure they are precached for offline use.

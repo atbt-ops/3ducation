@@ -7,8 +7,28 @@ import { mountPresets } from "./learn/presets.js";
 import { onAuth, signOutUser } from "./auth.js";
 import { isAdmin } from "./firebase.js";
 import { openAuthModal } from "./authModal.js";
+import { registerSW } from "virtual:pwa-register";
 // Firestore (sync + submissions) is the heaviest slice of the Firebase SDK,
 // so it's only fetched once someone actually signs in or opens those pages.
+
+// Auto-refresh a tab that's been open since before the latest deploy. Vite
+// content-hashes every build's filenames, so a tab still running yesterday's
+// JS will 404 the moment it tries to lazily load a page that changed (this
+// is what caused "the page is stuck / won't load" reports). registerType:
+// "autoUpdate" in vite.config.js makes the new service worker take over
+// immediately (skipWaiting + clientsClaim) and reload this tab once it does
+// — but only once a new service worker is actually *found*, which normally
+// only happens on a fresh navigation. The interval below checks for one
+// periodically so an open tab picks up a deploy without needing to be
+// closed and reopened. Sign-in survives the reload (Firebase keeps it in
+// IndexedDB, independent of the page).
+registerSW({
+  immediate: true,
+  onRegisteredSW(_swUrl, registration) {
+    if (!registration) return;
+    setInterval(() => registration.update(), 60_000);
+  },
+});
 
 const app = document.getElementById("app");
 
