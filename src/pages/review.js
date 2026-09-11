@@ -1,6 +1,6 @@
 import { listAllSubmissions, reviewSubmission } from "../submissions.js";
 import { isAdmin } from "../firebase.js";
-import { escapeHtml } from "../lib/html.js";
+import { escapeHtml, BACK_BTN } from "../lib/html.js";
 
 function body(s) {
   if (s.type === "formula") {
@@ -43,6 +43,7 @@ function card(s) {
 export async function renderReview(main, user) {
   if (!user || !isAdmin(user)) {
     main.innerHTML = `
+      ${BACK_BTN}
       <section class="hero">
         <span class="eyebrow">Review queue</span>
         <h1>Admins only.</h1>
@@ -53,6 +54,7 @@ export async function renderReview(main, user) {
   }
 
   main.innerHTML = `
+    ${BACK_BTN}
     <section class="hero">
       <span class="eyebrow">Review queue</span>
       <h1>Community submissions.</h1>

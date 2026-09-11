@@ -326,7 +326,7 @@ function renderModuleObject(m) {
   active?.onExit?.(viewer);
   ensureViewer();
   progress.markVisited(m.id);
-  crumbs.innerHTML = `Workshop <span aria-hidden="true">/</span> <b>${m.name}</b>`;
+  crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${m.name}</b>`;
 
   main.innerHTML = `
     <a class="back-btn" href="#/">
@@ -419,7 +419,7 @@ function withTimeout(promise, ms = 12000) {
 
 async function renderSubmitPage() {
   leaveModule();
-  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Submit an instrument</b>';
+  crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Submit an instrument</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderSubmit } = await withTimeout(import("./pages/submit.js"));
@@ -433,7 +433,7 @@ async function renderSubmitPage() {
 
 async function renderReviewPage() {
   leaveModule();
-  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Review queue</b>';
+  crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Review queue</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderReview } = await withTimeout(import("./pages/review.js"));
@@ -447,7 +447,7 @@ async function renderReviewPage() {
 
 async function renderCommunityListPage() {
   leaveModule();
-  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Community</b>';
+  crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Community</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderCommunityList } = await withTimeout(import("./pages/communityList.js"));
@@ -461,7 +461,7 @@ async function renderCommunityListPage() {
 
 async function renderCommunityInstrument(subId) {
   ensureViewer();
-  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Community</b>';
+  crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Community</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const [{ getSubmission }, { buildCommunityModule }] = await withTimeout(

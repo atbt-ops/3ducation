@@ -1,4 +1,4 @@
-import { escapeHtml } from "../lib/html.js";
+import { escapeHtml, BACK_BTN } from "../lib/html.js";
 
 function card(s) {
   return `
@@ -14,6 +14,7 @@ function card(s) {
 
 export async function renderCommunityList(main) {
   main.innerHTML = `
+    ${BACK_BTN}
     <section class="hero">
       <span class="eyebrow">Community instruments</span>
       <h1>Built by other learners.</h1>

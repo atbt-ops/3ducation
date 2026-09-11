@@ -117,6 +117,8 @@ button { font: inherit; color: inherit; }
 }
 .crumbs { font-size: 0.78rem; color: var(--ink-muted); letter-spacing: 0.04em; text-transform: uppercase; }
 .crumbs b { color: var(--ink); font-weight: 600; }
+.crumbs a { color: var(--ink-muted); text-decoration: none; }
+.crumbs a:hover { color: var(--brass-strong); text-decoration: underline; }
 
 .topbar-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
 .auth-area { display: flex; align-items: center; gap: 10px; }

@@ -1,7 +1,7 @@
 import { createSubmission, listMySubmissions } from "../submissions.js";
 import { SUBJECTS } from "../modules/index.js";
 import { isValidExpr } from "../lib/expr.js";
-import { escapeHtml } from "../lib/html.js";
+import { escapeHtml, BACK_BTN } from "../lib/html.js";
 
 const CODE_TEMPLATE = `import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
@@ -119,6 +119,7 @@ function codeFormHTML() {
 export async function renderSubmit(main, user, requestSignIn) {
   if (!user) {
     main.innerHTML = `
+      ${BACK_BTN}
       <section class="hero">
         <span class="eyebrow">Community instruments</span>
         <h1>Build the next instrument.</h1>
@@ -131,6 +132,7 @@ export async function renderSubmit(main, user, requestSignIn) {
   }
 
   main.innerHTML = `
+    ${BACK_BTN}
     <section class="hero">
       <span class="eyebrow">Community instruments</span>
       <h1>Submit an instrument.</h1>
