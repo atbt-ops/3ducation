@@ -363,7 +363,7 @@ button { font: inherit; color: inherit; }
 .bench-empty { color: var(--ink-muted); font-size: 0.9rem; padding: 24px 4px; }
 
 .search-input {
-  max-width: 360px;
+  width: 100%;
   background: var(--surface);
 }
 .search-input::-webkit-search-cancel-button { cursor: pointer; }
