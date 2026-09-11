@@ -55,13 +55,21 @@ import errors, bad geometry arguments and throws inside `update()` without a bro
 
 ```
 src/
-  main.js            app shell + hash router + render loop + subject filter
+  main.js            app shell + hash router + render loop + auth area + subject filter
   style.css          design tokens + components (light/dark)
   state.js           localStorage progress (visited / quiz best)
+  firebase.js        Firebase app + auth init, ADMIN_EMAILS/isAdmin (no firestore — see db.js)
+  db.js              firestore init, split out so it's only fetched when actually needed
+  auth.js            sign up / sign in / Google / sign out wrappers, friendly errors
+  authModal.js        the sign-in/sign-up modal UI
+  sync.js            mirrors localStorage progress to Firestore when signed in
+  submissions.js     Firestore CRUD for community submissions
   lib/
     physics.js       pure formulas (pendulum, projectile, Ohm, thin lens…) — unit tested
     expr.js          safe math-expression evaluator (shunting-yard, no eval) — unit tested
     elements.js      periodic-table data + category palette
+    surfaceMesh.js   shared z=f(x,y) mesh builder (Surface studio + community formulas)
+    html.js          escapeHtml, used on anything sourced from Firestore
   engine/
     viewer.js        shared WebGL renderer + orbit camera (mouse + keyboard) + tone-map toggle
     helpers.js       lights, bonds, grids, contact shadows, reduced-motion flag
@@ -71,6 +79,11 @@ src/
   modules/
     index.js         registry (order = workshop grid order) + SUBJECTS
     <module>.js       each: scene, view, lesson, quiz, presets, panelHTML/wire, update
+  pages/
+    submit.js        #/submit — formula (no-code) and developer-code submission forms
+    review.js        #/review — admin approve/reject queue
+    communityList.js #/community — approved formula instruments
+    communityModule.js  turns an approved formula submission into a module-shaped object
 test/
   physics.test.js    vitest coverage for src/lib/physics.js
   expr.test.js       vitest coverage for src/lib/expr.js
@@ -87,17 +100,25 @@ that 30 update frames run without throwing, before you ever open a browser.
 
 ## Community submissions
 
-Signed-in users can propose a new instrument at `#/submit` — name, subject, grade
-range, description and module code, following the same shape as "Add a module"
-above. It's saved to Firestore (`submissions/{id}`, status `pending`) and is
-**never executed** — nothing a visitor writes runs in anyone else's browser.
+Signed-in users can propose a new instrument at `#/submit`, in one of two tracks:
 
-Admins (emails listed in `ADMIN_EMAILS` in `src/firebase.js`, matching
-`firestore.rules`) review submissions at `#/review` and mark them approved or
-rejected. Approving does **not** publish it. To actually ship an approved
-instrument:
+- **Formula plot (no code)** — a name, subject, grade range, description and a
+  `z = f(x, y)` formula, validated live against the same evaluator Surface studio
+  uses (`src/lib/expr.js` — no `eval`, arithmetic only). Anyone can do this; no
+  programming knowledge needed. **Approving one publishes it immediately** at
+  `#/community/<id>` (listed on `#/community`) — there's nothing unsafe a formula
+  could do, so it doesn't need a code review or a deploy.
+- **Developer code** — full module code, same shape as "Add a module" above, for
+  someone who wants to build a fully custom instrument. Saved as text and
+  **never executed** — approving it does *not* publish it; see below.
 
-1. Read the submitted code on the review page.
+Both are saved to Firestore (`submissions/{id}`, status `pending`). Admins (emails
+in `ADMIN_EMAILS` in `src/firebase.js`, matching `firestore.rules`) review
+everything at `#/review`.
+
+To ship an approved **code** submission:
+
+1. Read it on the review page (rendered as escaped text, never executed).
 2. Copy it into a new `src/modules/<id>.js`, review and clean it up properly
    (treat it like any external PR — check it against the module interface,
    the existing safety patterns, and the a11y/perf conventions elsewhere in
@@ -105,6 +126,11 @@ instrument:
 3. Add it to `MODULES` in `src/modules/index.js`.
 4. Run `npm run lint && npm test && npm run smoke && npm run build`, then commit
    and push — CI deploys it like any other change.
+
+Approved **formula** submissions need none of this — `src/pages/communityModule.js`
+turns the stored formula into a module-shaped object on the fly (reusing
+`src/lib/surfaceMesh.js`, the same surface renderer Surface studio uses) and
+renders it through the normal module view.
 
 ### Firebase setup (for a fresh fork/deploy)
 

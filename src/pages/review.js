@@ -2,19 +2,31 @@ import { listAllSubmissions, reviewSubmission } from "../submissions.js";
 import { isAdmin } from "../firebase.js";
 import { escapeHtml } from "../lib/html.js";
 
+function body(s) {
+  if (s.type === "formula") {
+    return `
+      <div class="formula"><span>z = f(x, y)</span><b class="mono">${escapeHtml(s.formula)}</b></div>
+      <p class="fact"><a href="#/community/${s.id}" target="_blank" rel="noopener">Preview it live →</a>
+        (you can see it as admin even before approving)</p>`;
+  }
+  return `
+    <details><summary>View code (read-only, never executed)</summary>
+      <pre class="mono submission-code">${escapeHtml(s.code || "")}</pre>
+    </details>`;
+}
+
 function card(s) {
+  const kind = s.type === "formula" ? "No-code formula" : "Developer code";
   return `
     <div class="submission-row" data-id="${s.id}">
       <div>
         <b>${escapeHtml(s.name)}</b>
-        <span class="badge is-visited">${s.status}</span>
+        <span class="badge is-visited">${escapeHtml(s.status)}</span>
       </div>
-      <p class="fact">${escapeHtml(s.subject)} · classes ${s.gradeMin}–${s.gradeMax} ·
+      <p class="fact">${kind} · ${escapeHtml(s.subject)} · classes ${s.gradeMin}–${s.gradeMax} ·
         by ${escapeHtml(s.authorName || s.authorEmail || "unknown")}</p>
       <p class="fact">${escapeHtml(s.description)}</p>
-      <details><summary>View code (read-only, never executed)</summary>
-        <pre class="mono submission-code">${escapeHtml(s.code || "")}</pre>
-      </details>
+      ${body(s)}
       ${
         s.status === "pending"
           ? `<div class="control"><label for="note-${s.id}">Reviewer note (optional)</label>
@@ -44,9 +56,12 @@ export async function renderReview(main, user) {
     <section class="hero">
       <span class="eyebrow">Review queue</span>
       <h1>Community submissions.</h1>
-      <p>Approving marks a submission ready to merge — it does <strong>not</strong> publish it
-      automatically. Copy the code into a new file under <span class="mono">src/modules/</span>,
-      review it properly, add it to the registry, and deploy as a normal commit.</p>
+      <p>Approving a <strong>formula</strong> submission publishes it immediately at
+      <span class="mono">#/community</span> — it only ever runs through the same sandboxed
+      expression engine Surface studio uses, so there's nothing to execute unsafely. Approving
+      <strong>developer code</strong> does <em>not</em> publish it — copy it into
+      <span class="mono">src/modules/</span>, review it properly, add it to the registry, and
+      deploy as a normal commit.</p>
     </section>
     <div id="revList"><p class="fact">Loading…</p></div>
   `;

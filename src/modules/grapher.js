@@ -1,76 +1,19 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
 import { compile, isValidExpr } from "../lib/expr.js";
+import { createSurfaceMesh } from "../lib/surfaceMesh.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.9 });
 
-const RANGE = 3;
-const SEG = 84;
-const geo = new THREE.PlaneGeometry(RANGE * 2, RANGE * 2, SEG, SEG);
-geo.rotateX(-Math.PI / 2);
-const base = geo.attributes.position.array.slice();
-const pos = geo.attributes.position;
-const colors = new Float32Array(pos.count * 3);
-geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-
-const surface = new THREE.Mesh(
-  geo,
-  new THREE.MeshStandardMaterial({
-    vertexColors: true,
-    roughness: 0.5,
-    metalness: 0.04,
-    side: THREE.DoubleSide,
-  })
-);
-scene.add(surface);
-
-scene.add(
-  new THREE.LineSegments(
-    new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(-RANGE, 0, 0), new THREE.Vector3(RANGE, 0, 0),
-      new THREE.Vector3(0, 0, -RANGE), new THREE.Vector3(0, 0, RANGE),
-      new THREE.Vector3(0, -RANGE, 0), new THREE.Vector3(0, RANGE, 0),
-    ]),
-    new THREE.LineBasicMaterial({ color: 0x9a9a94 })
-  )
-);
+const { mesh: surface, rebuild: rebuildSurface, axes } = createSurfaceMesh({ range: 3, seg: 84 });
+scene.add(surface, axes());
 
 const DEFAULT = "k*(x^2 - y^2)";
 const state = { expr: DEFAULT, k: 0.6, fn: compile(DEFAULT, ["x", "y", "k"]), spin: false };
 
-const lo = new THREE.Color(0x0f6b63);
-const mid = new THREE.Color(0xf1ede1);
-const hi = new THREE.Color(0xb1520b);
-const tmp = new THREE.Color();
-
 function rebuild() {
-  const arr = pos.array;
-  let minH = Infinity;
-  let maxH = -Infinity;
-  const scope = { x: 0, y: 0, k: state.k };
-  for (let i = 0; i < arr.length; i += 3) {
-    scope.x = base[i];
-    scope.y = base[i + 2];
-    let h = state.fn(scope);
-    if (!Number.isFinite(h)) h = 0;
-    h = Math.max(-4.5, Math.min(4.5, h));
-    arr[i + 1] = h;
-    if (h < minH) minH = h;
-    if (h > maxH) maxH = h;
-  }
-  const span = maxH - minH || 1;
-  for (let i = 0, c = 0; i < arr.length; i += 3, c += 3) {
-    const f = (arr[i + 1] - minH) / span;
-    if (f < 0.5) tmp.copy(lo).lerp(mid, f * 2);
-    else tmp.copy(mid).lerp(hi, (f - 0.5) * 2);
-    colors[c] = tmp.r;
-    colors[c + 1] = tmp.g;
-    colors[c + 2] = tmp.b;
-  }
-  pos.needsUpdate = true;
-  geo.attributes.color.needsUpdate = true;
-  geo.computeVertexNormals();
+  rebuildSurface(state.fn, { k: state.k });
 }
 rebuild();
 
@@ -96,6 +39,8 @@ export default {
     <span class="mono">e</span>, and functions like <span class="mono">sin</span>,
     <span class="mono">cos</span>, <span class="mono">exp</span>, <span class="mono">sqrt</span>,
     <span class="mono">abs</span>, <span class="mono">atan2</span>. Colour runs low → high.</p>
+    <p class="fact">Found a formula you like? You can submit it as its own instrument for
+      everyone — no coding required — from <a href="#/submit">Submit an instrument</a>.</p>
   `,
 
   quiz: [

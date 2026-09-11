@@ -21,16 +21,18 @@ service cloud.firestore {
     }
 
     // Community instrument submissions. Anyone signed in can create one for
-    // themselves; only the author or an admin can read it; only an admin (or
-    // the author, while still pending) can update/delete it. Submitted code
-    // is inert text here — nothing in this app ever executes it.
+    // themselves. Once approved, a submission is public (that's what powers
+    // #/community); until then, only its author or an admin can read it.
+    // Submitted "code" text is inert here — nothing in this app ever executes
+    // it; only "formula" submissions ever render as a live instrument, and
+    // only through the same sandboxed expression evaluator Surface studio uses.
     match /submissions/{submissionId} {
       allow create: if isSignedIn()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.status == "pending";
 
-      allow read: if isSignedIn()
-        && (resource.data.authorUid == request.auth.uid || isAdmin());
+      allow read: if resource.data.status == "approved"
+        || (isSignedIn() && (resource.data.authorUid == request.auth.uid || isAdmin()));
 
       // Only an admin may change `status` (approve/reject). An author may
       // still edit their own submission while it's pending, but the update

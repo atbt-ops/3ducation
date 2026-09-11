@@ -33,7 +33,8 @@ app.innerHTML = `
   <footer class="site-foot">
     <p>Free and open source — <a href="https://github.com/atbt-ops/3ducation">github.com/atbt-ops/3ducation</a>.
     Signed-in progress syncs across devices; signed-out progress stays in this browser.
-    <a href="#/submit">Submit an instrument</a>.</p>
+    <a href="#/community">Browse community instruments</a> or
+    <a href="#/submit">submit your own</a> — no coding required.</p>
     <button class="linklike" id="resetProgress" type="button">Reset my progress</button>
   </footer>
 `;
@@ -55,13 +56,15 @@ function initials(user) {
 }
 
 function renderAuthArea() {
+  const communityLink = '<a class="auth-link" href="#/community">Community</a>';
   if (!currentUser) {
-    authArea.innerHTML = `<button class="btn" id="signInBtn" type="button">Sign in</button>`;
+    authArea.innerHTML = `${communityLink}<button class="btn" id="signInBtn" type="button">Sign in</button>`;
     authArea.querySelector("#signInBtn").addEventListener("click", () => requestSignIn());
     return;
   }
   const admin = isAdmin(currentUser);
   authArea.innerHTML = `
+    ${communityLink}
     <a class="auth-link" href="#/submit">Submit</a>
     ${admin ? '<a class="auth-link" href="#/review">Review</a>' : ""}
     <span class="auth-avatar" title="${currentUser.email || ""}">${initials(currentUser)}</span>
@@ -83,6 +86,8 @@ async function getSync() {
   if (!syncModule) syncModule = await import("./sync.js");
   return syncModule;
 }
+
+renderAuthArea(); // signed-out UI immediately; onAuth below replaces it once Firebase resolves
 
 onAuth(async (user) => {
   currentUser = user;
@@ -313,7 +318,11 @@ function videoBlock(m) {
 function renderModule(id) {
   const m = getModule(id);
   if (!m) return renderHome();
+  renderModuleObject(m);
+}
 
+/** Shared by built-in modules and community formula instruments (see pages/communityModule.js). */
+function renderModuleObject(m) {
   active?.onExit?.(viewer);
   ensureViewer();
   progress.markVisited(m.id);
@@ -406,6 +415,38 @@ async function renderReviewPage() {
   main.focus({ preventScroll: true });
 }
 
+async function renderCommunityListPage() {
+  leaveModule();
+  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Community</b>';
+  main.innerHTML = '<p class="fact">Loading…</p>';
+  const { renderCommunityList } = await import("./pages/communityList.js");
+  renderCommunityList(main);
+  window.scrollTo({ top: 0 });
+  main.focus({ preventScroll: true });
+}
+
+async function renderCommunityInstrument(subId) {
+  ensureViewer();
+  crumbs.innerHTML = 'Workshop <span aria-hidden="true">/</span> <b>Community</b>';
+  main.innerHTML = '<p class="fact">Loading…</p>';
+  try {
+    const [{ getSubmission }, { buildCommunityModule }] = await Promise.all([
+      import("./submissions.js"),
+      import("./pages/communityModule.js"),
+    ]);
+    const sub = await getSubmission(subId);
+    if (!sub || sub.type !== "formula" || (sub.status !== "approved" && !isAdmin(currentUser))) {
+      leaveModule();
+      main.innerHTML = '<p class="fact">This instrument isn\'t available — it may still be in review, or not exist.</p>';
+      return;
+    }
+    renderModuleObject(buildCommunityModule(sub));
+  } catch {
+    leaveModule();
+    main.innerHTML = '<p class="fact">Couldn\'t load that instrument.</p>';
+  }
+}
+
 /* ---------------- router ---------------- */
 function route() {
   const raw = location.hash;
@@ -414,6 +455,8 @@ function route() {
   const id = raw.replace(/^#\/?/, "");
   if (id === "submit") renderSubmitPage();
   else if (id === "review") renderReviewPage();
+  else if (id === "community") renderCommunityListPage();
+  else if (id.startsWith("community/")) renderCommunityInstrument(id.slice("community/".length));
   else if (id && getModule(id)) renderModule(id);
   else renderHome();
 }

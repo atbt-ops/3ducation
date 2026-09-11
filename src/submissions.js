@@ -1,11 +1,17 @@
-// Community instrument submissions — stored in Firestore, never executed.
-// A submission is plain text (name/description/code) that only becomes a
-// live module once an admin reviews it and a maintainer merges it into
-// src/modules/ through a normal commit. See README "Community submissions".
+// Community instrument submissions — stored in Firestore.
+//
+// Two kinds:
+//  - "formula": just data (a math expression string). Rendered through the
+//    same safe expr.js evaluator Surface studio uses. Nothing here is ever
+//    eval'd or executed as code, so an approved one can go live immediately.
+//  - "code": free-text module code. Never executed by this app. A maintainer
+//    reads it, and only a real git commit (see README "Community submissions")
+//    ever makes it live.
 import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -22,12 +28,14 @@ export async function createSubmission(user, data) {
     authorUid: user.uid,
     authorEmail: user.email || "",
     authorName: user.displayName || "",
+    type: data.type === "formula" ? "formula" : "code",
     name: data.name.trim(),
     subject: data.subject,
     gradeMin: data.gradeMin,
     gradeMax: data.gradeMax,
     description: data.description.trim(),
-    code: data.code,
+    formula: data.type === "formula" ? data.formula.trim() : "",
+    code: data.type === "code" ? data.code : "",
     status: "pending",
     createdAt: serverTimestamp(),
   };
@@ -45,6 +53,23 @@ export async function listMySubmissions(uid) {
 
 export async function listAllSubmissions() {
   const q = query(collection(db, COL), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+/** A single submission, subject to firestore.rules (public once approved, else author/admin only). */
+export async function getSubmission(id) {
+  const snap = await getDoc(doc(db, COL, id));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
+/** Approved, no-code formula instruments — publicly readable, shown at #/community. */
+export async function listApprovedFormulas() {
+  const q = query(
+    collection(db, COL),
+    where("status", "==", "approved"),
+    where("type", "==", "formula")
+  );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
