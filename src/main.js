@@ -199,23 +199,26 @@ const SUBJECT_ACCENT = {
   Astronomy: "var(--subj-astronomy)",
 };
 
-function moduleCard(m) {
-  const p = progress.for(m.id);
+function badgeHTML(moduleId) {
+  const p = progress.for(moduleId);
   const mastered = p.quizCount && p.quizBest === p.quizCount;
-  const badge = mastered
+  return mastered
     ? '<span class="badge is-mastered">Mastered</span>'
     : p.quizCount
       ? `<span class="badge is-score">Quiz ${p.quizBest}/${p.quizCount}</span>`
       : p.visited
         ? '<span class="badge is-visited">Visited</span>'
         : "";
+}
+
+function moduleCard(m) {
   return `
     <a class="card" href="#/${m.id}">
       <span class="rivet tl"></span><span class="rivet tr"></span>
       <span class="rivet bl"></span><span class="rivet br"></span>
       <span class="card-icon">${m.icon}</span>
       <span class="tag">${m.tag}${m.video ? ' <span class="tag-video" title="Has a video lecture">▶ video</span>' : ""}</span>
-      <h3>${m.name} ${badge}</h3>
+      <h3>${m.name} ${badgeHTML(m.id)}</h3>
       <p>${m.blurb}</p>
     </a>`;
 }
@@ -422,6 +425,17 @@ function renderModuleObject(m) {
   progress.markVisited(m.id);
   crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${m.name}</b>`;
 
+  const accent = SUBJECT_ACCENT[m.subject];
+  const accentStyle = accent ? `style="--accent:${accent}"` : "";
+  const related = MODULES.filter((x) => x.subject === m.subject && x.id !== m.id).slice(0, 4);
+  const relatedHTML = related.length
+    ? `
+    <section class="continue-section">
+      <h2 class="continue-heading">More in ${m.subject} <span>— keep exploring the subject</span></h2>
+      <div class="bench">${related.map(moduleCard).join("")}</div>
+    </section>`
+    : "";
+
   main.innerHTML = `
     <a class="back-btn" href="#/">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L3 7L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -429,7 +443,7 @@ function renderModuleObject(m) {
     </a>
     <div class="workbench">
       <div class="stage-wrap">
-        <span class="module-eyebrow">${m.tag}</span>
+        <span class="module-eyebrow" ${accentStyle}>${m.tag}</span>
         <div class="stage-tools">
           <button class="stage-tool" id="resetView" type="button" title="Reset view" aria-label="Reset view">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.46-3.54M13 3v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -440,8 +454,8 @@ function renderModuleObject(m) {
         </div>
         <span class="viewport-hint">drag or arrow-keys to orbit · scroll to zoom</span>
       </div>
-      <aside class="notebook">
-        <h2>${m.name}</h2>
+      <aside class="notebook" ${accentStyle}>
+        <h2>${m.name} ${badgeHTML(m.id)}</h2>
         <details class="lesson" open>
           <summary>Learn</summary>
           <div class="lesson-body">${m.lesson}</div>
@@ -452,6 +466,7 @@ function renderModuleObject(m) {
         <div class="quiz-slot" id="quiz"></div>
       </aside>
     </div>
+    ${relatedHTML}
   `;
 
   stageWrap = main.querySelector(".stage-wrap");

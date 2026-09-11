@@ -346,6 +346,7 @@ button { font: inherit; color: inherit; }
   @keyframes heroRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   .hero-panel { animation: heroRise 0.6s ease both; }
   .continue-section { animation: heroRise 0.6s ease 0.08s both; }
+  .workbench { animation: heroRise 0.5s ease both; }
 }
 
 .continue-section { margin-bottom: clamp(26px, 5vw, 40px); }
@@ -511,7 +512,7 @@ button { font: inherit; color: inherit; }
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--brass-strong);
+  color: var(--accent, var(--brass-strong));
   background: color-mix(in srgb, var(--surface) 78%, transparent);
   padding: 5px 9px;
   border-radius: 999px;
@@ -554,6 +555,7 @@ button { font: inherit; color: inherit; }
   min-width: 280px;
   background: var(--surface);
   border: 1px solid var(--line-strong);
+  border-top: 3px solid var(--accent, var(--line-strong));
   border-radius: 16px;
   padding: 22px;
   display: flex;
@@ -561,7 +563,7 @@ button { font: inherit; color: inherit; }
   gap: 16px;
   box-shadow: var(--shadow);
 }
-.notebook > h2 { font-size: 1.35rem; font-weight: 800; }
+.notebook > h2 { font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 .lesson { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
 .lesson > summary {
