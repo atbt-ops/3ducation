@@ -524,7 +524,25 @@ async function renderModule(id) {
   if (!meta) return renderHome();
   leaveModule();
   crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${meta.name}</b>`;
-  main.innerHTML = '<p class="fact">Loading…</p>';
+  // A skeleton in the instrument's own layout (not a bare "Loading…") — this
+  // chunk is small and usually flashes by in well under a second, but with
+  // 61 separate per-instrument chunks now (see registry.js), every open is a
+  // real network request instead of the instant swap it used to be.
+  main.innerHTML = `
+    <a class="back-btn" href="#/">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L3 7L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Workshop
+    </a>
+    <div class="workbench" aria-busy="true" aria-label="Loading ${meta.name}">
+      <div class="stage-wrap skeleton-block"></div>
+      <aside class="notebook">
+        <div class="skeleton-line skeleton-line-title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line" style="width:70%"></div>
+      </aside>
+    </div>
+  `;
   try {
     const m = await withTimeout(loadModule(id));
     if (!m) return renderHome();

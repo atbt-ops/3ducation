@@ -644,6 +644,16 @@ button { font: inherit; color: inherit; }
 }
 .notebook > h2 { font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
+/* Instrument-loading skeleton — same .workbench/.stage-wrap/.notebook shapes
+   as the real content, so there's no layout jump once it's replaced. */
+.stage-wrap.skeleton-block { background: var(--surface-2); }
+.skeleton-line { height: 13px; background: var(--surface-2); border-radius: 6px; margin-bottom: 12px; }
+.skeleton-line-title { height: 22px; width: 65%; margin-bottom: 18px; }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes skeletonPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+  .skeleton-block, .skeleton-line { animation: skeletonPulse 1.3s ease-in-out infinite; }
+}
+
 .lesson { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
 .lesson > summary {
   cursor: pointer;
