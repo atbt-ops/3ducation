@@ -14,6 +14,35 @@ import { registerSW } from "virtual:pwa-register";
 // Firestore (sync + submissions) is the heaviest slice of the Firebase SDK,
 // so it's only fetched once someone actually signs in or opens those pages.
 
+// Theme: defaults to following the visitor's device (no data-theme attribute
+// at all — see style.css's prefers-color-scheme rule); an explicit choice
+// here overrides that via data-theme, independent of the OS setting. Applied
+// before app.innerHTML below, so there's no flash of the wrong theme.
+const THEME_KEY = "3ducation.theme";
+const THEME_ORDER = ["system", "light", "dark"];
+const THEME_META = {
+  system: { icon: "🌗", label: "Theme: Auto (follows your device)" },
+  light: { icon: "☀️", label: "Theme: Light" },
+  dark: { icon: "🌙", label: "Theme: Dark" },
+};
+let theme = "system";
+try {
+  theme = localStorage.getItem(THEME_KEY) || "system";
+} catch {
+  /* ignore */
+}
+function applyTheme(t) {
+  const root = document.documentElement;
+  if (t === "system") {
+    root.removeAttribute("data-theme");
+    root.style.colorScheme = "light dark";
+  } else {
+    root.setAttribute("data-theme", t);
+    root.style.colorScheme = t;
+  }
+}
+applyTheme(theme);
+
 // Auto-refresh a tab that's been open since before the latest deploy. Vite
 // content-hashes every build's filenames, so a tab still running yesterday's
 // JS will 404 the moment it tries to lazily load a page that changed (this
@@ -47,6 +76,7 @@ app.innerHTML = `
     </a>
     <div class="topbar-right">
       <nav class="crumbs" id="crumbs" aria-live="polite">Workshop</nav>
+      <button class="theme-toggle" id="themeToggle" type="button"></button>
       <div class="auth-area" id="authArea"></div>
     </div>
   </header>
@@ -68,6 +98,25 @@ const authArea = document.getElementById("authArea");
 
 document.getElementById("resetProgress").addEventListener("click", () => {
   if (confirm("Clear your visited/mastered marks on this device?")) progress.reset();
+});
+
+const themeToggle = document.getElementById("themeToggle");
+function syncThemeButton() {
+  const meta = THEME_META[theme];
+  themeToggle.textContent = meta.icon;
+  themeToggle.title = meta.label;
+  themeToggle.setAttribute("aria-label", meta.label);
+}
+syncThemeButton();
+themeToggle.addEventListener("click", () => {
+  theme = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
+  applyTheme(theme);
+  syncThemeButton();
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    /* ignore */
+  }
 });
 
 /* ---------------- auth ---------------- */

@@ -64,6 +64,39 @@
   }
 }
 
+/* Manual override (main.js's theme toggle sets data-theme via localStorage,
+   independent of the OS setting) — same values as the media query above,
+   duplicated because plain CSS can't share a declaration block between a
+   @media condition and a plain attribute selector. Keep both in sync. */
+:root[data-theme="dark"] {
+  --bg: #0d0d10;
+  --bg-tint: #141417;
+  --surface: #17171b;
+  --surface-2: #202025;
+  --ink-strong: #ffffff;
+  --ink: #ececee;
+  --ink-muted: #a0a0aa;
+  --line: #2b2b31;
+  --line-strong: #3a3a41;
+  --brass: #f0a13c;
+  --brass-strong: #f8be6b;
+  --brass-tint: rgba(240, 161, 60, 0.16);
+  --on-brass: #1a1206;
+  --teal: #3fd0bd;
+  --teal-strong: #6fe5d6;
+  --teal-tint: rgba(63, 208, 189, 0.16);
+  --on-teal: #0a1f1c;
+  --violet: #b19aec;
+  --ok: #55c98a;
+  --bad: #f0846a;
+  --shadow: 0 20px 48px -22px rgba(0, 0, 0, 0.66);
+  --focus: #f8be6b;
+
+  --subj-biology: #6cc97e;
+  --subj-earth: #7fc4e0;
+  --subj-astronomy: #a3b3f5;
+}
+
 * { box-sizing: border-box; }
 html { color-scheme: light dark; }
 body {
@@ -135,6 +168,21 @@ button { font: inherit; color: inherit; }
 .crumbs a:hover { color: var(--brass-strong); text-decoration: underline; }
 
 .topbar-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
+.theme-toggle {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.theme-toggle:hover { border-color: var(--brass); color: var(--ink); }
 .auth-area { display: flex; align-items: center; gap: 10px; }
 .auth-link {
   font-size: 0.82rem;
