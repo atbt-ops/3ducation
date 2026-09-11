@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights, groundGrid } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.75, dir: 0.9, rim: 0.4 });
@@ -42,6 +43,16 @@ magma.position.set(0, 0, -R);
 scene.add(magma);
 
 const NODES = [igneous, sedimentary, metamorphic, magma];
+
+function addLabel(node, text, y) {
+  const label = createLabel(text);
+  label.position.set(0, y, 0);
+  node.add(label);
+}
+addLabel(igneous, "Igneous", 0.72);
+addLabel(sedimentary, "Sedimentary", 0.5);
+addLabel(metamorphic, "Metamorphic", 0.7);
+addLabel(magma, "Magma", 0.7);
 
 const orbitLine = new THREE.LineLoop(
   new THREE.BufferGeometry().setFromPoints(

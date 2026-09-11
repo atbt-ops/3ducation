@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 scene.add(new THREE.AmbientLight(0xffffff, 1));
@@ -61,6 +62,16 @@ for (let i = 0; i < 5; i++) {
 }
 flowerGroup.add(blob(0xffcf4a, 0, STEM_TOP + 0.3, 0.17, 0.17));
 group.add(flowerGroup);
+
+function addLabel(target, text, x, y, fontSize = 30) {
+  const label = createLabel(text, { fontSize });
+  label.position.set(x, y, 0.1);
+  target.add(label);
+}
+addLabel(rootsGroup, "Roots", 0, -2.1);
+addLabel(stemGroup, "Stem", 0.45, STEM_TOP * 0.5);
+addLabel(leavesGroup, "Leaves", 0, 1.55);
+addLabel(flowerGroup, "Flower", 0, STEM_TOP + 0.75);
 
 const PARTS = [
   { name: "Roots", group: rootsGroup, desc: "Anchor the plant in the soil, and absorb the water and minerals it needs — usually hidden underground." },

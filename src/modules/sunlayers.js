@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 scene.add(new THREE.AmbientLight(0xffffff, 0.55));
@@ -58,6 +59,21 @@ const meshes = LAYERS.map((layer) => {
   group.add(mesh);
   return mesh;
 });
+
+// One floating name label, following whichever layer is currently selected —
+// not one per layer, since they're nested inside each other and would overlap.
+let layerLabel = null;
+function showLayerLabel(i) {
+  if (layerLabel) {
+    layerLabel.parent?.remove(layerLabel);
+    layerLabel.material.map.dispose();
+    layerLabel.material.dispose();
+  }
+  const layer = LAYERS[i];
+  layerLabel = createLabel(layer.name, { fontSize: 26 });
+  layerLabel.position.set(0, layer.r + 0.2, 0);
+  meshes[i].add(layerLabel);
+}
 
 const state = { layer: 0, t: 0 };
 const els = {};
@@ -120,6 +136,7 @@ export default {
       els.name.textContent = layer.name;
       els.temp.textContent = layer.temp;
       els.desc.textContent = layer.desc;
+      showLayerLabel(i);
     };
     els.layer.addEventListener("input", sync);
     sync();

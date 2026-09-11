@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights, prefersReducedMotion } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.7, dir: 0.8 });
@@ -34,12 +35,18 @@ function build() {
   membrane.userData.part = "membrane";
   group.add(membrane);
   meshes.membrane = membrane;
+  const membraneLabel = createLabel("Membrane", { fontSize: 32 });
+  membraneLabel.position.set(0, 2.65, 0);
+  membrane.add(membraneLabel);
 
   if (plant) {
     const wall = new THREE.Mesh(new THREE.BoxGeometry(5.3, 5.3, 5.3), mat(0x8a6a3a, { wireframe: true }));
     wall.userData.part = "wall";
     group.add(wall);
     meshes.wall = wall;
+    const wallLabel = createLabel("Cell wall", { fontSize: 32 });
+    wallLabel.position.set(0, 2.95, 0);
+    wall.add(wallLabel);
   }
 
   const nucleus = new THREE.Mesh(new THREE.SphereGeometry(0.85, 28, 22), mat(0x6d4bb1));
@@ -47,34 +54,54 @@ function build() {
   nucleus.userData.part = "nucleus";
   group.add(nucleus);
   meshes.nucleus = nucleus;
+  const nucleusLabel = createLabel("Nucleus", { fontSize: 32 });
+  nucleusLabel.position.set(0, 1.15, 0);
+  nucleus.add(nucleusLabel);
 
   const mitoPositions = [
     [-1.3, 0.6, 0.5], [1.1, -1.1, -0.6], [-0.6, -1.2, 0.9], [1.4, 0.9, 0.4],
   ];
-  mitoPositions.forEach((p) => {
+  mitoPositions.forEach((p, i) => {
     const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.5, 8, 14), mat(0xd9503f));
     m.position.set(...p);
     m.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
     m.userData.part = "mito";
     group.add(m);
+    // Label only one — four identical labels on four identical organelles would just clutter the view.
+    if (i === 0) {
+      const label = createLabel("Mitochondrion", { fontSize: 28 });
+      label.position.set(0, 0.55, 0);
+      m.add(label);
+    }
   });
 
   if (plant) {
-    [[-1.5, -0.4, -0.8], [1.3, 0.2, 1.1], [0.2, 1.5, -0.9]].forEach((p) => {
+    [[-1.5, -0.4, -0.8], [1.3, 0.2, 1.1], [0.2, 1.5, -0.9]].forEach((p, i) => {
       const c = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 0.4, 8, 14), mat(0x4fa032));
       c.position.set(...p);
       c.userData.part = "chloro";
       group.add(c);
+      if (i === 0) {
+        const label = createLabel("Chloroplast", { fontSize: 28 });
+        label.position.set(0, 0.55, 0);
+        c.add(label);
+      }
     });
     const vac = new THREE.Mesh(new THREE.SphereGeometry(1.1, 24, 18), mat(0x7f9cc9, { transparent: true, opacity: 0.4 }));
     vac.position.set(-0.6, -0.3, -0.3);
     vac.userData.part = "vac";
     group.add(vac);
+    const vacLabel = createLabel("Vacuole", { fontSize: 30 });
+    vacLabel.position.set(0, 1.35, 0);
+    vac.add(vacLabel);
   } else {
     const vac = new THREE.Mesh(new THREE.SphereGeometry(0.45, 20, 16), mat(0x7f9cc9, { transparent: true, opacity: 0.4 }));
     vac.position.set(-1.2, 0.7, -0.6);
     vac.userData.part = "vac";
     group.add(vac);
+    const vacLabel = createLabel("Vacuole", { fontSize: 30 });
+    vacLabel.position.set(0, 0.7, 0);
+    vac.add(vacLabel);
   }
 
   const golgi = new THREE.Group();
@@ -88,6 +115,9 @@ function build() {
   golgi.userData.part = "golgi";
   golgi.traverse((o) => (o.userData.part = "golgi"));
   group.add(golgi);
+  const golgiLabel = createLabel("Golgi body", { fontSize: 28 });
+  golgiLabel.position.set(0, 0.55, 0);
+  golgi.add(golgiLabel);
 
   const er = new THREE.Mesh(
     new THREE.TorusKnotGeometry(0.7, 0.06, 80, 8, 2, 3),
@@ -96,6 +126,9 @@ function build() {
   er.position.set(-0.6, -0.1, 0.3);
   er.userData.part = "er";
   group.add(er);
+  const erLabel = createLabel("Endoplasmic reticulum", { fontSize: 26 });
+  erLabel.position.set(0, 0.95, 0);
+  er.add(erLabel);
 
   for (let i = 0; i < 40; i++) {
     const r = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), mat(0x23271f));
@@ -105,11 +138,20 @@ function build() {
     r.position.set(rad * Math.sin(b) * Math.cos(a), rad * Math.sin(b) * Math.sin(a), rad * Math.cos(b));
     r.userData.part = "ribo";
     group.add(r);
+    // One label stands in for all 40 — they're scattered dots, not individually distinct.
+    if (i === 0) {
+      const label = createLabel("Ribosomes", { fontSize: 28 });
+      label.position.set(0, 0.28, 0);
+      r.add(label);
+    }
   }
 }
 build();
 
-const pickables = () => group.children.flatMap((c) => (c.type === "Group" ? c.children : [c]));
+// Labels are Sprites parented onto organelle meshes/groups (see build()) purely for display —
+// excluded here so they're never raycast targets or emissive-highlighted like a real organelle.
+const pickables = () =>
+  group.children.flatMap((c) => (c.type === "Group" ? c.children : [c])).filter((m) => m.type !== "Sprite");
 const els = {};
 
 function select(part) {

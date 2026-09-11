@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { circlePoints } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 scene.add(new THREE.AmbientLight(0xffffff, 0.35));
@@ -33,6 +34,10 @@ PLANETS.forEach((p) => {
   p.angle = Math.random() * Math.PI * 2;
   scene.add(mesh);
   planetMeshes.push(mesh);
+
+  const label = createLabel(p.name);
+  label.position.set(0, p.size + 0.3, 0);
+  mesh.add(label);
 
   if (p.ring) {
     const ring = new THREE.Mesh(

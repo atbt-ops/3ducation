@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights, bondMesh, prefersReducedMotion } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.6, dir: 0.85 });
@@ -81,6 +82,9 @@ function build(key) {
     );
     mesh.position.copy(pos);
     group.add(mesh);
+    const label = createLabel(a[0], { fontSize: 34 });
+    label.position.set(0, el.r + 0.24, 0);
+    mesh.add(label);
   });
   d.bonds.forEach((b) => group.add(bondMesh(positions[b[0]], positions[b[1]], 0.09, 0xcabf9e)));
 }
