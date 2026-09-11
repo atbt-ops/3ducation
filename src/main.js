@@ -176,6 +176,16 @@ onAuth(async (user) => {
   if (raw === "submit" || raw === "review") route();
 });
 
+// Bumped by route() on every navigation. Async page renderers (module load,
+// submit/review/community) capture it when they start and check it again
+// after their own await — if it's moved on, a newer navigation has already
+// taken over the screen, so the stale result is dropped instead of
+// clobbering whatever's there now. Matters more since the lazy-loading
+// refactor: every instrument is now a real network request, not an instant
+// swap, so clicking through several quickly is a real scenario, not just a
+// theoretical one.
+let navToken = 0;
+
 /* ---------------- shared 3D viewer ---------------- */
 let viewer = null;
 let canvas = null;
@@ -522,6 +532,7 @@ function videoBlock(m) {
 async function renderModule(id) {
   const meta = getModule(id);
   if (!meta) return renderHome();
+  const myToken = navToken;
   leaveModule();
   crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${meta.name}</b>`;
   // A skeleton in the instrument's own layout (not a bare "Loading…") — this
@@ -545,9 +556,11 @@ async function renderModule(id) {
   `;
   try {
     const m = await withTimeout(loadModule(id));
+    if (myToken !== navToken) return; // superseded by a newer navigation while this was loading
     if (!m) return renderHome();
     renderModuleObject(m);
   } catch {
+    if (myToken !== navToken) return;
     chunkLoadError(meta.name);
   }
 }
@@ -661,48 +674,58 @@ function withTimeout(promise, ms = 12000) {
 }
 
 async function renderSubmitPage() {
+  const myToken = navToken;
   leaveModule();
   crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Submit an instrument</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderSubmit } = await withTimeout(import("./pages/submit.js"));
+    if (myToken !== navToken) return;
     await renderSubmit(main, currentUser, () => requestSignIn(() => renderSubmitPage()));
     window.scrollTo({ top: 0 });
     main.focus({ preventScroll: true });
   } catch {
+    if (myToken !== navToken) return;
     chunkLoadError("The submission form");
   }
 }
 
 async function renderReviewPage() {
+  const myToken = navToken;
   leaveModule();
   crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Review queue</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderReview } = await withTimeout(import("./pages/review.js"));
+    if (myToken !== navToken) return;
     await renderReview(main, currentUser);
     window.scrollTo({ top: 0 });
     main.focus({ preventScroll: true });
   } catch {
+    if (myToken !== navToken) return;
     chunkLoadError("The review queue");
   }
 }
 
 async function renderCommunityListPage() {
+  const myToken = navToken;
   leaveModule();
   crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Community</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderCommunityList } = await withTimeout(import("./pages/communityList.js"));
+    if (myToken !== navToken) return;
     await renderCommunityList(main);
     window.scrollTo({ top: 0 });
     main.focus({ preventScroll: true });
   } catch {
+    if (myToken !== navToken) return;
     chunkLoadError("The community gallery");
   }
 }
 
 async function renderCommunityInstrument(subId) {
+  const myToken = navToken;
   ensureViewer();
   crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Community</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
@@ -711,6 +734,7 @@ async function renderCommunityInstrument(subId) {
       Promise.all([import("./submissions.js"), import("./pages/communityModule.js")])
     );
     const sub = await getSubmission(subId);
+    if (myToken !== navToken) return;
     if (!sub || sub.type !== "formula" || (sub.status !== "approved" && !isAdmin(currentUser))) {
       leaveModule();
       main.innerHTML = '<p class="fact">This instrument isn\'t available — it may still be in review, or not exist.</p>';
@@ -718,6 +742,7 @@ async function renderCommunityInstrument(subId) {
     }
     renderModuleObject(buildCommunityModule(sub));
   } catch {
+    if (myToken !== navToken) return;
     chunkLoadError("That instrument");
   }
 }
@@ -727,6 +752,7 @@ function route() {
   const raw = location.hash;
   // Only "#/..." paths are routes; plain anchors like "#main" are left alone.
   if (raw && !raw.startsWith("#/")) return;
+  navToken++;
   stopHeroOrbit(); // torn down on every navigation; renderHome() below recreates it if we're headed back there
   const id = raw.replace(/^#\/?/, "");
   if (id === "submit") renderSubmitPage();
