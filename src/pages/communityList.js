@@ -24,21 +24,75 @@ export async function renderCommunityList(main) {
       maintainer has approved. Want to add one? Head to
       <a href="#/submit">Submit an instrument</a> — no programming needed, just a formula.</p>
     </section>
+    <div class="filters" id="clFilters" hidden>
+      <input type="search" id="cl-q" class="text-input search-input" placeholder="Search community instruments…" aria-label="Search community instruments">
+      <div class="chip-row" id="clChips" role="group" aria-label="Filter by subject"></div>
+    </div>
     <div class="bench" id="commBench"><p class="fact">Loading…</p></div>
+    <p class="bench-empty" id="clEmpty" hidden>Nothing matches that search — try a different word or subject.</p>
   `;
   const bench = main.querySelector("#commBench");
   const countEl = main.querySelector("#cl-count");
+  const filtersEl = main.querySelector("#clFilters");
+  const qInput = main.querySelector("#cl-q");
+  const chipsEl = main.querySelector("#clChips");
+  const emptyEl = main.querySelector("#clEmpty");
+
   try {
     const { listApprovedFormulas } = await import("../submissions.js");
     const items = await listApprovedFormulas();
-    if (items.length) {
-      countEl.innerHTML = `<strong>${items.length}</strong> instrument${items.length > 1 ? "s" : ""} built
-        by other learners and approved so far. Want to add one?
-        <a href="#/submit">Submit an instrument</a> — no programming needed, just a formula.`;
+    if (!items.length) {
+      bench.innerHTML = '<p class="fact">Nothing published yet — be the first at <a href="#/submit">Submit an instrument</a>.</p>';
+      return;
     }
-    bench.innerHTML = items.length
-      ? items.map(card).join("")
-      : '<p class="fact">Nothing published yet — be the first at <a href="#/submit">Submit an instrument</a>.</p>';
+
+    countEl.innerHTML = `<strong>${items.length}</strong> instrument${items.length > 1 ? "s" : ""} built
+      by other learners and approved so far. Want to add one?
+      <a href="#/submit">Submit an instrument</a> — no programming needed, just a formula.`;
+
+    const subjects = [...new Set(items.map((s) => s.subject))].sort();
+    let filter = "All";
+    let query = "";
+
+    function paintChips() {
+      chipsEl.innerHTML = ["All", ...subjects]
+        .map((name) => {
+          const accent = SUBJECT_ACCENT[name];
+          const dot = accent ? `<span class="chip-dot" style="background:${accent}" aria-hidden="true"></span>` : "";
+          return `<button class="chip" type="button" data-filter="${escapeHtml(name)}" style="${accent ? `--chip-accent:${accent}` : ""}" aria-pressed="${name === filter}">${dot}${escapeHtml(name)}</button>`;
+        })
+        .join("");
+    }
+
+    function paint() {
+      const q = query.toLowerCase();
+      const list = items.filter((s) => {
+        if (filter !== "All" && s.subject !== filter) return false;
+        if (!q) return true;
+        return (
+          s.name.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q) ||
+          s.subject.toLowerCase().includes(q)
+        );
+      });
+      emptyEl.hidden = list.length > 0;
+      bench.innerHTML = list.map(card).join("");
+      paintChips();
+    }
+
+    filtersEl.hidden = items.length <= 4;
+    chipsEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-filter]");
+      if (!btn) return;
+      filter = btn.dataset.filter;
+      paint();
+    });
+    qInput.addEventListener("input", () => {
+      query = qInput.value.trim();
+      paint();
+    });
+
+    paint();
   } catch {
     bench.innerHTML = '<p class="fact">Couldn\'t load community instruments right now.</p>';
   }
