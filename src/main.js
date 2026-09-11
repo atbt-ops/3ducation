@@ -103,12 +103,6 @@ function renderHome() {
   crumbs.textContent = "Workshop";
 
   const s = progress.summary(MODULE_IDS);
-  const subjectChips = ["All", ...SUBJECTS]
-    .map(
-      (name) =>
-        `<button class="chip" type="button" data-filter="${name}" aria-pressed="${name === homeFilter}">${name}</button>`
-    )
-    .join("");
   const bandChips = ["All", ...BANDS.map((b) => b.label)]
     .map(
       (name) =>
@@ -130,39 +124,81 @@ function renderHome() {
       </p>
     </section>
     <div class="filters">
-      <div class="chip-row filter-row" role="group" aria-label="Filter by subject">${subjectChips}</div>
+      <input type="search" id="q" class="text-input search-input" placeholder="Search instruments…" aria-label="Search instruments">
+      <div class="chip-row filter-row" role="group" aria-label="Filter by subject" id="subjectChips"></div>
       <div class="chip-row band-row" role="group" aria-label="Filter by school level">${bandChips}</div>
     </div>
-    <div class="bench" id="bench"></div>
-    <p class="bench-empty" id="benchEmpty" hidden>Nothing in that combination yet — try a wider filter.</p>
+    <div id="benchWrap"></div>
+    <p class="bench-empty" id="benchEmpty" hidden>Nothing matches that combination — try a wider search or filter.</p>
   `;
 
-  const bench = main.querySelector("#bench");
+  const wrap = main.querySelector("#benchWrap");
   const emptyEl = main.querySelector("#benchEmpty");
-  const paint = () => {
+  const subjectChipsEl = main.querySelector("#subjectChips");
+  const qInput = main.querySelector("#q");
+  let query = "";
+
+  const inScope = (m) => {
+    if (homeBand === "All") return true;
     const band = BANDS.find((b) => b.label === homeBand);
-    const list = MODULES.filter(
-      (m) =>
-        (homeFilter === "All" || m.subject === homeFilter) &&
-        (homeBand === "All" || inBand(m, band))
-    );
-    bench.innerHTML = list.map(moduleCard).join("");
-    emptyEl.hidden = list.length > 0;
+    return inBand(m, band);
   };
+  const matchesQuery = (m) => {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    return (
+      m.name.toLowerCase().includes(q) ||
+      m.blurb.toLowerCase().includes(q) ||
+      m.tag.toLowerCase().includes(q)
+    );
+  };
+
+  function paintChips() {
+    const counts = {};
+    MODULES.filter(inScope).forEach((m) => (counts[m.subject] = (counts[m.subject] || 0) + 1));
+    const total = MODULES.filter(inScope).length;
+    subjectChipsEl.innerHTML = ["All", ...SUBJECTS]
+      .map((name) => {
+        const n = name === "All" ? total : counts[name] || 0;
+        return `<button class="chip" type="button" data-filter="${name}" aria-pressed="${name === homeFilter}" ${n === 0 && name !== "All" ? "disabled" : ""}>${name}${name === "All" ? "" : ` (${n})`}</button>`;
+      })
+      .join("");
+  }
+
+  function paint() {
+    const list = MODULES.filter(
+      (m) => inScope(m) && (homeFilter === "All" || m.subject === homeFilter) && matchesQuery(m)
+    );
+    emptyEl.hidden = list.length > 0;
+
+    if (query || homeFilter !== "All") {
+      // A focused set — one flat grid reads fine.
+      wrap.innerHTML = `<div class="bench">${list.map(moduleCard).join("")}</div>`;
+    } else {
+      // Everything — group by subject so 48+ cards stay scannable.
+      wrap.innerHTML = SUBJECTS.map((subj) => {
+        const items = list.filter((m) => m.subject === subj);
+        if (!items.length) return "";
+        return `
+          <section class="subject-group">
+            <h2 class="subject-heading">${subj} <span class="subject-count">${items.length}</span></h2>
+            <div class="bench">${items.map(moduleCard).join("")}</div>
+          </section>`;
+      }).join("");
+    }
+    paintChips();
+  }
   paint();
 
-  main.querySelector(".filter-row").addEventListener("click", (e) => {
+  subjectChipsEl.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-filter]");
-    if (!btn) return;
+    if (!btn || btn.disabled) return;
     homeFilter = btn.dataset.filter;
     try {
       localStorage.setItem("3ducation.filter", homeFilter);
     } catch {
       /* ignore */
     }
-    main.querySelectorAll(".filter-row .chip").forEach((c) =>
-      c.setAttribute("aria-pressed", c === btn ? "true" : "false")
-    );
     paint();
   });
 
@@ -178,6 +214,11 @@ function renderHome() {
     main.querySelectorAll(".band-row .chip").forEach((c) =>
       c.setAttribute("aria-pressed", c === btn ? "true" : "false")
     );
+    paint();
+  });
+
+  qInput.addEventListener("input", () => {
+    query = qInput.value.trim();
     paint();
   });
 

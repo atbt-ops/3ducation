@@ -147,7 +147,37 @@ button { font: inherit; color: inherit; }
 .filter-row, .band-row { margin: 0; }
 .band-row .chip { font-size: 0.76rem; padding: 5px 12px; }
 .band-row .chip[aria-pressed="true"] { background: var(--brass); border-color: var(--brass); color: var(--on-brass); }
+.chip:disabled { opacity: 0.4; cursor: default; }
 .bench-empty { color: var(--ink-muted); font-size: 0.9rem; padding: 24px 4px; }
+
+.search-input {
+  max-width: 360px;
+  background: var(--surface);
+}
+.search-input::-webkit-search-cancel-button { cursor: pointer; }
+
+.subject-group { margin-bottom: 30px; }
+.subject-group:last-child { margin-bottom: 0; }
+.subject-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-strong);
+}
+.subject-count {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
 
 .bench {
   display: grid;
