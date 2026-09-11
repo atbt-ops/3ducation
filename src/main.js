@@ -332,11 +332,19 @@ function renderHome() {
         if (!items.length) return "";
         const accent = SUBJECT_ACCENT[subj];
         const sSummary = progress.summary(items.map((m) => m.id));
+        const allMastered = sSummary.mastered === items.length;
+        const allExplored = sSummary.visited === items.length;
+        const completionBadge = allMastered
+          ? `<span class="badge is-mastered subject-badge" title="Every instrument in ${subj} mastered">🏆 Subject mastered</span>`
+          : allExplored
+            ? `<span class="badge is-visited" title="Every instrument in ${subj} explored">✓ Fully explored</span>`
+            : "";
         const progressHTML = sSummary.visited
           ? `
             <div class="subject-progress" style="${accent ? `--accent:${accent}` : ""}">
               <div class="subject-progress-bar"><div class="subject-progress-fill" style="width:${Math.round((sSummary.visited / items.length) * 100)}%"></div></div>
               <span class="subject-progress-label">${sSummary.visited}/${items.length} explored${sSummary.mastered ? ` · ${sSummary.mastered} mastered` : ""}</span>
+              ${completionBadge}
             </div>`
           : "";
         return `
