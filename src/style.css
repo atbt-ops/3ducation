@@ -381,6 +381,10 @@ button { font: inherit; color: inherit; }
   border-bottom: 2px solid var(--accent, var(--line-strong));
 }
 .subject-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent, var(--teal)); flex: none; }
+.subject-progress { display: flex; align-items: center; gap: 10px; margin: -6px 0 14px; flex-wrap: wrap; }
+.subject-progress-bar { flex: 1; max-width: 220px; height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.subject-progress-fill { height: 100%; background: var(--accent, var(--teal)); border-radius: 999px; transition: width 0.4s ease; }
+.subject-progress-label { font-size: 0.76rem; color: var(--ink-muted); white-space: nowrap; }
 .subject-count {
   font-family: "JetBrains Mono", monospace;
   font-weight: 500;

@@ -331,12 +331,21 @@ function renderHome() {
         const items = list.filter((m) => m.subject === subj);
         if (!items.length) return "";
         const accent = SUBJECT_ACCENT[subj];
+        const sSummary = progress.summary(items.map((m) => m.id));
+        const progressHTML = sSummary.visited
+          ? `
+            <div class="subject-progress" style="${accent ? `--accent:${accent}` : ""}">
+              <div class="subject-progress-bar"><div class="subject-progress-fill" style="width:${Math.round((sSummary.visited / items.length) * 100)}%"></div></div>
+              <span class="subject-progress-label">${sSummary.visited}/${items.length} explored${sSummary.mastered ? ` · ${sSummary.mastered} mastered` : ""}</span>
+            </div>`
+          : "";
         return `
           <section class="subject-group">
             <h2 class="subject-heading" style="${accent ? `--accent:${accent}` : ""}">
               <span class="subject-dot" aria-hidden="true"></span>${subj}
               <span class="subject-count">${items.length}</span>
             </h2>
+            ${progressHTML}
             <div class="bench">${items.map(moduleCard).join("")}</div>
           </section>`;
       }).join("");

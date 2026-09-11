@@ -14,9 +14,20 @@ function tilePos(col, row) {
   return { x, y };
 }
 
+/** Shrinks the font until `text` fits `maxWidth`, so every element's full name always fits its card — no truncating to initials or an ellipsis. */
+function fitFont(ctx, text, maxWidth, weight, startSize, minSize) {
+  let size = startSize;
+  while (size > minSize) {
+    ctx.font = `${weight} ${size}px 'JetBrains Mono', monospace`;
+    if (ctx.measureText(text).width <= maxWidth) break;
+    size -= 0.5;
+  }
+  return size;
+}
+
 function tileTexture(el) {
   const [z, sym, name, mass, cat] = el;
-  const s = 128;
+  const s = 192; // higher resolution than the tile's on-screen size, so names stay crisp up close
   const c = document.createElement("canvas");
   c.width = c.height = s;
   const ctx = c.getContext("2d");
@@ -25,18 +36,19 @@ function tileTexture(el) {
   ctx.fillRect(0, 0, s, s);
   ctx.fillStyle = "rgba(255,255,255,0.92)";
   ctx.textAlign = "left";
-  ctx.font = "600 18px 'JetBrains Mono', monospace";
-  ctx.fillText(String(z), 10, 24);
+  ctx.font = "600 27px 'JetBrains Mono', monospace";
+  ctx.fillText(String(z), 15, 36);
   ctx.textAlign = "center";
-  ctx.font = "700 48px 'Bricolage Grotesque', sans-serif";
-  ctx.fillText(sym, s / 2, s / 2 + 14);
-  ctx.font = "500 13px 'JetBrains Mono', monospace";
-  ctx.fillText(name.length > 12 ? name.slice(0, 11) + "…" : name, s / 2, s - 26);
-  ctx.font = "500 12px 'JetBrains Mono', monospace";
-  ctx.fillText(mass >= 100 ? mass.toFixed(0) : mass.toFixed(2), s / 2, s - 10);
+  ctx.font = "700 72px 'Bricolage Grotesque', sans-serif";
+  ctx.fillText(sym, s / 2, s / 2 + 21);
+  const nameSize = fitFont(ctx, name, s - 20, 500, 20, 7);
+  ctx.font = `500 ${nameSize}px 'JetBrains Mono', monospace`;
+  ctx.fillText(name, s / 2, s - 39);
+  ctx.font = "500 18px 'JetBrains Mono', monospace";
+  ctx.fillText(mass >= 100 ? mass.toFixed(0) : mass.toFixed(2), s / 2, s - 15);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 2;
+  tex.anisotropy = 4;
   return tex;
 }
 
