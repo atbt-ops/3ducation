@@ -118,7 +118,7 @@ function renderHome() {
 
   main.innerHTML = `
     <section class="hero">
-      <span class="eyebrow">${MODULES.length} instruments · classes I–XII · 118 elements · free</span>
+      <span class="eyebrow">${MODULES.length} instruments · classes I–XII · every subject · free</span>
       <h1>Science you can pick up and turn over.</h1>
       <p>Every model is a real <span class="d3">3D</span> object running on the same equations
       scientists use — physics, chemistry, biology, maths and space, from primary counting to
