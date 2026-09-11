@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 scene.add(new THREE.AmbientLight(0xffffff, 1));
@@ -34,6 +35,19 @@ group.add(lungL, lungR);
 const diaphragm = blob(0xc98a5a, 0, -1.15, 1.5, 0.18);
 group.add(diaphragm);
 const DIAPHRAGM_BASE_Y = -1.15;
+
+// Added to the outer group at fixed positions, not as children of lungL/
+// lungR/diaphragm — those get resized/repositioned every frame to animate
+// breathing, non-uniformly, which would otherwise distort a child label.
+const lungLLabel = createLabel("Left lung", { fontSize: 24 });
+lungLLabel.position.set(-0.75, 1.0, 0);
+group.add(lungLLabel);
+const lungRLabel = createLabel("Right lung", { fontSize: 24 });
+lungRLabel.position.set(0.75, 1.0, 0);
+group.add(lungRLabel);
+const diaphragmLabel = createLabel("Diaphragm", { fontSize: 24 });
+diaphragmLabel.position.set(0, -1.75, 0);
+group.add(diaphragmLabel);
 
 const state = { bpm: 15, running: true, t: 0 };
 const els = {};

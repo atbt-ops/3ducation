@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.66, dir: 0.8 });
@@ -13,11 +14,17 @@ function barMagnet() {
     new THREE.MeshStandardMaterial({ color: 0xc23b2b, roughness: 0.5 })
   );
   north.position.x = 0.35;
+  const nLabel = createLabel("N", { fontSize: 34 });
+  nLabel.position.set(0, 0.5, 0);
+  north.add(nLabel);
   const south = new THREE.Mesh(
     new THREE.BoxGeometry(0.7, 0.5, 0.5),
     new THREE.MeshStandardMaterial({ color: 0x3a5fa8, roughness: 0.5 })
   );
   south.position.x = -0.35;
+  const sLabel = createLabel("S", { fontSize: 34 });
+  sLabel.position.set(0, 0.5, 0);
+  south.add(sLabel);
   g.add(north, south);
   return g;
 }

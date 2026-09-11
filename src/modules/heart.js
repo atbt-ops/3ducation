@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 scene.add(new THREE.AmbientLight(0xffffff, 1));
@@ -20,6 +21,10 @@ function blob(color, x, y, s) {
 const heartL = blob(RED, 0.5, 0, 0.9);
 const heartR = blob(BLUE, -0.5, 0, 0.9);
 group.add(heartR, heartL);
+// Added to the mesh itself — heartL/heartR only ever get a uniform beat-pulse
+// scale, so a child label isn't distorted by it.
+heartL.add(createLabel("Left heart", { fontSize: 26 }));
+heartR.add(createLabel("Right heart", { fontSize: 26 }));
 
 const lungs = blob(0xf0c0c8, 0, 2.6, 0.9);
 lungs.scale.x = 2.4;
@@ -27,6 +32,15 @@ group.add(lungs);
 const body = blob(0xd8c6a0, 0, -2.8, 0.9);
 body.scale.x = 3;
 group.add(body);
+// Added to the outer group, not the meshes themselves — lungs/body have a
+// non-uniform x-scale (they're stretched ellipses), which would otherwise
+// distort a child label horizontally.
+const lungsLabel = createLabel("Lungs", { fontSize: 28 });
+lungsLabel.position.set(0, 3.3, 0);
+group.add(lungsLabel);
+const bodyLabel = createLabel("Body", { fontSize: 28 });
+bodyLabel.position.set(0, -3.5, 0);
+group.add(bodyLabel);
 
 // two loop paths
 function loopPath(pts) {

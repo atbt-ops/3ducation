@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights, contactShadow } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.62, dir: 0.9 });
@@ -21,6 +22,16 @@ const coilGeo = new THREE.BufferGeometry();
 coilGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(COIL_PTS * 3), 3));
 const coil = new THREE.Line(coilGeo, new THREE.LineBasicMaterial({ color: 0xb0803f }));
 group.add(coil);
+
+// Added to the outer group at fixed absolute offsets — core is rotated 90°
+// to lie along X, so a child label would inherit that rotation and end up
+// sideways instead of above it.
+const coreLabel = createLabel("Iron core", { fontSize: 26 });
+coreLabel.position.set(-1.1, 0.5, 0);
+group.add(coreLabel);
+const coilLabel = createLabel("Coil", { fontSize: 26 });
+coilLabel.position.set(0.6, 0.75, 0);
+group.add(coilLabel);
 
 const state = { turns: 20, current: 1.4, t: 0 };
 

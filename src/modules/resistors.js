@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.64, dir: 0.85 });
@@ -40,6 +41,9 @@ function rebuild() {
   const batt = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.1, 0.5), resMat);
   batt.position.set(-2.6, 0, 0);
   dynamic.add(batt);
+  const battLabel = createLabel("Battery", { fontSize: 26 });
+  battLabel.position.set(0, 0.9, 0);
+  batt.add(battLabel);
 
   const wire = (a, b) => {
     const dir = new THREE.Vector3().subVectors(b, a);
@@ -55,6 +59,12 @@ function rebuild() {
     const r2 = resistorMesh();
     r2.position.set(1.2, 1.4, 0);
     dynamic.add(r1, r2);
+    const r1Label = createLabel("R₁", { fontSize: 26 });
+    r1Label.position.set(0, 0.45, 0);
+    r1.add(r1Label);
+    const r2Label = createLabel("R₂", { fontSize: 26 });
+    r2Label.position.set(0, 0.45, 0);
+    r2.add(r2Label);
     wire(new THREE.Vector3(-2.6, 0.6, 0), new THREE.Vector3(-2.6, 1.4, 0));
     wire(new THREE.Vector3(-2.6, 1.4, 0), new THREE.Vector3(-0.85, 1.4, 0));
     wire(new THREE.Vector3(0.05, 1.4, 0), new THREE.Vector3(0.75, 1.4, 0));
@@ -68,6 +78,12 @@ function rebuild() {
     const r2 = resistorMesh();
     r2.position.set(0.6, -0.2, 0);
     dynamic.add(r1, r2);
+    const r1Label = createLabel("R₁", { fontSize: 26 });
+    r1Label.position.set(0, 0.45, 0);
+    r1.add(r1Label);
+    const r2Label = createLabel("R₂", { fontSize: 26 });
+    r2Label.position.set(0, 0.45, 0);
+    r2.add(r2Label);
     wire(new THREE.Vector3(-2.6, 0.6, 0), new THREE.Vector3(-2.6, 1.2, 0));
     wire(new THREE.Vector3(-2.6, 1.2, 0), new THREE.Vector3(-1.4, 1.2, 0));
     wire(new THREE.Vector3(-1.4, 1.2, 0), new THREE.Vector3(-1.4, -0.2, 0));

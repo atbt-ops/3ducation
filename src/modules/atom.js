@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
 import { ELEMENTS } from "../lib/elements.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.85 });
@@ -32,15 +33,30 @@ function build() {
   while (group.children.length) group.remove(group.children[0]);
   electrons = [];
 
-  // nucleus cluster
+  // nucleus cluster — label one representative proton and one neutron
+  // (there can be dozens; labeling every one would just be visual noise).
   const total = state.p + state.n;
+  let labeledProton = false;
+  let labeledNeutron = false;
   for (let k = 0; k < total; k++) {
-    const m = new THREE.Mesh(nucleonGeo, k < state.p ? protonMat : neutronMat);
+    const isProton = k < state.p;
+    const m = new THREE.Mesh(nucleonGeo, isProton ? protonMat : neutronMat);
     const r = 0.05 + 0.32 * Math.cbrt(total) * Math.random();
     const a = Math.random() * Math.PI * 2;
     const b = Math.acos(2 * Math.random() - 1);
     m.position.set(r * Math.sin(b) * Math.cos(a), r * Math.sin(b) * Math.sin(a), r * Math.cos(b));
     group.add(m);
+    if (isProton && !labeledProton) {
+      labeledProton = true;
+      const label = createLabel("Proton", { fontSize: 24 });
+      label.position.set(0, 0.3, 0);
+      m.add(label);
+    } else if (!isProton && !labeledNeutron) {
+      labeledNeutron = true;
+      const label = createLabel("Neutron", { fontSize: 24 });
+      label.position.set(0, 0.3, 0);
+      m.add(label);
+    }
   }
 
   const shells = shellsFor(state.e);

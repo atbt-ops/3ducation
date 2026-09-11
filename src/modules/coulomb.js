@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.7, dir: 0.85 });
@@ -19,6 +20,28 @@ group.add(arrowA, arrowB);
 
 const state = { qa: 3, qb: -3, dist: 3.2 };
 const K = 6; // scaled constant for a readable force number
+
+// A +/− sign label on each charge, showing its actual polarity directly —
+// not just the color convention. Recreated (old texture disposed) whenever
+// layout() runs, since a slider can flip a charge's sign.
+let labelA = null;
+let labelB = null;
+function disposeLabel(l) {
+  if (!l) return;
+  l.parent?.remove(l);
+  l.material.map.dispose();
+  l.material.dispose();
+}
+function showSignLabels() {
+  disposeLabel(labelA);
+  labelA = createLabel(state.qa >= 0 ? "+" : "−", { fontSize: 36 });
+  labelA.position.set(0, 0.75, 0);
+  qA.add(labelA);
+  disposeLabel(labelB);
+  labelB = createLabel(state.qb >= 0 ? "+" : "−", { fontSize: 36 });
+  labelB.position.set(0, 0.75, 0);
+  qB.add(labelB);
+}
 
 function force() {
   const f = (K * Math.abs(state.qa) * Math.abs(state.qb)) / (state.dist * state.dist);
@@ -42,6 +65,7 @@ function layout() {
   arrowB.setDirection(new THREE.Vector3(attract ? -1 : 1, 0, 0));
   arrowA.setLength(len, 0.2, 0.12);
   arrowB.setLength(len, 0.2, 0.12);
+  showSignLabels();
 }
 layout();
 

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
 import { ohms } from "../lib/physics.js";
+import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.62, dir: 0.8 });
@@ -67,6 +68,9 @@ const battery = new THREE.Mesh(
 );
 battery.position.set(0, -H, 0);
 group.add(battery);
+const batteryLabel = createLabel("Battery", { fontSize: 30 });
+batteryLabel.position.set(0, 0.6, 0);
+battery.add(batteryLabel);
 ["+0.72", "-0.72"].forEach((x) => {
   const term = new THREE.Mesh(
     new THREE.CylinderGeometry(0.07, 0.07, 0.2, 12),
@@ -87,6 +91,9 @@ const bulbMat = new THREE.MeshStandardMaterial({
 const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.44, 24, 18), bulbMat);
 bulb.position.set(0, H, 0);
 group.add(bulb);
+const bulbLabel = createLabel("Bulb", { fontSize: 30 });
+bulbLabel.position.set(0, 0.75, 0);
+bulb.add(bulbLabel);
 const glow = new THREE.PointLight(0xffce7a, 0, 7);
 glow.position.copy(bulb.position);
 group.add(glow);
