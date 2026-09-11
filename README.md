@@ -1,19 +1,21 @@
 # 3ducation
 
-**A free, interactive 3D science lab for classes I–XII.** 36 hands-on instruments
-across physics, chemistry, biology, maths and space — each running on the real
-equations, each with a short lesson, guided experiments and a check-yourself quiz.
-Plus all 118 elements and a formula box that plots anything you type. No account,
-works offline. Filter by subject or by school level (Primary / Middle / Secondary).
+**A free, interactive 3D science lab for classes I–XII.** 48 hands-on instruments
+across physics, chemistry, biology, earth science, maths and space — each running
+on the real equations, each with a short lesson, guided experiments and a
+check-yourself quiz. Plus all 118 elements and a formula box that plots anything
+you type. No account, works offline. Filter by subject or by school level
+(Primary / Middle / Secondary).
 
 🔗 **Live:** https://atbt-ops.github.io/3ducation/
 
 | Subject       | Instruments |
 | ------------- | ----------- |
-| **Physics**   | Pendulum · Projectile range · Mass on a spring · Ramp & friction · Newton's cradle · Ohm's law loop · Series & parallel · Magnetic field · Electromagnet · Wave interference · Standing waves · Converging lens · Float or sink · Heat flow |
-| **Chemistry** | Molecule kit · States of matter · Atom builder · Gas laws · The pH scale · Periodic table (118 elements) |
-| **Biology**   | Cell explorer · DNA double helix · Photosynthesis · The heart |
-| **Maths**     | Geometry set · Surface studio (`z = f(x,y)`) · Fraction wall · Times table · Unit circle · Pythagoras · Galton board · Dice sums · Slope of a curve |
+| **Physics**   | Pendulum · Projectile range · Mass on a spring · Ramp & friction · Newton's cradle · Levers & balance · Ohm's law loop · Series & parallel · Magnetic field · Electromagnet · Electric charges · Wave interference · Standing waves · Sound: pitch & loudness · Converging lens · Refraction · Float or sink · Heat flow |
+| **Chemistry** | Molecule kit · States of matter · Atom builder · Gas laws · The pH scale · Reaction rate · Balancing equations · Periodic table (118 elements) |
+| **Biology**   | Cell explorer · DNA double helix · Photosynthesis · The heart · Energy pyramid · Punnett square |
+| **Earth Science** | The water cycle |
+| **Maths**     | Geometry set · Surface studio (`z = f(x,y)`) · Fraction wall · Times table · Unit circle · Pythagoras · Similar triangles · Line grapher · Mean/median/mode · Galton board · Dice sums · Slope of a curve |
 | **Space**     | Orrery · Moon phases · Seasons & the tilt |
 
 Most instruments ship a set of **guided experiments** — one click dials in a named
