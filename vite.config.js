@@ -9,6 +9,18 @@ export default defineConfig({
   build: {
     target: "es2020",
     chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        // three.js is the single biggest dependency and never changes between
+        // our own deploys (same pinned version) — splitting it into its own
+        // chunk means a returning visitor's browser can reuse its cached copy
+        // across deploys, only re-downloading the (much smaller) app-code
+        // chunk that actually changed. Safe, mechanical, no behavior change.
+        manualChunks(id) {
+          if (id.includes("node_modules/three")) return "three";
+        },
+      },
+    },
   },
   plugins: [
     VitePWA({
