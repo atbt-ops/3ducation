@@ -249,6 +249,9 @@ function renderHome() {
           <div class="stat"><b data-count="${s.mastered}">0</b><span>mastered</span></div>
           <div class="stat"><b data-count="${SUBJECTS.length}">0</b><span>subjects</span></div>
         </div>
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn" type="button" id="surpriseBtn">🎲 Surprise me</button>
+        </div>
       </div>
       <aside class="hero-spot">
         <div class="hero-orbit-wrap"><canvas class="hero-orbit-canvas" aria-hidden="true"></canvas></div>
@@ -280,6 +283,11 @@ function renderHome() {
     heroOrbit.start();
   }
   main.querySelectorAll(".stat b[data-count]").forEach((el) => animateCount(el, +el.dataset.count));
+
+  main.querySelector("#surpriseBtn").addEventListener("click", () => {
+    const pick = MODULES[Math.floor(Math.random() * MODULES.length)];
+    location.hash = `#/${pick.id}`;
+  });
 
   const wrap = main.querySelector("#benchWrap");
   const emptyEl = main.querySelector("#benchEmpty");
