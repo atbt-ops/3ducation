@@ -101,6 +101,23 @@ function metaMismatches(entry, m) {
   return bad;
 }
 
+/** Catches the class of bug a passing scene/update loop can't: a quiz question that
+ * mountQuiz() would render blank, or with an out-of-range "correct" answer. */
+function quizProblems(quiz) {
+  if (!Array.isArray(quiz)) return ["quiz is not an array"];
+  const problems = [];
+  quiz.forEach((item, i) => {
+    if (!item || typeof item.q !== "string" || !item.q.trim()) problems.push(`q[${i}]: empty/missing question text`);
+    if (!Array.isArray(item?.choices) || item.choices.length < 2) problems.push(`q[${i}]: needs at least 2 choices`);
+    else if (item.choices.some((c) => typeof c !== "string" || !c.trim())) problems.push(`q[${i}]: an empty choice`);
+    if (typeof item?.answer !== "number" || item.answer < 0 || item.answer >= (item.choices?.length || 0)) {
+      problems.push(`q[${i}]: answer index out of range`);
+    }
+    if (!item || typeof item.explain !== "string" || !item.explain.trim()) problems.push(`q[${i}]: empty/missing explanation`);
+  });
+  return problems;
+}
+
 let failed = 0;
 for (const entry of MODULES) {
   try {
@@ -123,6 +140,8 @@ for (const entry of MODULES) {
     if (!m.scene || !m.scene.isScene) throw new Error("no scene");
     if (!Array.isArray(m.grades) || m.grades.length !== 2) throw new Error("bad grades");
     if (m.video && (!m.video.id || !m.video.title)) throw new Error("video needs id + title");
+    const quizIssues = quizProblems(m.quiz);
+    if (quizIssues.length) throw new Error(quizIssues.join("; "));
     console.log(`ok   ${m.id}`);
   } catch (e) {
     failed++;

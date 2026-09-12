@@ -98,6 +98,14 @@
 }
 
 * { box-sizing: border-box; }
+/* The browser's own [hidden] rule lives in the user-agent stylesheet, which
+   ANY author rule beats regardless of specificity — so .btn's own
+   `display: inline-flex` (and any other class that sets `display`) silently
+   overrides `el.hidden = true`, leaving the element visible and clickable.
+   This restores the actual native behavior everywhere in the app: elements
+   like quiz.js's "Next question"/"Try again" buttons rely on `.hidden` to
+   stay out of the way until they're meant to be clicked. */
+[hidden] { display: none !important; }
 html { color-scheme: light dark; }
 body {
   margin: 0;
