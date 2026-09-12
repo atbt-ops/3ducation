@@ -101,6 +101,19 @@ const main = document.getElementById("main");
 const crumbs = document.getElementById("crumbs");
 const authArea = document.getElementById("authArea");
 
+/** Moves focus to the new page content after every render, and pins scroll to
+ * the top. Safari/WebKit's support for `focus({preventScroll:true})` is
+ * unreliable — it can silently scroll `main` into view a couple of frames
+ * *after* this runs (confirmed via getBoundingClientRect sampling across
+ * rAF frames: scrollY stays 0 for two frames, then jumps), so a single
+ * synchronous scrollTo(0) right after focus() isn't enough on its own. The
+ * rAF-deferred one below re-asserts top-of-page after that delayed nudge. */
+function focusMainAndScrollTop() {
+  main.focus({ preventScroll: true });
+  window.scrollTo({ top: 0 });
+  requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top: 0 })));
+}
+
 document.getElementById("resetProgress").addEventListener("click", () => {
   if (confirm("Clear your visited/mastered marks on this device?")) progress.reset();
 });
@@ -577,8 +590,7 @@ function renderHome() {
     paint();
   });
 
-  window.scrollTo({ top: 0 });
-  main.focus({ preventScroll: true });
+  focusMainAndScrollTop();
 }
 
 /** A single subject's full instrument grid — reached from a home page tile. */
@@ -628,8 +640,7 @@ function renderSubjectPage(subj) {
     paint();
   });
 
-  window.scrollTo({ top: 0 });
-  main.focus({ preventScroll: true });
+  focusMainAndScrollTop();
 }
 
 /* ---------------- video lecture ---------------- */
@@ -783,8 +794,7 @@ function renderModuleObject(m) {
   m.onEnter?.(viewer);
   active = m;
   viewer.resize(stageWrap);
-  window.scrollTo({ top: 0 });
-  main.focus({ preventScroll: true });
+  focusMainAndScrollTop();
 }
 
 /* ---------------- static pages (submit / review) ---------------- */
@@ -825,8 +835,7 @@ async function renderSubmitPage() {
     const { renderSubmit } = await withTimeout(import("./pages/submit.js"));
     if (myToken !== navToken) return;
     await renderSubmit(main, currentUser, () => requestSignIn(() => renderSubmitPage()));
-    window.scrollTo({ top: 0 });
-    main.focus({ preventScroll: true });
+    focusMainAndScrollTop();
   } catch {
     if (myToken !== navToken) return;
     chunkLoadError("The submission form");
@@ -842,8 +851,7 @@ async function renderReviewPage() {
     const { renderReview } = await withTimeout(import("./pages/review.js"));
     if (myToken !== navToken) return;
     await renderReview(main, currentUser);
-    window.scrollTo({ top: 0 });
-    main.focus({ preventScroll: true });
+    focusMainAndScrollTop();
   } catch {
     if (myToken !== navToken) return;
     chunkLoadError("The review queue");
@@ -859,8 +867,7 @@ async function renderCommunityListPage() {
     const { renderCommunityList } = await withTimeout(import("./pages/communityList.js"));
     if (myToken !== navToken) return;
     await renderCommunityList(main);
-    window.scrollTo({ top: 0 });
-    main.focus({ preventScroll: true });
+    focusMainAndScrollTop();
   } catch {
     if (myToken !== navToken) return;
     chunkLoadError("The community gallery");
