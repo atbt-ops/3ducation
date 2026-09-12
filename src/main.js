@@ -11,6 +11,11 @@ import { onAuth, signOutUser } from "./auth.js";
 import { isAdmin } from "./firebase.js";
 import { openAuthModal } from "./authModal.js";
 import { registerSW } from "virtual:pwa-register";
+import showcaseOrrery from "./assets/showcase/orrery.jpg";
+import showcaseMirrors from "./assets/showcase/mirrors.jpg";
+import showcaseCell from "./assets/showcase/cell.jpg";
+import showcaseIonicbond from "./assets/showcase/ionicbond.jpg";
+import showcaseGalaxies from "./assets/showcase/galaxies.jpg";
 // Firestore (sync + submissions) is the heaviest slice of the Firebase SDK,
 // so it's only fetched once someone actually signs in or opens those pages.
 
@@ -200,6 +205,14 @@ function stopHeroOrbit() {
   heroOrbit = null;
 }
 
+/** The home showcase carousel's autoplay — torn down the same way as heroOrbit
+ * above, so repeat visits to "#/" don't stack up intervals and listeners. */
+let carouselCleanup = null;
+function stopCarousel() {
+  carouselCleanup?.();
+  carouselCleanup = null;
+}
+
 /** Counts a stat up from 0 to `target`, skipped (jumps straight there) if the visitor prefers reduced motion. */
 function animateCount(el, target) {
   if (prefersReducedMotion || !target) {
@@ -254,6 +267,97 @@ const SUBJECT_BLURB = {
   Math: "Numbers, shapes, graphs and calculus — geometry and algebra you can turn around.",
   Astronomy: "Orbits, eclipses, moon phases, and how stars are born and die.",
 };
+
+// Real screenshots of the running app (captured from the actual 3D stage of
+// each instrument) — not mockups. A quick, honest preview of the variety
+// inside before a visitor commits to opening one.
+const SHOWCASE = [
+  { src: showcaseOrrery, caption: "Orrery — planets and orbits drawn to real relative sizes." },
+  { src: showcaseMirrors, caption: "Concave & convex mirrors — drag the object and watch the ray diagram update." },
+  { src: showcaseCell, caption: "Cell explorer — tap any organelle to read what it does." },
+  { src: showcaseIonicbond, caption: "Ionic bonding — watch an electron jump from sodium to chlorine." },
+  { src: showcaseGalaxies, caption: "Galaxy types — spiral, elliptical and irregular, side by side." },
+];
+
+/** A small, dependency-free carousel: one slide visible at a time, dot and
+ * arrow navigation, autoplay that pauses on hover/focus/hidden-tab and never
+ * runs at all for prefers-reduced-motion. */
+function mountCarousel(root, slides) {
+  root.innerHTML = `
+    <button class="carousel-arrow prev" type="button" aria-label="Previous instrument">‹</button>
+    <div class="carousel-viewport">
+      <div class="carousel-track">
+        ${slides
+          .map(
+            (s, i) => `
+          <figure class="carousel-slide">
+            <img src="${s.src}" alt="${s.caption}" loading="${i === 0 ? "eager" : "lazy"}" width="1280" height="960">
+            <figcaption>${s.caption}</figcaption>
+          </figure>`
+          )
+          .join("")}
+      </div>
+    </div>
+    <button class="carousel-arrow next" type="button" aria-label="Next instrument">›</button>
+    <div class="carousel-dots" role="tablist" aria-label="Showcase slides">
+      ${slides.map((_, i) => `<button class="carousel-dot" type="button" role="tab" aria-label="Slide ${i + 1}"></button>`).join("")}
+    </div>
+  `;
+
+  const track = root.querySelector(".carousel-track");
+  const dots = [...root.querySelectorAll(".carousel-dot")];
+  let index = 0;
+  let timer = null;
+
+  function paint() {
+    track.style.transform = `translateX(-${index * 100}%)`;
+    dots.forEach((d, i) => d.setAttribute("aria-selected", String(i === index)));
+  }
+  function go(i) {
+    index = (i + slides.length) % slides.length;
+    paint();
+  }
+  function play() {
+    if (prefersReducedMotion) return;
+    stop();
+    timer = setInterval(() => go(index + 1), 4500);
+  }
+  function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  root.querySelector(".prev").addEventListener("click", () => {
+    go(index - 1);
+    play();
+  });
+  root.querySelector(".next").addEventListener("click", () => {
+    go(index + 1);
+    play();
+  });
+  dots.forEach((d, i) =>
+    d.addEventListener("click", () => {
+      go(i);
+      play();
+    })
+  );
+  root.addEventListener("pointerenter", stop);
+  root.addEventListener("pointerleave", play);
+  root.addEventListener("focusin", stop);
+  root.addEventListener("focusout", play);
+  const onVisibility = () => (document.hidden ? stop() : play());
+  document.addEventListener("visibilitychange", onVisibility);
+
+  paint();
+  play();
+
+  // The document-level listener otherwise outlives this DOM (it's on
+  // `document`, not `root`) — every return to "#/" would stack another one.
+  return () => {
+    stop();
+    document.removeEventListener("visibilitychange", onVisibility);
+  };
+}
 
 function subjectSlug(name) {
   return name.toLowerCase().replace(/\s+/g, "-");
@@ -401,6 +505,10 @@ function renderHome() {
         </div>
       </aside>
     </section>
+    <section class="showcase">
+      <h2 class="showcase-heading">See it in action</h2>
+      <div class="carousel" id="showcaseCarousel"></div>
+    </section>
     ${recentHTML}
     <div class="filters">
       <input type="search" id="q" class="text-input search-input" placeholder="Search instruments…" aria-label="Search instruments">
@@ -415,6 +523,8 @@ function renderHome() {
     heroOrbit = createHeroOrbit(orbitCanvas);
     heroOrbit.start();
   }
+  stopCarousel();
+  carouselCleanup = mountCarousel(main.querySelector("#showcaseCarousel"), SHOWCASE);
   main.querySelectorAll(".stat b[data-count]").forEach((el) => animateCount(el, +el.dataset.count));
 
   main.querySelector("#surpriseBtn").addEventListener("click", () => {
@@ -773,6 +883,7 @@ function route() {
   if (raw && !raw.startsWith("#/")) return;
   navToken++;
   stopHeroOrbit(); // torn down on every navigation; renderHome() below recreates it if we're headed back there
+  stopCarousel();
   const id = raw.replace(/^#\/?/, "");
   if (id === "submit") renderSubmitPage();
   else if (id === "review") renderReviewPage();
