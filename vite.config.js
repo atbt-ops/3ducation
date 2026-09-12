@@ -36,7 +36,7 @@ export default defineConfig({
       workbox: {
         // three.js bundles are large; make sure they are precached for offline use.
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        globPatterns: ["**/*.{js,css,html,svg,png,jpg,jpeg,woff2}"],
       },
       manifest: {
         name: "3ducation — Science Lab",
