@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { createLabel } from "../engine/label.js";
+const heartIllustration = new URL("../assets/illustrations/heart.jpg", import.meta.url).href;
 
 const scene = new THREE.Scene();
 scene.add(new THREE.AmbientLight(0xffffff, 1));
@@ -87,6 +88,11 @@ export default {
   flat: true,
   blurb: "Two loops, one pump, blue to red and back.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 33S6 24 6 15a7 7 0 0 1 14-3 7 7 0 0 1 14 3c0 9-14 18-14 18Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  illustration: {
+    src: heartIllustration,
+    alt: "Diagram of a human heart's internal chambers, valves and major blood vessels, in a front view and a rotated view.",
+    caption: "<b>Reference diagram</b> — the same chambers and vessels from the 3D model above.",
+  },
   scene,
   view: { target: [0, 0, 0], radius: 11, theta: 0, phi: 1.5708, minRadius: 5, maxRadius: 18 },
 

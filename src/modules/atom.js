@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
 import { ELEMENTS } from "../lib/elements.js";
 import { createLabel } from "../engine/label.js";
+const atomIllustration = new URL("../assets/illustrations/atom.jpg", import.meta.url).href;
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.85 });
@@ -105,6 +106,11 @@ export default {
   grades: [8, 11],
   blurb: "Add protons and electrons, name the element.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="3" fill="currentColor"/><ellipse cx="20" cy="20" rx="15" ry="6" stroke="currentColor" stroke-width="2"/><ellipse cx="20" cy="20" rx="15" ry="6" stroke="currentColor" stroke-width="2" transform="rotate(60 20 20)"/><ellipse cx="20" cy="20" rx="15" ry="6" stroke="currentColor" stroke-width="2" transform="rotate(120 20 20)"/></svg>',
+  illustration: {
+    src: atomIllustration,
+    alt: "Diagram of an atom's structure: a central nucleus of protons and neutrons surrounded by concentric electron shells.",
+    caption: "<b>Reference diagram</b> — the nucleus and electron shells from the 3D model above, seen face-on.",
+  },
   scene,
   view: { target: [0, 0, 0], radius: 10, theta: 0.6, phi: 1.15, minRadius: 4, maxRadius: 20 },
 

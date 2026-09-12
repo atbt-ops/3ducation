@@ -1,0 +1,24 @@
+<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="crust" cx="38%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#a4926a"/>
+      <stop offset="100%" stop-color="#8a7a52"/>
+    </radialGradient>
+    <radialGradient id="mantle" cx="38%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#cf5f2f"/>
+      <stop offset="100%" stop-color="#b14a1e"/>
+    </radialGradient>
+    <radialGradient id="outercore" cx="38%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#f5a13f"/>
+      <stop offset="100%" stop-color="#e8871f"/>
+    </radialGradient>
+    <radialGradient id="innercore" cx="38%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#fffbe0"/>
+      <stop offset="100%" stop-color="#fff0b0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="500" cy="500" r="460" fill="url(#crust)" stroke="#20222a" stroke-width="10"/>
+  <circle cx="500" cy="500" r="425" fill="url(#mantle)" stroke="#20222a" stroke-width="10"/>
+  <circle cx="500" cy="500" r="265" fill="url(#outercore)" stroke="#20222a" stroke-width="10"/>
+  <circle cx="500" cy="500" r="127" fill="url(#innercore)" stroke="#20222a" stroke-width="10"/>
+</svg>

@@ -585,9 +585,13 @@ button { font: inherit; color: inherit; }
 .workbench { display: flex; gap: 18px; align-items: stretch; }
 @media (max-width: 860px) { .workbench { flex-direction: column; } }
 
+/* Holds the live 3D stage and, for a handful of flagship instruments, a
+   static reference illustration stacked beneath it — the interactive model
+   stays the primary experience, the illustration is a supplementary aid. */
+.stage-column { display: flex; flex-direction: column; gap: 14px; flex: 1.5; min-width: 0; }
+
 .stage-wrap {
   position: relative;
-  flex: 1.5;
   min-width: 0;
   aspect-ratio: 4 / 3;
   max-height: 640px;
@@ -597,6 +601,22 @@ button { font: inherit; color: inherit; }
   background: radial-gradient(circle at 50% 42%, var(--surface) 0%, var(--bg-tint) 82%);
   box-shadow: var(--shadow);
 }
+
+.stage-illustration {
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.stage-illustration img { display: block; width: 100%; height: auto; }
+.stage-illustration figcaption {
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--line);
+}
+.stage-illustration figcaption b { color: var(--ink); font-weight: 700; }
 #stage { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #stage:active { cursor: grabbing; }
 .viewport-hint {

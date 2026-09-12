@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
+const earthlayersIllustration = new URL("../assets/illustrations/earthlayers.svg", import.meta.url).href;
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.75, dir: 0.95, rim: 0.4 });
@@ -84,6 +85,11 @@ export default {
   grades: [3, 8],
   blurb: "A cutaway from crust to inner core — click through what's underfoot.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="14" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="9" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="4" fill="currentColor"/><path d="M20 20L32 12" stroke="currentColor" stroke-width="2"/><path d="M20 20L32 28" stroke="currentColor" stroke-width="2"/></svg>',
+  illustration: {
+    src: earthlayersIllustration,
+    alt: "Diagram of Earth's four layers: crust, mantle, outer core and inner core, shown as concentric colored rings.",
+    caption: "<b>Reference diagram</b> — the same four layers and colors as the 3D model above, crust to inner core.",
+  },
   scene,
   view: { target: [0, 0, 0], radius: 6.5, theta: 0, phi: 1.25, minRadius: 3, maxRadius: 12 },
 

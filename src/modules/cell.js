@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { sceneLights, prefersReducedMotion } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
+const cellIllustration = new URL("../assets/illustrations/cell.jpg", import.meta.url).href;
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.7, dir: 0.8 });
@@ -175,6 +176,11 @@ export default {
   grades: [6, 10],
   blurb: "Fly inside a cell and tap its parts.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="15" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="18" r="5" fill="currentColor"/><ellipse cx="13" cy="25" rx="4" ry="2.4" stroke="currentColor" stroke-width="2"/></svg>',
+  illustration: {
+    src: cellIllustration,
+    alt: "Diagram of an animal cell's internal organelles, including the nucleus, mitochondria, endoplasmic reticulum and Golgi apparatus.",
+    caption: "<b>Reference diagram</b> — the same organelles from the 3D model above, laid out for quick comparison.",
+  },
   scene,
   view: { target: [0, 0, 0], radius: 8.5, theta: 0.7, phi: 1.1, minRadius: 4, maxRadius: 16 },
 

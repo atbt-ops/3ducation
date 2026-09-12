@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { sceneLights } from "../engine/helpers.js";
+const dnaIllustration = new URL("../assets/illustrations/dna.jpg", import.meta.url).href;
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.68, dir: 0.85 });
@@ -72,6 +73,11 @@ export default {
   video: { id: "34Jr2U7KwOE", title: "DNA structure and replication (Khan Academy)" },
   blurb: "Twist the ladder, watch A pair with T.",
   icon: '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 6c0 8 12 8 12 16s-12 8-12 16M26 6c0 8-12 8-12 16s12 8 12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 13h10M15 27h10" stroke="currentColor" stroke-width="2"/></svg>',
+  illustration: {
+    src: dnaIllustration,
+    alt: "Diagram of a DNA double helix, showing the twisted sugar-phosphate backbone and paired bases connecting the two strands.",
+    caption: "<b>Reference diagram</b> — the same twisted backbone and base pairs from the 3D model above.",
+  },
   scene,
   view: { target: [0, 0, 0], radius: 9, theta: 0.6, phi: 1.25, minRadius: 4, maxRadius: 16 },
 

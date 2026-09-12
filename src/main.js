@@ -528,6 +528,22 @@ function videoBlock(m) {
     </details>`;
 }
 
+/* ---------------- reference illustration ---------------- */
+// A handful of flagship instruments (see each module's `illustration` field)
+// carry a static reference image — a professionally-styled scientific
+// diagram, shown stacked beneath the live 3D stage. The interactive model
+// stays the primary experience; this is a supplementary aid, closer to a
+// textbook plate, for the instruments where that context helps most.
+function illustrationHTML(m) {
+  if (!m.illustration) return "";
+  const { src, alt, caption } = m.illustration;
+  return `
+    <figure class="stage-illustration">
+      <img src="${src}" alt="${alt}" loading="lazy" width="1280" height="720">
+      <figcaption>${caption}</figcaption>
+    </figure>`;
+}
+
 /* ---------------- module view ---------------- */
 async function renderModule(id) {
   const meta = getModule(id);
@@ -545,7 +561,7 @@ async function renderModule(id) {
       Workshop
     </a>
     <div class="workbench" aria-busy="true" aria-label="Loading ${meta.name}">
-      <div class="stage-wrap skeleton-block"></div>
+      <div class="stage-column"><div class="stage-wrap skeleton-block"></div></div>
       <aside class="notebook">
         <div class="skeleton-line skeleton-line-title"></div>
         <div class="skeleton-line"></div>
@@ -589,17 +605,20 @@ function renderModuleObject(m) {
       Workshop
     </a>
     <div class="workbench">
-      <div class="stage-wrap">
-        <span class="module-eyebrow" ${accentStyle}>${m.tag}</span>
-        <div class="stage-tools">
-          <button class="stage-tool" id="resetView" type="button" title="Reset view" aria-label="Reset view">
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.46-3.54M13 3v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button class="stage-tool" id="fsToggle" type="button" title="Fullscreen" aria-label="Toggle fullscreen">
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
+      <div class="stage-column">
+        <div class="stage-wrap">
+          <span class="module-eyebrow" ${accentStyle}>${m.tag}</span>
+          <div class="stage-tools">
+            <button class="stage-tool" id="resetView" type="button" title="Reset view" aria-label="Reset view">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.46-3.54M13 3v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="stage-tool" id="fsToggle" type="button" title="Fullscreen" aria-label="Toggle fullscreen">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <span class="viewport-hint">drag or arrow-keys to orbit · scroll to zoom</span>
         </div>
-        <span class="viewport-hint">drag or arrow-keys to orbit · scroll to zoom</span>
+        ${illustrationHTML(m)}
       </div>
       <aside class="notebook" ${accentStyle}>
         <h2>${m.name} ${badgeHTML(m.id)}</h2>
