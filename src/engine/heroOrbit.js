@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { sceneLights, disposeScene, prefersReducedMotion } from "./helpers.js";
 
 /**
@@ -17,6 +18,10 @@ export function createHeroOrbit(canvas) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.2;
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
 
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
   camera.position.set(0, 0.55, 7.2);
@@ -109,6 +114,7 @@ export function createHeroOrbit(canvas) {
     },
     dispose() {
       this.stop();
+      scene.environment?.dispose();
       disposeScene(scene);
       renderer.dispose();
     },
