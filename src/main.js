@@ -283,6 +283,9 @@ const SHOWCASE = [
  * arrow navigation, autoplay that pauses on hover/focus/hidden-tab and never
  * runs at all for prefers-reduced-motion. */
 function mountCarousel(root, slides) {
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-roledescription", "carousel");
+  root.setAttribute("aria-label", "Instrument showcase");
   root.innerHTML = `
     <button class="carousel-arrow prev" type="button" aria-label="Previous instrument">‹</button>
     <div class="carousel-viewport">
@@ -290,7 +293,7 @@ function mountCarousel(root, slides) {
         ${slides
           .map(
             (s, i) => `
-          <figure class="carousel-slide">
+          <figure class="carousel-slide" id="carousel-slide-${i}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${slides.length}">
             <img src="${s.src}" alt="${s.caption}" loading="${i === 0 ? "eager" : "lazy"}" width="1280" height="960">
             <figcaption>${s.caption}</figcaption>
           </figure>`
@@ -300,27 +303,38 @@ function mountCarousel(root, slides) {
     </div>
     <button class="carousel-arrow next" type="button" aria-label="Next instrument">›</button>
     <div class="carousel-dots" role="tablist" aria-label="Showcase slides">
-      ${slides.map((_, i) => `<button class="carousel-dot" type="button" role="tab" aria-label="Slide ${i + 1}"></button>`).join("")}
+      ${slides
+        .map(
+          (s, i) =>
+            `<button class="carousel-dot" type="button" role="tab" aria-controls="carousel-slide-${i}" aria-label="Show slide ${i + 1}: ${s.caption}"></button>`
+        )
+        .join("")}
     </div>
+    <div class="sr-only" aria-live="polite"></div>
   `;
 
   const track = root.querySelector(".carousel-track");
   const dots = [...root.querySelectorAll(".carousel-dot")];
+  const liveRegion = root.querySelector("[aria-live]");
   let index = 0;
   let timer = null;
 
-  function paint() {
+  function paint(announce) {
     track.style.transform = `translateX(-${index * 100}%)`;
     dots.forEach((d, i) => d.setAttribute("aria-selected", String(i === index)));
+    // Only announce on user-driven navigation, not every autoplay tick —
+    // a screen reader narrating an unrequested slide change every 4.5s
+    // would be closer to a nuisance than a courtesy.
+    if (announce) liveRegion.textContent = `Slide ${index + 1} of ${slides.length}: ${slides[index].caption}`;
   }
-  function go(i) {
+  function go(i, announce = true) {
     index = (i + slides.length) % slides.length;
-    paint();
+    paint(announce);
   }
   function play() {
     if (prefersReducedMotion) return;
     stop();
-    timer = setInterval(() => go(index + 1), 4500);
+    timer = setInterval(() => go(index + 1, false), 4500);
   }
   function stop() {
     if (timer) clearInterval(timer);
