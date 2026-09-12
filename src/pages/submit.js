@@ -168,9 +168,9 @@ export async function renderSubmit(main, user, requestSignIn) {
         <aside class="hero-spot">
           <h2>No coding needed</h2>
           <ul class="spot-list">
-            <li><span class="spot-emoji" aria-hidden="true">🧮</span>Type a formula, see it plot live in Surface studio, then submit it.</li>
-            <li><span class="spot-emoji" aria-hidden="true">✅</span>Approved formulas go live immediately at <span class="mono">#/community</span>.</li>
-            <li><span class="spot-emoji" aria-hidden="true">💻</span>Comfortable with JavaScript? There's an advanced developer-code track too.</li>
+            <li><span class="spot-emoji" aria-hidden="true">🧮</span><span>Type a formula, see it plot live in Surface studio, then submit it.</span></li>
+            <li><span class="spot-emoji" aria-hidden="true">✅</span><span>Approved formulas go live immediately at <span class="mono">#/community</span>.</span></li>
+            <li><span class="spot-emoji" aria-hidden="true">💻</span><span>Comfortable with JavaScript? There's an advanced developer-code track too.</span></li>
           </ul>
         </aside>
       </section>`;
@@ -190,8 +190,8 @@ export async function renderSubmit(main, user, requestSignIn) {
       <aside class="hero-spot">
         <h2>How review works</h2>
         <ul class="spot-list">
-          <li><span class="spot-emoji" aria-hidden="true">🧮</span><strong>Formula:</strong> validated instantly by the same safe engine Surface studio uses — approved ones publish right away, no code review needed.</li>
-          <li><span class="spot-emoji" aria-hidden="true">💻</span><strong>Developer code:</strong> saved as text, never executed — a maintainer reads it and merges it in by hand if it's a good fit.</li>
+          <li><span class="spot-emoji" aria-hidden="true">🧮</span><span><strong>Formula:</strong> validated instantly by the same safe engine Surface studio uses — approved ones publish right away, no code review needed.</span></li>
+          <li><span class="spot-emoji" aria-hidden="true">💻</span><span><strong>Developer code:</strong> saved as text, never executed — a maintainer reads it and merges it in by hand if it's a good fit.</span></li>
         </ul>
       </aside>
     </section>

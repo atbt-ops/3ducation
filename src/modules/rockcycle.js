@@ -45,7 +45,9 @@ scene.add(magma);
 const NODES = [igneous, sedimentary, metamorphic, magma];
 
 function addLabel(node, text, y) {
-  const label = createLabel(text);
+  // Default label size is tuned for the orrery's much larger radius (15) — at this
+  // scene's radius (2.3), full-size labels overflow the canvas edge. Shrink to fit.
+  const label = createLabel(text, { scale: 0.5 });
   label.position.set(0, y, 0);
   node.add(label);
 }

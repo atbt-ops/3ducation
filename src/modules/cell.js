@@ -35,7 +35,10 @@ function build() {
   membrane.userData.part = "membrane";
   group.add(membrane);
   meshes.membrane = membrane;
-  const membraneLabel = createLabel("Membrane", { fontSize: 32 });
+  // Default label size is tuned for the orrery's much larger radius (15) — this cell
+  // scene is packed into a radius of ~2.4, so full-size labels overlap each other.
+  const LBL = { scale: 0.45 };
+  const membraneLabel = createLabel("Membrane", { fontSize: 32, ...LBL });
   membraneLabel.position.set(0, 2.65, 0);
   membrane.add(membraneLabel);
 
@@ -44,7 +47,7 @@ function build() {
     wall.userData.part = "wall";
     group.add(wall);
     meshes.wall = wall;
-    const wallLabel = createLabel("Cell wall", { fontSize: 32 });
+    const wallLabel = createLabel("Cell wall", { fontSize: 32, ...LBL });
     wallLabel.position.set(0, 2.95, 0);
     wall.add(wallLabel);
   }
@@ -54,7 +57,7 @@ function build() {
   nucleus.userData.part = "nucleus";
   group.add(nucleus);
   meshes.nucleus = nucleus;
-  const nucleusLabel = createLabel("Nucleus", { fontSize: 32 });
+  const nucleusLabel = createLabel("Nucleus", { fontSize: 32, ...LBL });
   nucleusLabel.position.set(0, 1.15, 0);
   nucleus.add(nucleusLabel);
 
@@ -69,7 +72,7 @@ function build() {
     group.add(m);
     // Label only one — four identical labels on four identical organelles would just clutter the view.
     if (i === 0) {
-      const label = createLabel("Mitochondrion", { fontSize: 28 });
+      const label = createLabel("Mitochondrion", { fontSize: 28, ...LBL });
       label.position.set(0, 0.55, 0);
       m.add(label);
     }
@@ -82,7 +85,7 @@ function build() {
       c.userData.part = "chloro";
       group.add(c);
       if (i === 0) {
-        const label = createLabel("Chloroplast", { fontSize: 28 });
+        const label = createLabel("Chloroplast", { fontSize: 28, ...LBL });
         label.position.set(0, 0.55, 0);
         c.add(label);
       }
@@ -91,7 +94,7 @@ function build() {
     vac.position.set(-0.6, -0.3, -0.3);
     vac.userData.part = "vac";
     group.add(vac);
-    const vacLabel = createLabel("Vacuole", { fontSize: 30 });
+    const vacLabel = createLabel("Vacuole", { fontSize: 30, ...LBL });
     vacLabel.position.set(0, 1.35, 0);
     vac.add(vacLabel);
   } else {
@@ -99,7 +102,7 @@ function build() {
     vac.position.set(-1.2, 0.7, -0.6);
     vac.userData.part = "vac";
     group.add(vac);
-    const vacLabel = createLabel("Vacuole", { fontSize: 30 });
+    const vacLabel = createLabel("Vacuole", { fontSize: 30, ...LBL });
     vacLabel.position.set(0, 0.7, 0);
     vac.add(vacLabel);
   }
@@ -115,7 +118,7 @@ function build() {
   golgi.userData.part = "golgi";
   golgi.traverse((o) => (o.userData.part = "golgi"));
   group.add(golgi);
-  const golgiLabel = createLabel("Golgi body", { fontSize: 28 });
+  const golgiLabel = createLabel("Golgi body", { fontSize: 28, ...LBL });
   golgiLabel.position.set(0, 0.55, 0);
   golgi.add(golgiLabel);
 
@@ -126,7 +129,7 @@ function build() {
   er.position.set(-0.6, -0.1, 0.3);
   er.userData.part = "er";
   group.add(er);
-  const erLabel = createLabel("Endoplasmic reticulum", { fontSize: 26 });
+  const erLabel = createLabel("Endoplasmic reticulum", { fontSize: 26, ...LBL });
   erLabel.position.set(0, 0.95, 0);
   er.add(erLabel);
 
@@ -140,7 +143,7 @@ function build() {
     group.add(r);
     // One label stands in for all 40 — they're scattered dots, not individually distinct.
     if (i === 0) {
-      const label = createLabel("Ribosomes", { fontSize: 28 });
+      const label = createLabel("Ribosomes", { fontSize: 28, ...LBL });
       label.position.set(0, 0.28, 0);
       r.add(label);
     }

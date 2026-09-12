@@ -73,8 +73,8 @@ export async function renderReview(main, user) {
       <aside class="hero-spot">
         <h2>How approving each type works</h2>
         <ul class="spot-list">
-          <li><span class="spot-emoji" aria-hidden="true">🧮</span><strong>Formula:</strong> publishes immediately at <span class="mono">#/community</span> — it only ever runs through the same sandboxed expression engine Surface studio uses, so there's nothing to execute unsafely.</li>
-          <li><span class="spot-emoji" aria-hidden="true">💻</span><strong>Developer code:</strong> approving does <em>not</em> publish it — copy it into <span class="mono">src/modules/</span>, review it properly, add it to the registry, and deploy as a normal commit.</li>
+          <li><span class="spot-emoji" aria-hidden="true">🧮</span><span><strong>Formula:</strong> publishes immediately at <span class="mono">#/community</span> — it only ever runs through the same sandboxed expression engine Surface studio uses, so there's nothing to execute unsafely.</span></li>
+          <li><span class="spot-emoji" aria-hidden="true">💻</span><span><strong>Developer code:</strong> approving does <em>not</em> publish it — copy it into <span class="mono">src/modules/</span>, review it properly, add it to the registry, and deploy as a normal commit.</span></li>
         </ul>
       </aside>
     </section>

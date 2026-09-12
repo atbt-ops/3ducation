@@ -391,9 +391,9 @@ function renderHome() {
         <div class="hero-orbit-wrap"><canvas class="hero-orbit-canvas" aria-hidden="true"></canvas></div>
         <h2>Not just a solo build</h2>
         <ul class="spot-list">
-          <li><span class="spot-emoji" aria-hidden="true">🧪</span>${MODULES.length} hands-on instruments — no sign-up or install needed</li>
-          <li><span class="spot-emoji" aria-hidden="true">🎥</span>Video lectures attached to select topics</li>
-          <li><span class="spot-emoji" aria-hidden="true">👥</span>Community-submitted instruments, always growing</li>
+          <li><span class="spot-emoji" aria-hidden="true">🧪</span><span>${MODULES.length} hands-on instruments — no sign-up or install needed</span></li>
+          <li><span class="spot-emoji" aria-hidden="true">🎥</span><span>Video lectures attached to select topics</span></li>
+          <li><span class="spot-emoji" aria-hidden="true">👥</span><span>Community-submitted instruments, always growing</span></li>
         </ul>
         <div class="btn-row">
           <a class="btn primary" href="#/community">Browse community</a>
