@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 /**
  * A small orbit camera + renderer wrapper shared by every module.
@@ -12,6 +13,14 @@ export class Viewer {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.15;
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
+
+    // A neutral studio-style environment map — gives every PBR material
+    // (metals, the lens, mirrors, resistor caps, ...) soft ambient
+    // reflections instead of flat shading. MeshBasicMaterial (the flat
+    // diagram modules) ignores it entirely, so it's a no-risk global upgrade.
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
 
     this.target = new THREE.Vector3();
     this.wantTarget = new THREE.Vector3();
@@ -136,6 +145,7 @@ export class Viewer {
   }
 
   render(scene) {
+    if (!scene.environment) scene.environment = this.envMap;
     this.renderer.render(scene, this.camera);
   }
 }
