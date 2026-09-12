@@ -46,7 +46,9 @@ const lungRLabel = createLabel("Right lung", { fontSize: 24 });
 lungRLabel.position.set(0.75, 1.0, 0);
 group.add(lungRLabel);
 const diaphragmLabel = createLabel("Diaphragm", { fontSize: 24 });
-diaphragmLabel.position.set(0, -1.75, 0);
+// -1.75 sat past the diaphragm's own bottom edge (-1.33) and got clipped by
+// the canvas edge at this view's framing — keep it just below the mesh instead.
+diaphragmLabel.position.set(0, -1.45, 0);
 group.add(diaphragmLabel);
 
 const state = { bpm: 15, running: true, t: 0 };

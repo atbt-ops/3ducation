@@ -22,9 +22,16 @@ const heartL = blob(RED, 0.5, 0, 0.9);
 const heartR = blob(BLUE, -0.5, 0, 0.9);
 group.add(heartR, heartL);
 // Added to the mesh itself — heartL/heartR only ever get a uniform beat-pulse
-// scale, so a child label isn't distorted by it.
-heartL.add(createLabel("Left heart", { fontSize: 26 }));
-heartR.add(createLabel("Right heart", { fontSize: 26 }));
+// scale, so a child label isn't distorted by it. The two blobs overlap by
+// design (that's the heart shape), so labels centered on each blob would sit
+// on top of each other — offset one up and one down, and shrink both, so
+// they clear that shared overlap zone.
+const heartLLabel = createLabel("Left heart", { fontSize: 26, scale: 0.6 });
+heartLLabel.position.set(0, 0.55, 0);
+heartL.add(heartLLabel);
+const heartRLabel = createLabel("Right heart", { fontSize: 26, scale: 0.6 });
+heartRLabel.position.set(0, -0.55, 0);
+heartR.add(heartRLabel);
 
 const lungs = blob(0xf0c0c8, 0, 2.6, 0.9);
 lungs.scale.x = 2.4;

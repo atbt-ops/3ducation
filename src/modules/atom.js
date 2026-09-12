@@ -48,13 +48,16 @@ function build() {
     group.add(m);
     if (isProton && !labeledProton) {
       labeledProton = true;
-      const label = createLabel("Proton", { fontSize: 24 });
+      // Default label size overwhelms the tiny (~0.3-radius) nucleon cluster
+      // and the two labeled nucleons can land close together at random —
+      // shrink well below the cell/rockcycle scale and pull them apart.
+      const label = createLabel("Proton", { fontSize: 24, scale: 0.3 });
       label.position.set(0, 0.3, 0);
       m.add(label);
     } else if (!isProton && !labeledNeutron) {
       labeledNeutron = true;
-      const label = createLabel("Neutron", { fontSize: 24 });
-      label.position.set(0, 0.3, 0);
+      const label = createLabel("Neutron", { fontSize: 24, scale: 0.3 });
+      label.position.set(0, -0.3, 0);
       m.add(label);
     }
   }
