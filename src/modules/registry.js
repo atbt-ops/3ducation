@@ -248,6 +248,16 @@ export const REGISTRY = [
     load: () => import("./prismdispersion.js"),
   },
   {
+    id: "lightscattering",
+    name: "Why the sky is blue",
+    tag: "Physics · Optics",
+    subject: "Physics",
+    grades: [8, 12],
+    blurb: "Scattering explains a blue sky at noon and a red sun at sunset.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"20\" cy=\"14\" r=\"6\" fill=\"currentColor\"/><path d=\"M4 30c6-6 12-6 16 0s10 6 16 0\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>",
+    load: () => import("./lightscattering.js"),
+  },
+  {
     id: "molecule",
     name: "Molecule kit",
     tag: "Chemistry · Bonding",
