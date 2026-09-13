@@ -21,7 +21,7 @@ const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.5, 3.6, 24), skinM
 arm.rotation.z = Math.PI / 2;
 arm.position.set(-1.6, -1.4, 0);
 group.add(arm);
-const armLabel = createLabel("Arm", { fontSize: 22, scale: 0.5 });
+const armLabel = createLabel("Arm", { fontSize: 26 });
 armLabel.position.set(-3.1, -1.4, 0);
 group.add(armLabel);
 
@@ -33,7 +33,7 @@ group.add(cuff);
 const strap = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.06, 0.9), strapMat);
 strap.position.set(-1.8, -0.78, 0);
 group.add(strap);
-const cuffLabel = createLabel("Cuff", { fontSize: 22, scale: 0.5 });
+const cuffLabel = createLabel("Cuff", { fontSize: 26 });
 cuffLabel.position.set(-1.8, -0.35, 0);
 group.add(cuffLabel);
 
@@ -47,7 +47,7 @@ const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.4, 18, 14), bulbMat);
 bulb.scale.set(0.85, 1.4, 0.85);
 bulb.position.set(1.5, -3.0, 0.4);
 group.add(bulb);
-const bulbLabel = createLabel("Bulb pump", { fontSize: 22, scale: 0.5 });
+const bulbLabel = createLabel("Bulb pump", { fontSize: 26 });
 bulbLabel.position.set(1.5, -3.75, 0);
 group.add(bulbLabel);
 
@@ -62,7 +62,7 @@ const gaugeFace = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.05, 32
 gaugeFace.rotation.x = Math.PI / 2;
 gaugeFace.position.set(gaugeCenter[0], gaugeCenter[1], gaugeCenter[2] + 0.09);
 group.add(gaugeFace);
-const gaugeLabel = createLabel("Gauge", { fontSize: 22, scale: 0.5 });
+const gaugeLabel = createLabel("Gauge", { fontSize: 26 });
 gaugeLabel.position.set(gaugeCenter[0], gaugeCenter[1] + 1.05, 0);
 group.add(gaugeLabel);
 

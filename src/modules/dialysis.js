@@ -19,7 +19,7 @@ const patient = new THREE.Mesh(
 patient.scale.set(1, 1.5, 1);
 patient.position.set(-4.4, -0.7, 0);
 group.add(patient);
-const patientLabel = createLabel("Patient", { fontSize: 22, scale: 0.5 });
+const patientLabel = createLabel("Patient", { fontSize: 26 });
 patientLabel.position.set(-4.4, 0.65, 0);
 group.add(patientLabel);
 
@@ -31,7 +31,7 @@ const pump = new THREE.Mesh(
 pump.rotation.z = Math.PI / 2;
 pump.position.set(-2.2, 0.3, 0);
 group.add(pump);
-const pumpLabel = createLabel("Blood pump", { fontSize: 22, scale: 0.5 });
+const pumpLabel = createLabel("Blood pump", { fontSize: 26 });
 pumpLabel.position.set(-2.2, 0.9, 0);
 group.add(pumpLabel);
 
@@ -64,10 +64,10 @@ const membrane = new THREE.Mesh(
 membrane.rotation.z = Math.PI / 2;
 dialyzer.add(membrane);
 
-const dialyzerLabel = createLabel("Dialyzer (cellophane membrane)", { fontSize: 20, scale: 0.5 });
+const dialyzerLabel = createLabel("Dialyzer", { fontSize: 26 });
 dialyzerLabel.position.set(0, 1.15, 0);
 dialyzer.add(dialyzerLabel);
-const fluidLabel = createLabel("Dialyzing fluid", { fontSize: 20, scale: 0.5 });
+const fluidLabel = createLabel("Dialyzing fluid", { fontSize: 26 });
 fluidLabel.position.set(0, -1.15, 0);
 dialyzer.add(fluidLabel);
 
@@ -101,10 +101,10 @@ const bloodPath = new THREE.CatmullRomCurve3(
 const DIALYZER_ENTER = 2 / 8;
 const DIALYZER_EXIT = 4 / 8;
 
-const arteryLabel = createLabel("Artery (blood out)", { fontSize: 20, scale: 0.48 });
-arteryLabel.position.set(-3.4, 0.9, 0);
+const arteryLabel = createLabel("Artery", { fontSize: 26 });
+arteryLabel.position.set(-3.4, 1.55, 0);
 group.add(arteryLabel);
-const veinLabel = createLabel("Vein (blood in)", { fontSize: 20, scale: 0.48 });
+const veinLabel = createLabel("Vein", { fontSize: 26 });
 veinLabel.position.set(-3.4, -1.0, 0);
 group.add(veinLabel);
 

@@ -35,7 +35,7 @@ group.add(junction);
   tip.position.set(...p);
   group.add(tip);
 });
-const earLabel = createLabel("Ear tips", { fontSize: 24, scale: 0.55 });
+const earLabel = createLabel("Ear tips", { fontSize: 26 });
 earLabel.position.set(0, 3.55, 0);
 group.add(earLabel);
 
@@ -43,7 +43,7 @@ group.add(earLabel);
 const head = new THREE.Group();
 head.position.set(0, -3, 0);
 group.add(head);
-const headLabel = createLabel("Chest piece", { fontSize: 24, scale: 0.55 });
+const headLabel = createLabel("Chest piece", { fontSize: 26 });
 headLabel.position.set(0, 0.65, 0);
 head.add(headLabel);
 
