@@ -228,6 +228,16 @@ export const REGISTRY = [
     load: () => import("./heat.js"),
   },
   {
+    id: "thermometer",
+    name: "Thermometer",
+    tag: "Physics · Heat",
+    subject: "Physics",
+    grades: [5, 9],
+    blurb: "Watch the liquid rise and fall — and see how Celsius and Fahrenheit relate.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"17\" y=\"6\" width=\"6\" height=\"20\" rx=\"3\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"20\" cy=\"30\" r=\"5\" fill=\"currentColor\"/><rect x=\"18.5\" y=\"16\" width=\"3\" height=\"12\" fill=\"currentColor\"/></svg>",
+    load: () => import("./thermometer.js"),
+  },
+  {
     id: "mirrors",
     name: "Concave & convex mirrors",
     tag: "Physics · Optics",
@@ -236,6 +246,16 @@ export const REGISTRY = [
     blurb: "Curved mirrors and where their images really form.",
     icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M13 6C9 12 9 28 13 34\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M4 20h9M27 20h9\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-dasharray=\"2 3\"/><circle cx=\"27\" cy=\"20\" r=\"2.4\" fill=\"currentColor\"/></svg>",
     load: () => import("./mirrors.js"),
+  },
+  {
+    id: "periscope",
+    name: "Periscope",
+    tag: "Physics · Optics",
+    subject: "Physics",
+    grades: [5, 9],
+    blurb: "Two mirrors, kept parallel, let you see over an obstacle — misalign one and the image vanishes.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"14\" y=\"4\" width=\"12\" height=\"32\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M14 10l12 4M14 30l12-4\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>",
+    load: () => import("./periscope.js"),
   },
   {
     id: "humaneye",
