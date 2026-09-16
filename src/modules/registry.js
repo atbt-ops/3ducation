@@ -512,6 +512,16 @@ export const REGISTRY = [
     load: () => import("./counting.js"),
   },
   {
+    id: "clock",
+    name: "Reading the clock",
+    tag: "Math · Time",
+    subject: "Math",
+    grades: [2, 5],
+    blurb: "Set the hands and read the time — the short hand for hours, the long for minutes.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"20\" cy=\"20\" r=\"15\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M20 20V11M20 20l7 4\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>",
+    load: () => import("./clock.js"),
+  },
+  {
     id: "shapes3d",
     name: "3D shapes explorer",
     tag: "Math · Shapes",
