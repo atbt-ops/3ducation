@@ -18,6 +18,32 @@ const leaf = new THREE.Mesh(
 leaf.rotation.y = -0.3;
 group.add(leaf);
 
+// A darker midrib + a few side veins, and a stalk — without these a plain
+// green outline reads as an abstract blob rather than a leaf.
+const veinMat = new THREE.LineBasicMaterial({ color: 0x2b5f24 });
+function vein(points) {
+  return new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(points.map(([x, y]) => new THREE.Vector3(x, y, 0.13))),
+    veinMat
+  );
+}
+leaf.add(vein([[0, -1.5], [0, 1.7]]));
+[
+  [[0, 1.05], [0.7, 0.6]],
+  [[0, 1.05], [-0.7, 0.6]],
+  [[0, 0.15], [0.85, -0.3]],
+  [[0, 0.15], [-0.85, -0.3]],
+  [[0, -0.75], [0.55, -1.1]],
+  [[0, -0.75], [-0.55, -1.1]],
+].forEach((pts) => leaf.add(vein(pts)));
+
+const petiole = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.05, 0.07, 0.6, 8),
+  new THREE.MeshStandardMaterial({ color: 0x5f8a3a, roughness: 0.7 })
+);
+petiole.position.set(0, -1.9, 0);
+leaf.add(petiole);
+
 const sun = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 16), new THREE.MeshBasicMaterial({ color: 0xffd27a }));
 sun.position.set(-3.2, 2.4, 1);
 sun.add(glowSprite({ color: 0xffd27a, size: 2.0 }));

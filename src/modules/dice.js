@@ -41,10 +41,12 @@ function showFace(die, n) {
 const dice = [makeDie(), makeDie(), makeDie()];
 dice.forEach((d, i) => {
   d.position.set((i - 1) * 0.9, 2.4, 0);
+  showFace(d, i + 1);
   group.add(d);
 });
 
-const state = { count: 2, rolling: false, spin: 0 };
+const state = { count: 2, rolling: false, settle: 0 };
+dice.forEach((d, i) => (d.visible = i < state.count));
 let counts = {};
 let bars = [];
 
@@ -82,6 +84,7 @@ function roll(times) {
         die.visible = i < state.count;
         if (i < state.count) showFace(die, 1 + Math.floor(Math.random() * 6));
       });
+      state.settle = 0.7;
     }
   }
   const max = Math.max(...Object.values(counts), 1);
@@ -156,9 +159,13 @@ export default {
   },
 
   update(dt) {
-    state.spin += dt;
+    if (state.settle <= 0) return;
+    // Tumble briefly after a roll, then settle to upright so the rolled
+    // face's pips stay legible instead of spinning forever.
+    state.settle = Math.max(0, state.settle - dt);
+    const k = state.settle / 0.7;
     dice.forEach((d, i) => {
-      if (i < state.count) d.rotation.set(state.spin * 0.6 + i, state.spin * 0.4 + i, 0);
+      if (i < state.count) d.rotation.set(k * (k * 10 + i), k * (k * 8 + i), 0);
     });
   },
 

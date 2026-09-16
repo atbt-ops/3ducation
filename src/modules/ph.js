@@ -5,9 +5,12 @@ const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.75 });
 scene.add(contactShadow({ radius: 2.6, y: -1.55, opacity: 0.16 }));
 
+// Plain alpha-blended glass, not a transmission material — a transmissive
+// beaker overlapping the (also transparent) liquid mesh depth-sorts
+// unreliably and washes the liquid out to a flat foggy white.
 const beaker = new THREE.Mesh(
   new THREE.CylinderGeometry(1.1, 1, 2.4, 32, 1, true),
-  new THREE.MeshPhysicalMaterial({ color: 0xdddddd, transmission: 0.7, transparent: true, opacity: 0.3, roughness: 0.05, side: THREE.DoubleSide })
+  new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.2, roughness: 0.05, side: THREE.DoubleSide })
 );
 beaker.position.y = -0.2;
 scene.add(beaker);

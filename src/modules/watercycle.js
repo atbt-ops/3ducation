@@ -13,10 +13,20 @@ group.add(ground);
 const ocean = new THREE.Mesh(new THREE.BoxGeometry(4, 0.5, 3), new THREE.MeshStandardMaterial({ color: 0x3a7fae, roughness: 0.3 }));
 ocean.position.set(-2.5, -1.65, 0);
 group.add(ocean);
-// mountain
-const mountain = new THREE.Mesh(new THREE.ConeGeometry(1.6, 2.4, 5), new THREE.MeshStandardMaterial({ color: 0x9a8f7a, roughness: 0.85 }));
-mountain.position.set(3, -0.5, 0);
-group.add(mountain);
+// mountain — a wide rocky cone plus a smaller snow-capped cone on top, the
+// combination reads as "mountain" far more clearly than a single bare cone.
+const mountainBase = new THREE.Mesh(
+  new THREE.ConeGeometry(1.6, 2.2, 8),
+  new THREE.MeshStandardMaterial({ color: 0x8a7c68, roughness: 0.9, flatShading: true })
+);
+mountainBase.position.set(3, -0.6, 0);
+group.add(mountainBase);
+const snowCap = new THREE.Mesh(
+  new THREE.ConeGeometry(0.55, 0.75, 8),
+  new THREE.MeshStandardMaterial({ color: 0xf7f7f7, roughness: 0.7, flatShading: true })
+);
+snowCap.position.set(3, 0.85, 0);
+group.add(snowCap);
 // sun
 const sun = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 16), new THREE.MeshBasicMaterial({ color: 0xffd27a }));
 sun.position.set(-3.4, 2.8, 0);
