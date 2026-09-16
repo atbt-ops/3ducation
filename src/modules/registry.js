@@ -238,6 +238,16 @@ export const REGISTRY = [
     load: () => import("./buoyancy.js"),
   },
   {
+    id: "barometer",
+    name: "Mercury barometer",
+    tag: "Physics · Pressure",
+    subject: "Physics",
+    grades: [8, 11],
+    blurb: "Watch a mercury column rise and fall as atmospheric pressure changes.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"17\" y=\"4\" width=\"6\" height=\"24\" rx=\"2\" stroke=\"currentColor\" stroke-width=\"2\"/><rect x=\"18.5\" y=\"18\" width=\"3\" height=\"9\" fill=\"currentColor\"/><ellipse cx=\"20\" cy=\"32\" rx=\"11\" ry=\"4\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>",
+    load: () => import("./barometer.js"),
+  },
+  {
     id: "heat",
     name: "Heat flow",
     tag: "Physics · Thermal",
@@ -256,6 +266,16 @@ export const REGISTRY = [
     blurb: "Watch the liquid rise and fall — and see how Celsius and Fahrenheit relate.",
     icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"17\" y=\"6\" width=\"6\" height=\"20\" rx=\"3\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"20\" cy=\"30\" r=\"5\" fill=\"currentColor\"/><rect x=\"18.5\" y=\"16\" width=\"3\" height=\"12\" fill=\"currentColor\"/></svg>",
     load: () => import("./thermometer.js"),
+  },
+  {
+    id: "calorimeter",
+    name: "Calorimeter",
+    tag: "Physics · Heat",
+    subject: "Physics",
+    grades: [8, 11],
+    blurb: "Drop a hot solid into water and predict the equilibrium temperature.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M9 8v22a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M9 8h22\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"20\" cy=\"22\" r=\"4\" fill=\"currentColor\"/></svg>",
+    load: () => import("./calorimeter.js"),
   },
   {
     id: "mirrors",
