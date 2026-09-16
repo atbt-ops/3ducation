@@ -98,6 +98,16 @@ export const REGISTRY = [
     load: () => import("./magnet.js"),
   },
   {
+    id: "compass",
+    name: "Magnetic compass",
+    tag: "Physics · Magnetism",
+    subject: "Physics",
+    grades: [5, 8],
+    blurb: "Turn the housing — the needle always settles pointing the same real-world way.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"20\" cy=\"20\" r=\"15\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M20 8l4 12-4 12-4-12z\" fill=\"currentColor\"/></svg>",
+    load: () => import("./compass.js"),
+  },
+  {
     id: "electromagnet",
     name: "Electromagnet",
     tag: "Physics · Electromagnetism",
@@ -358,6 +368,16 @@ export const REGISTRY = [
     blurb: "Fly inside a cell and tap its parts.",
     icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"20\" cy=\"20\" r=\"15\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"22\" cy=\"18\" r=\"5\" fill=\"currentColor\"/><ellipse cx=\"13\" cy=\"25\" rx=\"4\" ry=\"2.4\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>",
     load: () => import("./cell.js"),
+  },
+  {
+    id: "microscope",
+    name: "Compound microscope",
+    tag: "Biology · Tools",
+    subject: "Biology",
+    grades: [5, 8],
+    blurb: "Turn the focus knob and switch lenses to bring micro-organisms into view.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M14 34h10M19 34V22\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M19 22c4 0 6-3 6-7V9\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"25\" cy=\"7\" r=\"3\" stroke=\"currentColor\" stroke-width=\"2\"/><rect x=\"9\" y=\"24\" width=\"14\" height=\"3\" rx=\"1\" fill=\"currentColor\"/></svg>",
+    load: () => import("./microscope.js"),
   },
   {
     id: "dna",
