@@ -1,6 +1,6 @@
 # 3ducation
 
-**A free, interactive 3D science lab for classes I–XII.** 89 hands-on instruments
+**A free, interactive 3D science lab for classes I–XII.** 90 hands-on instruments
 across physics, chemistry, biology, earth science, maths and space — each running
 on the real equations, each with a short lesson, guided experiments and a
 check-yourself quiz. Plus all 118 elements and a formula box that plots anything
@@ -14,7 +14,7 @@ can be filtered by school level (Primary / Middle / Secondary) or found by searc
 | Subject       | Instruments |
 | ------------- | ----------- |
 | **Physics**   | Pendulum · Projectile range · Mass on a spring · Ramp & friction · Newton's cradle · Levers & balance · Ohm's law loop · Series & parallel · Magnetic field · Magnetic compass · Electromagnet · Electromagnetic induction · Electric motor · Electric generator · Electric charges · Wave interference · Standing waves · Sound: pitch & loudness · Converging lens · Refraction · The human eye · Prism & dispersion · Why the sky is blue · Float or sink · Mercury barometer · Heat flow · Thermometer · Calorimeter · Periscope · Electroscope · Spring balance |
-| **Chemistry** | Molecule kit · States of matter · Atom builder · Gas laws · The pH scale · Reaction rate · Balancing equations · Periodic table (118 elements) |
+| **Chemistry** | Molecule kit · States of matter · Atom builder · Gas laws · The pH scale · Reaction rate · Distillation · Balancing equations · Periodic table (118 elements) |
 | **Biology**   | Cell explorer · Compound microscope · DNA double helix · Photosynthesis · The heart · Energy pyramid · Punnett square · Stethoscope · Sphygmomanometer · Dialysis machine · Reflex hammer · Reaction time ruler |
 | **Earth Science** | The water cycle |
 | **Maths**     | Geometry set · Counting blocks · Reading the clock · Pan balance · Surface studio (`z = f(x,y)`) · Fraction wall · Times table · Unit circle · Clinometer · Pythagoras · Similar triangles · Line grapher · Mean/median/mode · Galton board · Dice sums · Slope of a curve |

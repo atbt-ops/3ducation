@@ -389,6 +389,16 @@ export const REGISTRY = [
     load: () => import("./reactionrate.js"),
   },
   {
+    id: "distillation",
+    name: "Distillation",
+    tag: "Chemistry · Separation",
+    subject: "Chemistry",
+    grades: [8, 11],
+    blurb: "Heat a liquid mixture and separate it by boiling point, drop by drop.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"12\" cy=\"26\" r=\"7\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M12 19V9M12 12h14\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"30\" cy=\"30\" r=\"5\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M30 25v-6\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>",
+    load: () => import("./distillation.js"),
+  },
+  {
     id: "balancing",
     name: "Balancing equations",
     tag: "Chemistry · Reactions",
