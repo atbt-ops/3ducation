@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, glowSprite } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
@@ -137,6 +137,9 @@ const bulbMat = new THREE.MeshStandardMaterial({ color: 0xfff3c0, emissive: 0xff
 const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 12), bulbMat);
 bulb.position.set(...bulbPos);
 group.add(bulb);
+const bulbGlowSprite = glowSprite({ color: 0xffce7a, size: 1.4 });
+bulbGlowSprite.material.opacity = 0;
+bulb.add(bulbGlowSprite);
 const bulbLabel = createLabel("Bulb", { fontSize: 22 });
 bulbLabel.position.set(bulbPos[0], bulbPos[1] - 0.6, 0);
 group.add(bulbLabel);
@@ -220,6 +223,7 @@ export default {
     const value = state.isAC ? raw : Math.abs(raw);
     needlePivot.rotation.z = Math.PI / 2 - value * 0.9;
     bulbMat.emissiveIntensity = Math.abs(value) * 2.2;
+    bulbGlowSprite.material.opacity = Math.abs(value) * 0.8;
   },
 
   onEnter() {},

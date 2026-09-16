@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, glowSprite } from "../engine/helpers.js";
 import { ohms } from "../lib/physics.js";
 import { createLabel } from "../engine/label.js";
 
@@ -97,6 +97,9 @@ bulb.add(bulbLabel);
 const glow = new THREE.PointLight(0xffce7a, 0, 7);
 glow.position.copy(bulb.position);
 group.add(glow);
+const bulbGlowSprite = glowSprite({ color: 0xffce7a, size: 1.8 });
+bulbGlowSprite.material.opacity = 0;
+bulb.add(bulbGlowSprite);
 
 // Electron markers spread evenly around the loop.
 const N = 44;
@@ -198,6 +201,7 @@ export default {
       const lit = Math.min(1, power / 18);
       bulbMat.emissiveIntensity = lit * 2.4;
       glow.intensity = lit * 3.2;
+      bulbGlowSprite.material.opacity = lit * 0.85;
     };
     els.v.addEventListener("input", () => ((state.volts = parseFloat(els.v.value)), sync()));
     els.r.addEventListener("input", () => ((state.ohms = parseFloat(els.r.value)), sync()));

@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.7, dir: 0.8 });
+scene.add(contactShadow({ radius: 2.2, y: -2.02 }));
 
 const TANK = 4;
 const tank = new THREE.LineSegments(
