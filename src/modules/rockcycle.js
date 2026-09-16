@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { sceneLights, groundGrid } from "../engine/helpers.js";
+import { sceneLights, groundGrid, glowSprite } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
@@ -40,6 +40,7 @@ const magma = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0xff7a1f, emissive: 0xff5a0a, emissiveIntensity: 0.9, roughness: 0.4 })
 );
 magma.position.set(0, 0, -R);
+magma.add(glowSprite({ color: 0xff7a1f, size: 1.6 }));
 scene.add(magma);
 
 const NODES = [igneous, sedimentary, metamorphic, magma];

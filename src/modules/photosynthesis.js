@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, glowSprite } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.7, dir: 0.85 });
@@ -20,6 +20,7 @@ group.add(leaf);
 
 const sun = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 16), new THREE.MeshBasicMaterial({ color: 0xffd27a }));
 sun.position.set(-3.2, 2.4, 1);
+sun.add(glowSprite({ color: 0xffd27a, size: 2.0 }));
 group.add(sun);
 const sunLight = new THREE.PointLight(0xfff2d0, 1, 20);
 sunLight.position.copy(sun.position);

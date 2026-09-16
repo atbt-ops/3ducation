@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, glowSprite } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.85 });
@@ -20,6 +20,7 @@ group.add(mountain);
 // sun
 const sun = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 16), new THREE.MeshBasicMaterial({ color: 0xffd27a }));
 sun.position.set(-3.4, 2.8, 0);
+sun.add(glowSprite({ color: 0xffd27a, size: 2.0 }));
 group.add(sun);
 // clouds
 const cloudMat = new THREE.MeshStandardMaterial({ color: 0xf3f0e6, roughness: 0.9 });
