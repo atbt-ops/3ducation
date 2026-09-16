@@ -563,6 +563,16 @@ export const REGISTRY = [
     load: () => import("./unitcircle.js"),
   },
   {
+    id: "clinometer",
+    name: "Clinometer",
+    tag: "Math · Trigonometry",
+    subject: "Math",
+    grades: [9, 11],
+    blurb: "Sight the top of a tower and find its height from an angle and a distance.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"17\" y=\"24\" width=\"6\" height=\"10\" rx=\"1\" fill=\"currentColor\"/><path d=\"M20 24V8\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M20 24l11-9\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M8 24h24\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-dasharray=\"2 3\"/></svg>",
+    load: () => import("./clinometer.js"),
+  },
+  {
     id: "pythagoras",
     name: "Pythagoras",
     tag: "Math · Geometry",
