@@ -117,6 +117,33 @@ export function starfield({ count = 500, radius = 45, size = 0.12 } = {}) {
   return points;
 }
 
+/**
+ * A shaded-disc material for the "blob" style flat diagrams (heart, digestive
+ * system, respiratory system, plant parts) — replaces a flat solid-color fill
+ * with a baked radial gradient (a light highlight offset toward the upper
+ * left, darkening toward the rim) so each circle reads as a glossy, rounded
+ * shape instead of a clip-art dot. Same canvas-gradient technique as
+ * contactShadow/glowSprite. Opaque, so it drops straight into CircleGeometry
+ * meshes with no other changes to draw order or overlap behaviour.
+ */
+export function radialGradientMaterial(color, { highlight = 0.45, shadow = 0.45, size = 128 } = {}) {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  const base = new THREE.Color(color);
+  const light = base.clone().lerp(new THREE.Color(0xffffff), highlight);
+  const dark = base.clone().lerp(new THREE.Color(0x000000), shadow);
+  const cx = size * 0.38;
+  const cy = size * 0.34;
+  const g = ctx.createRadialGradient(cx, cy, size * 0.02, cx, cy, size * 0.8);
+  g.addColorStop(0, `#${light.getHexString()}`);
+  g.addColorStop(0.55, `#${base.getHexString()}`);
+  g.addColorStop(1, `#${dark.getHexString()}`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c) });
+}
+
 export function bondMesh(a, b, radius, color) {
   const dir = new THREE.Vector3().subVectors(b, a);
   const len = dir.length();

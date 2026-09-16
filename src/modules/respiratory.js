@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { createLabel } from "../engine/label.js";
+import { radialGradientMaterial } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 scene.add(new THREE.AmbientLight(0xffffff, 1));
@@ -7,7 +8,7 @@ const group = new THREE.Group();
 scene.add(group);
 
 function blob(color, x, y, sx, sy) {
-  const m = new THREE.Mesh(new THREE.CircleGeometry(1, 28), new THREE.MeshBasicMaterial({ color }));
+  const m = new THREE.Mesh(new THREE.CircleGeometry(1, 28), radialGradientMaterial(color));
   m.position.set(x, y, 0);
   m.scale.set(sx, sy, 1);
   return m;

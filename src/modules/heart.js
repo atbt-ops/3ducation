@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { createLabel } from "../engine/label.js";
+import { radialGradientMaterial } from "../engine/helpers.js";
 const heartIllustration = new URL("../assets/illustrations/heart.jpg", import.meta.url).href;
 
 const scene = new THREE.Scene();
@@ -14,7 +15,7 @@ const BLUE = 0x3a5fa8;
 function blob(color, x, y, s) {
   const m = new THREE.Mesh(
     new THREE.CircleGeometry(s, 32),
-    new THREE.MeshBasicMaterial({ color })
+    radialGradientMaterial(color)
   );
   m.position.set(x, y, 0);
   return m;
