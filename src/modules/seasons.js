@@ -1,7 +1,10 @@
 import * as THREE from "three";
+import { starfield, glowSprite } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 scene.add(new THREE.AmbientLight(0xffffff, 0.28));
+scene.add(starfield());
 const sunLight = new THREE.PointLight(0xfff2d0, 2.4, 60);
 scene.add(sunLight);
 
@@ -9,6 +12,7 @@ const sun = new THREE.Mesh(
   new THREE.SphereGeometry(0.9, 28, 22),
   new THREE.MeshBasicMaterial({ color: 0xffd27a })
 );
+sun.add(glowSprite({ color: 0xffd27a, size: 3.6, blending: THREE.AdditiveBlending }));
 scene.add(sun);
 
 const ORBIT = 5;
@@ -47,7 +51,7 @@ const orbitLine = new THREE.LineLoop(
       return new THREE.Vector3(Math.cos(t) * ORBIT, 0, Math.sin(t) * ORBIT);
     })
   ),
-  new THREE.LineBasicMaterial({ color: 0x555550, transparent: true, opacity: 0.35 })
+  new THREE.LineBasicMaterial({ color: 0x7a86ad, transparent: true, opacity: 0.45 })
 );
 scene.add(orbitLine);
 

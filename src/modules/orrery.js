@@ -1,10 +1,12 @@
 import * as THREE from "three";
-import { circlePoints } from "../engine/helpers.js";
+import { circlePoints, starfield, glowSprite } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 scene.add(new THREE.AmbientLight(0xffffff, 0.35));
 scene.add(new THREE.PointLight(0xfff2d0, 1.6, 80));
+scene.add(starfield());
 
 const PLANETS = [
   { name: "Mercury", color: 0xb7ab98, orbit: 2.4, size: 0.14, period: 0.24, fact: "The fastest planet — one year is just 88 Earth days." },
@@ -20,6 +22,7 @@ const sun = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0xffd27a })
 );
 scene.add(sun);
+sun.add(glowSprite({ color: 0xffd27a, size: 3.4, blending: THREE.AdditiveBlending }));
 
 const planetMeshes = [];
 const pathsGroup = new THREE.Group();

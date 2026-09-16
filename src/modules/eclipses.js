@@ -1,7 +1,10 @@
 import * as THREE from "three";
+import { starfield } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 scene.add(new THREE.AmbientLight(0xffffff, 0.24));
+scene.add(starfield());
 const sunLight = new THREE.DirectionalLight(0xfff4e0, 2.2);
 sunLight.position.set(12, 0, 0);
 scene.add(sunLight);
@@ -28,7 +31,7 @@ const orbitLine = new THREE.LineLoop(
       return new THREE.Vector3(Math.cos(t) * ORBIT, 0, Math.sin(t) * ORBIT);
     })
   ),
-  new THREE.LineBasicMaterial({ color: 0x555550, transparent: true, opacity: 0.4 })
+  new THREE.LineBasicMaterial({ color: 0x7a86ad, transparent: true, opacity: 0.45 })
 );
 scene.add(orbitLine);
 

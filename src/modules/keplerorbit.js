@@ -1,7 +1,10 @@
 import * as THREE from "three";
+import { starfield, glowSprite } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+scene.add(starfield());
 const glow = new THREE.PointLight(0xfff2d0, 2.6, 60);
 scene.add(glow);
 
@@ -12,6 +15,7 @@ function orbitRadius(e, theta) {
 }
 
 const star = new THREE.Mesh(new THREE.SphereGeometry(0.42, 26, 20), new THREE.MeshBasicMaterial({ color: 0xffd27a }));
+star.add(glowSprite({ color: 0xffd27a, size: 2.2, blending: THREE.AdditiveBlending }));
 scene.add(star); // sits at the focus — the origin — not the ellipse's centre
 
 const planet = new THREE.Mesh(
@@ -32,7 +36,7 @@ function buildOrbitLine(e) {
   });
   return new THREE.LineLoop(
     new THREE.BufferGeometry().setFromPoints(pts),
-    new THREE.LineBasicMaterial({ color: 0x8a8a80, transparent: true, opacity: 0.45 })
+    new THREE.LineBasicMaterial({ color: 0x8a92b0, transparent: true, opacity: 0.5 })
   );
 }
 

@@ -1,13 +1,17 @@
 import * as THREE from "three";
+import { starfield, glowSprite } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 scene.add(new THREE.AmbientLight(0xffffff, 0.22));
+scene.add(starfield());
 const sunLight = new THREE.DirectionalLight(0xfff4e0, 2.3);
 sunLight.position.set(10, 1, 0);
 scene.add(sunLight);
 
 const sunMark = new THREE.Mesh(new THREE.SphereGeometry(0.4, 20, 16), new THREE.MeshBasicMaterial({ color: 0xffd27a }));
 sunMark.position.set(5.5, 0.5, 0);
+sunMark.add(glowSprite({ color: 0xffd27a, size: 2.0, blending: THREE.AdditiveBlending }));
 scene.add(sunMark);
 
 const EARTH_R = 0.95;

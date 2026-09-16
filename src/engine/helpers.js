@@ -5,7 +5,7 @@ export function sceneLights(scene, opts = {}) {
   const hemi = new THREE.HemisphereLight(0xffffff, 0xd7d7d2, opts.ambient ?? opts.hemi ?? 0.72);
   const key = new THREE.DirectionalLight(0xfff3e0, opts.dir ?? 0.95);
   key.position.set(4, 7, 5);
-  const rim = new THREE.DirectionalLight(0xdfeaff, opts.rim ?? 0.4);
+  const rim = new THREE.DirectionalLight(0xdfeaff, opts.rim ?? 0.5);
   rim.position.set(-5, 3, -6);
   scene.add(hemi, key, rim);
   return { hemi, key, rim };
@@ -38,6 +38,83 @@ export function contactShadow({ radius = 3, opacity = 0.26, y = -0.9 } = {}) {
   mesh.position.y = y;
   mesh.renderOrder = -1;
   return mesh;
+}
+
+/**
+ * A soft radial-gradient billboard for faking a glow around something
+ * that's supposed to look self-luminous (a sun, a lit bulb) without a
+ * post-processing bloom pass. Same canvas-gradient technique as
+ * contactShadow, just camera-facing.
+ *
+ * Defaults to normal alpha blending — on this app's light page background,
+ * additive blending (which only ever *adds* light) is nearly invisible
+ * against a bright backdrop. Pass `blending: THREE.AdditiveBlending`
+ * explicitly for scenes that already have a dark background (e.g. the
+ * starfield space scenes), where additive glow looks properly luminous.
+ */
+export function glowSprite({ color = 0xffd27a, size = 3, opacity = 0.6, blending = THREE.NormalBlending } = {}) {
+  const res = 128;
+  const c = document.createElement("canvas");
+  c.width = c.height = res;
+  const ctx = c.getContext("2d");
+  const col = new THREE.Color(color);
+  const rgb = `${Math.round(col.r * 255)},${Math.round(col.g * 255)},${Math.round(col.b * 255)}`;
+  const g = ctx.createRadialGradient(res / 2, res / 2, 0, res / 2, res / 2, res / 2);
+  g.addColorStop(0, `rgba(${rgb},${opacity})`);
+  g.addColorStop(0.4, `rgba(${rgb},${opacity * 0.5})`);
+  g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, res, res);
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(c),
+      transparent: true,
+      depthWrite: false,
+      blending,
+    })
+  );
+  sprite.scale.set(size, size, 1);
+  sprite.renderOrder = -1;
+  return sprite;
+}
+
+/**
+ * A starfield backdrop for scenes set in empty space — a shell of small
+ * points at a fixed radius around the origin. Cheap (one draw call) and
+ * gives orbit/astronomy scenes something other than the page background
+ * behind them.
+ */
+export function starfield({ count = 500, radius = 45, size = 0.12 } = {}) {
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    // Rejection-sample a direction so points spread evenly over the sphere
+    // (naive spherical-coordinate sampling clumps at the poles).
+    let x, y, z, lenSq;
+    do {
+      x = Math.random() * 2 - 1;
+      y = Math.random() * 2 - 1;
+      z = Math.random() * 2 - 1;
+      lenSq = x * x + y * y + z * z;
+    } while (lenSq > 1 || lenSq === 0);
+    const len = Math.sqrt(lenSq);
+    const r = radius * (0.85 + Math.random() * 0.15);
+    positions[i * 3] = (x / len) * r;
+    positions[i * 3 + 1] = (y / len) * r;
+    positions[i * 3 + 2] = (z / len) * r;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.8,
+    depthWrite: false,
+  });
+  const points = new THREE.Points(geo, mat);
+  points.renderOrder = -2;
+  return points;
 }
 
 export function bondMesh(a, b, radius, color) {

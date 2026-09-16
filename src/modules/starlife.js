@@ -1,8 +1,10 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, starfield } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 sceneLights(scene, { ambient: 0.5, dir: 0.7, rim: 0.3 });
+scene.add(starfield());
 
 const core = new THREE.Mesh(
   new THREE.SphereGeometry(1, 40, 30),

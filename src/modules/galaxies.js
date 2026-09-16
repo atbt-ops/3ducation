@@ -1,8 +1,10 @@
 import * as THREE from "three";
-import { sceneLights, prefersReducedMotion } from "../engine/helpers.js";
+import { sceneLights, prefersReducedMotion, starfield } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 sceneLights(scene, { ambient: 0.55, dir: 0.5 });
+scene.add(starfield({ radius: 30, count: 300 }));
 let spin = !prefersReducedMotion;
 
 function pointsFrom(positions, color, size) {

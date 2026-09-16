@@ -1,8 +1,11 @@
 import * as THREE from "three";
 import { createLabel } from "../engine/label.js";
+import { starfield } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1c);
 scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+scene.add(starfield());
 
 const GAP = Math.PI / 2;
 const PHI_START = Math.PI / 2 + GAP / 2;
