@@ -1,11 +1,12 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.75 });
 const group = new THREE.Group();
 scene.add(group);
+scene.add(contactShadow({ radius: 1.2, y: -1.68 }));
 
 // The jar.
 const jar = new THREE.Mesh(

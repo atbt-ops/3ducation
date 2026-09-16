@@ -1,11 +1,12 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.8 });
 const group = new THREE.Group();
 scene.add(group);
+scene.add(contactShadow({ radius: 1.4, y: -1.08 }));
 
 const COLD = new THREE.Color(0x3a6fd6);
 const HOT = new THREE.Color(0xc23b2b);

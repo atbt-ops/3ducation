@@ -1,22 +1,25 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.8, dir: 0.9, rim: 0.35 });
+const shadow = contactShadow({ radius: 1.3, y: -1.0 });
+scene.add(shadow);
 
 const SHAPES = [
-  { name: "Cube", faces: 6, edges: 12, vertices: 8, example: "A dice, or a gift box.", color: 0x4a8fc0, make: () => new THREE.BoxGeometry(1.5, 1.5, 1.5) },
-  { name: "Cuboid", faces: 6, edges: 12, vertices: 8, example: "A book, or a brick.", color: 0xb1520b, make: () => new THREE.BoxGeometry(1.9, 1.1, 1.1) },
-  { name: "Sphere", faces: 1, edges: 0, vertices: 0, example: "A ball, or an orange.", color: 0xe0562a, make: () => new THREE.SphereGeometry(0.95, 32, 24) },
-  { name: "Cylinder", faces: 3, edges: 2, vertices: 0, example: "A can of food.", color: 0x0f6b63, make: () => new THREE.CylinderGeometry(0.8, 0.8, 1.7, 32) },
-  { name: "Cone", faces: 2, edges: 1, vertices: 1, example: "An ice-cream cone, or a party hat.", color: 0x5b3fb1, make: () => new THREE.ConeGeometry(0.9, 1.7, 32) },
-  { name: "Square pyramid", faces: 5, edges: 8, vertices: 5, example: "The Great Pyramid of Giza.", color: 0x8a6a3a, make: () => new THREE.ConeGeometry(1.05, 1.6, 4) },
+  { name: "Cube", faces: 6, edges: 12, vertices: 8, example: "A dice, or a gift box.", color: 0x4a8fc0, halfHeight: 0.75, make: () => new THREE.BoxGeometry(1.5, 1.5, 1.5) },
+  { name: "Cuboid", faces: 6, edges: 12, vertices: 8, example: "A book, or a brick.", color: 0xb1520b, halfHeight: 0.55, make: () => new THREE.BoxGeometry(1.9, 1.1, 1.1) },
+  { name: "Sphere", faces: 1, edges: 0, vertices: 0, example: "A ball, or an orange.", color: 0xe0562a, halfHeight: 0.95, make: () => new THREE.SphereGeometry(0.95, 32, 24) },
+  { name: "Cylinder", faces: 3, edges: 2, vertices: 0, example: "A can of food.", color: 0x0f6b63, halfHeight: 0.85, make: () => new THREE.CylinderGeometry(0.8, 0.8, 1.7, 32) },
+  { name: "Cone", faces: 2, edges: 1, vertices: 1, example: "An ice-cream cone, or a party hat.", color: 0x5b3fb1, halfHeight: 0.85, make: () => new THREE.ConeGeometry(0.9, 1.7, 32) },
+  { name: "Square pyramid", faces: 5, edges: 8, vertices: 5, example: "The Great Pyramid of Giza.", color: 0x8a6a3a, halfHeight: 0.8, make: () => new THREE.ConeGeometry(1.05, 1.6, 4) },
 ];
 
 const material = new THREE.MeshStandardMaterial({ color: SHAPES[0].color, roughness: 0.5, metalness: 0.05 });
 const mesh = new THREE.Mesh(SHAPES[0].make(), material);
 if (SHAPES[0].name === "Square pyramid") mesh.rotation.y = Math.PI / 4;
 scene.add(mesh);
+shadow.position.y = -SHAPES[0].halfHeight - 0.05;
 
 const state = { index: 0 };
 const els = {};
@@ -27,6 +30,7 @@ function applyShape(i) {
   mesh.geometry = s.make();
   mesh.rotation.set(0, s.name === "Square pyramid" ? Math.PI / 4 : 0, 0);
   material.color.setHex(s.color);
+  shadow.position.y = -s.halfHeight - 0.05;
 }
 
 export default {

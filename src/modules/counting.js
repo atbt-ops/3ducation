@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.85, dir: 0.85, rim: 0.3 });
+scene.add(contactShadow({ radius: 3.2, y: -2.35 }));
 
 const COLS = 5; // 5 towers of ten = up to 50
 const ROWS = 10;

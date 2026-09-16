@@ -1,10 +1,11 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.8 });
 const group = new THREE.Group();
 scene.add(group);
+scene.add(contactShadow({ radius: 3, y: -1.55 }));
 
 function pip(x, y) {
   const m = new THREE.Mesh(new THREE.CircleGeometry(0.07, 12), new THREE.MeshBasicMaterial({ color: 0x1c1c1f }));

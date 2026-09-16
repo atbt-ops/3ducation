@@ -1,10 +1,11 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.8 });
 const group = new THREE.Group();
 scene.add(group);
+scene.add(contactShadow({ radius: 3, y: -0.45 }));
 
 const ROWS_MAX = 12;
 const SPACING = 0.62;

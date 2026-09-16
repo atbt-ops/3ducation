@@ -1,10 +1,11 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.8 });
 const group = new THREE.Group();
 scene.add(group);
+scene.add(contactShadow({ radius: 3, y: -1.65 }));
 
 const DATASETS = {
   test: { label: "Test scores", data: [62, 71, 71, 78, 80, 82, 82, 82, 88, 91, 95] },

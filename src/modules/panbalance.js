@@ -1,11 +1,12 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.8 });
 const group = new THREE.Group();
 scene.add(group);
+scene.add(contactShadow({ radius: 1.1, y: -0.08 }));
 
 const metalMat = new THREE.MeshStandardMaterial({ color: 0xb9bfc6, roughness: 0.3, metalness: 0.7 });
 const beamMat = new THREE.MeshStandardMaterial({ color: 0x8a6a3a, roughness: 0.5 });

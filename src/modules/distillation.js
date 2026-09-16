@@ -1,11 +1,17 @@
 import * as THREE from "three";
-import { sceneLights } from "../engine/helpers.js";
+import { sceneLights, contactShadow, glowSprite } from "../engine/helpers.js";
 import { createLabel } from "../engine/label.js";
 
 const scene = new THREE.Scene();
 sceneLights(scene, { ambient: 0.72, dir: 0.8 });
 const group = new THREE.Group();
 scene.add(group);
+const flaskShadow = contactShadow({ radius: 1.1, y: -2.1 });
+flaskShadow.position.x = -2.6;
+group.add(flaskShadow);
+const collectShadow = contactShadow({ radius: 0.9, y: -2.1 });
+collectShadow.position.x = 2.0;
+group.add(collectShadow);
 
 const ACETONE_BP = 56;
 const WATER_BP = 100;
@@ -20,6 +26,7 @@ burner.position.set(-2.6, -1.9, 0);
 group.add(burner);
 const flame = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.4, 12), new THREE.MeshBasicMaterial({ color: 0xffb020 }));
 flame.position.set(-2.6, -1.65, 0);
+flame.add(glowSprite({ color: 0xffb020, size: 1.1, opacity: 0.5 }));
 group.add(flame);
 
 // Distillation flask, with liquid inside and a thermometer at the neck.
