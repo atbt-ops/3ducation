@@ -1,6 +1,6 @@
 # 3ducation
 
-**A free, interactive 3D science lab for classes I–XII.** 80 hands-on instruments
+**A free, interactive 3D science lab for classes I–XII.** 81 hands-on instruments
 across physics, chemistry, biology, earth science, maths and space — each running
 on the real equations, each with a short lesson, guided experiments and a
 check-yourself quiz. Plus all 118 elements and a formula box that plots anything
@@ -17,7 +17,7 @@ can be filtered by school level (Primary / Middle / Secondary) or found by searc
 | **Chemistry** | Molecule kit · States of matter · Atom builder · Gas laws · The pH scale · Reaction rate · Balancing equations · Periodic table (118 elements) |
 | **Biology**   | Cell explorer · DNA double helix · Photosynthesis · The heart · Energy pyramid · Punnett square · Stethoscope · Sphygmomanometer · Dialysis machine · Reflex hammer · Reaction time ruler |
 | **Earth Science** | The water cycle |
-| **Maths**     | Geometry set · Counting blocks · Reading the clock · Surface studio (`z = f(x,y)`) · Fraction wall · Times table · Unit circle · Clinometer · Pythagoras · Similar triangles · Line grapher · Mean/median/mode · Galton board · Dice sums · Slope of a curve |
+| **Maths**     | Geometry set · Counting blocks · Reading the clock · Pan balance · Surface studio (`z = f(x,y)`) · Fraction wall · Times table · Unit circle · Clinometer · Pythagoras · Similar triangles · Line grapher · Mean/median/mode · Galton board · Dice sums · Slope of a curve |
 | **Space**     | Orrery · Moon phases · Seasons & the tilt |
 
 Most instruments ship a set of **guided experiments** — one click dials in a named

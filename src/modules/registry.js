@@ -522,6 +522,16 @@ export const REGISTRY = [
     load: () => import("./clock.js"),
   },
   {
+    id: "panbalance",
+    name: "Pan balance",
+    tag: "Math · Measurement",
+    subject: "Math",
+    grades: [3, 6],
+    blurb: "Load both pans and see which is heavier — or find the weight that balances them.",
+    icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M20 6v8M8 14h24\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M8 14l-4 10h8l-4-10ZM32 14l-4 10h8l-4-10Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"/><rect x=\"17\" y=\"30\" width=\"6\" height=\"4\" fill=\"currentColor\"/></svg>",
+    load: () => import("./panbalance.js"),
+  },
+  {
     id: "shapes3d",
     name: "3D shapes explorer",
     tag: "Math · Shapes",
