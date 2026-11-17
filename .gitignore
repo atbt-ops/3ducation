@@ -11,3 +11,9 @@ npm-debug.log*
 !.vscode/extensions.json
 # generated PWA icons (rebuilt by `npm run icons`)
 public/icons/
+
+.env.*
+!.env.example
+src/generated/
+.firebase/
+*-debug.log

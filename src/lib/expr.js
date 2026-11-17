@@ -62,6 +62,7 @@ function tokenize(src) {
  * `allowedVars` is the set of variable names the formula may reference.
  */
 export function compile(src, allowedVars = ["x", "y", "t"]) {
+  if (typeof src !== "string" || src.length > 1000) throw new Error("Expression is too long");
   const tokens = tokenize(String(src).toLowerCase());
   const output = [];
   const stack = [];
@@ -69,7 +70,7 @@ export function compile(src, allowedVars = ["x", "y", "t"]) {
 
   const valueBefore = (tk) =>
     tk != null &&
-    (/^[\d.]/.test(tk) || tk === ")" || allowedVars.includes(tk) || tk in CONSTS);
+    (/^[\d.]/.test(tk) || tk === ")" || allowedVars.includes(tk) || Object.hasOwn(CONSTS, tk));
 
   const popWhile = (test) => {
     while (stack.length && stack[stack.length - 1] !== "(" && test(stack[stack.length - 1])) {
@@ -80,16 +81,16 @@ export function compile(src, allowedVars = ["x", "y", "t"]) {
   for (const tk of tokens) {
     if (/^[\d.]/.test(tk)) {
       output.push({ t: "num", v: parseFloat(tk) });
-    } else if (tk in CONSTS) {
+    } else if (Object.hasOwn(CONSTS, tk)) {
       output.push({ t: "num", v: CONSTS[tk] });
-    } else if (tk in FUNCS) {
+    } else if (Object.hasOwn(FUNCS, tk)) {
       stack.push({ t: "fn", v: tk });
     } else if (allowedVars.includes(tk)) {
       output.push({ t: "var", v: tk });
     } else if (tk === ",") {
       popWhile(() => true);
       if (!stack.length) throw new Error("Misplaced comma");
-    } else if (tk in OPS && tk !== "neg") {
+    } else if (Object.hasOwn(OPS, tk) && tk !== "neg") {
       if ((tk === "-" || tk === "+") && !valueBefore(prev)) {
         if (tk === "-") stack.push({ t: "op", v: "neg" });
       } else {

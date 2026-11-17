@@ -2,20 +2,28 @@ import "./style.css";
 import { Viewer } from "./engine/viewer.js";
 import { createHeroOrbit } from "./engine/heroOrbit.js";
 import { prefersReducedMotion } from "./engine/helpers.js";
-import { MODULES, MODULE_IDS, SUBJECTS, BANDS, inBand, getModule, loadModule } from "./modules/index.js";
+import {
+  MODULES,
+  MODULE_IDS,
+  SUBJECTS,
+  BANDS,
+  inBand,
+  getModule,
+  loadModule,
+} from "./modules/index.js";
 import { SUBJECT_ACCENT } from "./lib/subjectAccent.js";
 import { progress } from "./state.js";
 import { mountQuiz } from "./learn/quiz.js";
 import { mountPresets } from "./learn/presets.js";
 import { onAuth, signOutUser } from "./auth.js";
-import { isAdmin } from "./firebase.js";
+import { isAdmin, refreshAdmin, firebaseConfigured } from "./firebase.js";
+import { setOwner, saveItem, readState, subscribe as subscribeState } from "./features/store.js";
+import { escapeHtml } from "./lib/html.js";
 import { openAuthModal } from "./authModal.js";
 import { registerSW } from "virtual:pwa-register";
-import showcaseOrrery from "./assets/showcase/orrery.jpg";
 import showcaseMirrors from "./assets/showcase/mirrors.jpg";
 import showcaseCell from "./assets/showcase/cell.jpg";
 import showcaseIonicbond from "./assets/showcase/ionicbond.jpg";
-import showcaseGalaxies from "./assets/showcase/galaxies.jpg";
 // Firestore (sync + submissions) is the heaviest slice of the Firebase SDK,
 // so it's only fetched once someone actually signs in or opens those pages.
 
@@ -23,7 +31,8 @@ import showcaseGalaxies from "./assets/showcase/galaxies.jpg";
 // at all — see style.css's prefers-color-scheme rule); an explicit choice
 // here overrides that via data-theme, independent of the OS setting. Applied
 // before app.innerHTML below, so there's no flash of the wrong theme.
-const THEME_KEY = "3ducation.theme";
+const THEME_KEY = "sparklab.theme";
+const LEGACY_THEME_KEY = "3ducation.theme";
 const THEME_ORDER = ["system", "light", "dark"];
 const THEME_META = {
   system: { icon: "🌗", label: "Theme: Auto (follows your device)" },
@@ -32,7 +41,7 @@ const THEME_META = {
 };
 let theme = "system";
 try {
-  theme = localStorage.getItem(THEME_KEY) || "system";
+  theme = localStorage.getItem(THEME_KEY) || localStorage.getItem(LEGACY_THEME_KEY) || "system";
 } catch {
   /* ignore */
 }
@@ -48,19 +57,26 @@ function applyTheme(t) {
 }
 applyTheme(theme);
 
-// Auto-refresh a tab that's been open since before the latest deploy. Vite
-// content-hashes every build's filenames, so a tab still running yesterday's
-// JS will 404 the moment it tries to lazily load a page that changed (this
-// is what caused "the page is stuck / won't load" reports). registerType:
-// "autoUpdate" in vite.config.js makes the new service worker take over
-// immediately (skipWaiting + clientsClaim) and reload this tab once it does
-// — but only once a new service worker is actually *found*, which normally
-// only happens on a fresh navigation. The interval below checks for one
-// periodically so an open tab picks up a deploy without needing to be
-// closed and reopened. Sign-in survives the reload (Firebase keeps it in
-// IndexedDB, independent of the page).
-registerSW({
+let offlineReady = false;
+let offlineMessage = import.meta.env.DEV
+  ? "Offline cache enabled in production builds"
+  : "Preparing offline access…";
+let cloudMessage = firebaseConfigured ? "Local only" : "Cloud not configured";
+
+// Cache new releases in the background, then let learners save drafts before applying them.
+const updateSW = registerSW({
+  onNeedRefresh() {
+    document.getElementById("update-app")?.removeAttribute("hidden");
+  },
   immediate: true,
+  onOfflineReady() {
+    offlineReady = true;
+    updateConnection();
+  },
+  onRegisterError() {
+    offlineMessage = "Offline download unavailable · retry by reloading online";
+    updateConnection();
+  },
   onRegisteredSW(_swUrl, registration) {
     if (!registration) return;
     setInterval(() => registration.update(), 60_000);
@@ -71,13 +87,13 @@ const app = document.getElementById("app");
 
 app.innerHTML = `
   <header class="topbar">
-    <a class="brand" href="#/" aria-label="3ducation home">
+    <a class="brand" href="#/" aria-label="SparkLab home">
       <svg class="brand-mark" viewBox="0 0 26 26" fill="none" aria-hidden="true">
         <circle cx="13" cy="13" r="3.6" fill="currentColor"/>
         <ellipse cx="13" cy="13" rx="12" ry="5.2" stroke="currentColor" stroke-width="1.4"/>
         <ellipse cx="13" cy="13" rx="12" ry="5.2" stroke="currentColor" stroke-width="1.4" transform="rotate(60 13 13)"/>
       </svg>
-      <span class="brand-word"><span class="d3">3d</span>ucation</span>
+      <span class="brand-word"><span class="d3">Spark</span>Lab</span>
     </a>
     <div class="topbar-right">
       <nav class="crumbs" id="crumbs" aria-live="polite">Workshop</nav>
@@ -86,17 +102,56 @@ app.innerHTML = `
     </div>
   </header>
 
+  <nav class="feature-nav" aria-label="Learning tools">
+    <a href="#/">Experiments</a><a href="#/instruments">75 instruments</a><a href="#/formula">Formula Box</a><a href="#/dashboard">My learning</a><a href="#/submit">Contribute</a>
+  </nav>
+  <div class="connection-bar" role="status" id="connection-status"></div>
+  <div class="feature-nav"><button class="btn" id="install-app" hidden>Install Spark</button><button class="btn" id="update-app" hidden>Update available · save your work, then reload</button></div>
+  <div id="storage-alert" role="alert" hidden class="storage-alert">Browser storage is full or disabled. Recent changes may last only for this session. Export your learning from My learning.</div>
   <main id="main" class="view" tabindex="-1"></main>
 
   <footer class="site-foot">
-    <p>Free and open source — <a href="https://github.com/atbt-ops/3ducation">github.com/atbt-ops/3ducation</a>.
-    Signed-in progress syncs across devices; signed-out progress stays in this browser.
-    <a href="#/community">Browse community instruments</a> or
-    <a href="#/submit">submit your own</a> — no coding required.</p>
-    <button class="linklike" id="resetProgress" type="button">Reset my progress</button>
+    <p>
+      <strong>SparkLab</strong> — Interactive 3D STEM lab empowering students across Physics, Chemistry, Biology, and Mathematics. Built to bring hands-on science experiments to every classroom, even without physical lab equipment or an active internet connection.
+    </p>
+    <button class="linklike" id="resetProgress" type="button">Reset progress</button>
   </footer>
 `;
 
+function updateConnection() {
+  const el = document.getElementById("connection-status");
+  if (el)
+    el.textContent = `${navigator.onLine ? "● Online" : "○ Offline"} · ${offlineReady ? "Offline learning ready" : offlineMessage} · ${cloudMessage}`;
+}
+addEventListener("online", updateConnection);
+addEventListener("offline", updateConnection);
+addEventListener("spark-sync", (e) => {
+  cloudMessage = e.detail;
+  updateConnection();
+});
+addEventListener("spark-storage-error", () => {
+  document.getElementById("storage-alert").hidden = false;
+});
+if (navigator.serviceWorker)
+  navigator.serviceWorker.ready.then(() => {
+    offlineReady = true;
+    updateConnection();
+  });
+updateConnection();
+let installPrompt;
+addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  document.getElementById("install-app").hidden = false;
+});
+document.getElementById("install-app").onclick = async () => {
+  if (installPrompt) {
+    await installPrompt.prompt();
+    installPrompt = null;
+    document.getElementById("install-app").hidden = true;
+  }
+};
+document.getElementById("update-app").onclick = () => updateSW(true);
 const main = document.getElementById("main");
 const crumbs = document.getElementById("crumbs");
 const authArea = document.getElementById("authArea");
@@ -126,12 +181,21 @@ function syncThemeButton() {
   themeToggle.setAttribute("aria-label", meta.label);
 }
 syncThemeButton();
+subscribeState((s) => {
+  const t = s.preferences.theme?.value;
+  if (THEME_ORDER.includes(t) && theme !== t) {
+    theme = t;
+    applyTheme(t);
+    syncThemeButton();
+  }
+});
 themeToggle.addEventListener("click", () => {
   theme = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
   applyTheme(theme);
   syncThemeButton();
   try {
     localStorage.setItem(THEME_KEY, theme);
+    saveItem("preferences", "theme", { value: theme });
   } catch {
     /* ignore */
   }
@@ -157,7 +221,7 @@ function renderAuthArea() {
     ${communityLink}
     <a class="auth-link" href="#/submit">Submit</a>
     ${admin ? '<a class="auth-link" href="#/review">Review</a>' : ""}
-    <span class="auth-avatar" title="${currentUser.email || ""}">${initials(currentUser)}</span>
+    <span class="auth-avatar" title="${escapeHtml(currentUser.email || "")}">${escapeHtml(initials(currentUser))}</span>
     <button class="btn" id="signOutBtn" type="button">Sign out</button>
   `;
   authArea.querySelector("#signOutBtn").addEventListener("click", () => signOutUser());
@@ -179,19 +243,36 @@ async function getSync() {
 
 renderAuthArea(); // signed-out UI immediately; onAuth below replaces it once Firebase resolves
 
+let authGeneration = 0;
 onAuth(async (user) => {
+  const authToken = ++authGeneration;
+  syncModule?.detachSync();
+  setOwner(user?.uid);
   currentUser = user;
+  await refreshAdmin(user);
+  if (authToken !== authGeneration) return;
+  const preference = readState().preferences.theme?.value;
+  if (THEME_ORDER.includes(preference)) {
+    theme = preference;
+    applyTheme(theme);
+    syncThemeButton();
+  }
   renderAuthArea();
   if (user) {
     const { attachSync } = await getSync();
+    if (authToken !== authGeneration) return;
     attachSync(user.uid);
+    const { flushSubmissions } = await import("./submissions.js");
+    if (authToken !== authGeneration) return;
+    flushSubmissions(user);
   } else if (syncModule) {
     syncModule.detachSync();
   }
   // Re-render a gated page once auth resolves (it's async on first load), or
   // again whenever sign-in state changes underneath it.
   const raw = location.hash.replace(/^#\/?/, "");
-  if (raw === "submit" || raw === "review") route();
+  if (raw === "submit" || raw === "review" || raw === "dashboard" || raw === "submit/formula")
+    route();
 });
 
 // Bumped by route() on every navigation. Async page renderers (module load,
@@ -203,6 +284,19 @@ onAuth(async (user) => {
 // swap, so clicking through several quickly is a real scenario, not just a
 // theoretical one.
 let navToken = 0;
+let featureCleanup = null;
+addEventListener("online", async () => {
+  if (currentUser) {
+    const { flushSubmissions } = await import("./submissions.js");
+    flushSubmissions(currentUser);
+  }
+});
+setInterval(async () => {
+  if (currentUser && navigator.onLine) {
+    const { flushSubmissions } = await import("./submissions.js");
+    flushSubmissions(currentUser);
+  }
+}, 30000);
 
 /* ---------------- shared 3D viewer ---------------- */
 let viewer = null;
@@ -247,7 +341,10 @@ function ensureViewer() {
   canvas = document.createElement("canvas");
   canvas.id = "stage";
   canvas.tabIndex = 0;
-  canvas.setAttribute("aria-label", "3D model viewport. Drag or use arrow keys to orbit, +/- to zoom.");
+  canvas.setAttribute(
+    "aria-label",
+    "3D model viewport. Drag or use arrow keys to orbit, +/- to zoom."
+  );
   viewer = new Viewer(canvas);
 }
 
@@ -267,29 +364,33 @@ requestAnimationFrame(loop);
 /* ---------------- home ---------------- */
 let homeBand = "All";
 try {
-  homeBand = localStorage.getItem("3ducation.band") || "All";
+  homeBand =
+    localStorage.getItem("sparklab.band") || localStorage.getItem("3ducation.band") || "All";
 } catch {
   /* ignore */
 }
 
 const SUBJECT_BLURB = {
-  Physics: "Forces, energy, circuits, light and sound — push, drop, and short-circuit your way through it.",
+  Physics:
+    "Forces, energy, circuits, light and sound — push, drop, and short-circuit your way through it.",
   Chemistry: "Atoms, reactions, gases and the periodic table — 118 elements to explore.",
   Biology: "Cells, DNA, the heart, and how living things work and grow.",
-  "Earth Science": "Inside the planet, its plates, rocks, and the water cycle.",
   Math: "Numbers, shapes, graphs and calculus — geometry and algebra you can turn around.",
-  Astronomy: "Orbits, eclipses, moon phases, and how stars are born and die.",
 };
 
 // Real screenshots of the running app (captured from the actual 3D stage of
 // each instrument) — not mockups. A quick, honest preview of the variety
 // inside before a visitor commits to opening one.
 const SHOWCASE = [
-  { src: showcaseOrrery, caption: "Orrery — planets and orbits drawn to real relative sizes." },
-  { src: showcaseMirrors, caption: "Concave & convex mirrors — drag the object and watch the ray diagram update." },
+  {
+    src: showcaseMirrors,
+    caption: "Concave & convex mirrors — drag the object and watch the ray diagram update.",
+  },
   { src: showcaseCell, caption: "Cell explorer — tap any organelle to read what it does." },
-  { src: showcaseIonicbond, caption: "Ionic bonding — watch an electron jump from sodium to chlorine." },
-  { src: showcaseGalaxies, caption: "Galaxy types — spiral, elliptical and irregular, side by side." },
+  {
+    src: showcaseIonicbond,
+    caption: "Ionic bonding — watch an electron jump from sodium to chlorine.",
+  },
 ];
 
 /** A small, dependency-free carousel: one slide visible at a time, dot and
@@ -338,7 +439,8 @@ function mountCarousel(root, slides) {
     // Only announce on user-driven navigation, not every autoplay tick —
     // a screen reader narrating an unrequested slide change every 4.5s
     // would be closer to a nuisance than a courtesy.
-    if (announce) liveRegion.textContent = `Slide ${index + 1} of ${slides.length}: ${slides[index].caption}`;
+    if (announce)
+      liveRegion.textContent = `Slide ${index + 1} of ${slides.length}: ${slides[index].caption}`;
   }
   function go(i, announce = true) {
     index = (i + slides.length) % slides.length;
@@ -401,7 +503,11 @@ function inScope(m) {
 function matchesQuery(m, query) {
   if (!query) return true;
   const q = query.toLowerCase();
-  return m.name.toLowerCase().includes(q) || m.blurb.toLowerCase().includes(q) || m.tag.toLowerCase().includes(q);
+  return (
+    m.name.toLowerCase().includes(q) ||
+    m.blurb.toLowerCase().includes(q) ||
+    m.tag.toLowerCase().includes(q)
+  );
 }
 
 function bandChipsHTML(selected) {
@@ -420,11 +526,13 @@ function wireBandRow(root, onChange) {
     if (!btn) return;
     homeBand = btn.dataset.band;
     try {
-      localStorage.setItem("3ducation.band", homeBand);
+      localStorage.setItem("sparklab.band", homeBand);
     } catch {
       /* ignore */
     }
-    root.querySelectorAll(".band-row .chip").forEach((c) => c.setAttribute("aria-pressed", c === btn ? "true" : "false"));
+    root
+      .querySelectorAll(".band-row .chip")
+      .forEach((c) => c.setAttribute("aria-pressed", c === btn ? "true" : "false"));
     onChange();
   });
 }
@@ -547,8 +655,12 @@ function renderHome() {
 
   const orbitCanvas = main.querySelector(".hero-orbit-canvas");
   if (orbitCanvas) {
-    heroOrbit = createHeroOrbit(orbitCanvas);
-    heroOrbit.start();
+    try {
+      heroOrbit = createHeroOrbit(orbitCanvas);
+      heroOrbit.start();
+    } catch {
+      orbitCanvas.hidden = true;
+    }
   }
   stopCarousel();
   carouselCleanup = mountCarousel(main.querySelector("#showcaseCarousel"), SHOWCASE);
@@ -573,11 +685,18 @@ function renderHome() {
       return;
     }
     // No search — subjects as big tiles, not 50+ cards at once. Click one to open it.
-    const visibleSubjects = SUBJECTS.filter((subj) => MODULES.some((m) => m.subject === subj && inScope(m)));
+    const visibleSubjects = SUBJECTS.filter((subj) =>
+      MODULES.some((m) => m.subject === subj && inScope(m))
+    );
     emptyEl.hidden = visibleSubjects.length > 0;
     wrap.innerHTML = visibleSubjects.length
       ? `<div class="subject-tiles">${visibleSubjects
-          .map((subj) => subjectTile(subj, MODULES.filter((m) => m.subject === subj && inScope(m))))
+          .map((subj) =>
+            subjectTile(
+              subj,
+              MODULES.filter((m) => m.subject === subj && inScope(m))
+            )
+          )
           .join("")}</div>`
       : "";
   }
@@ -719,9 +838,21 @@ async function renderModule(id) {
 /** Shared by built-in modules and community formula instruments (see pages/communityModule.js). */
 function renderModuleObject(m) {
   active?.onExit?.(viewer);
-  ensureViewer();
+  try {
+    ensureViewer();
+  } catch {
+    leaveModule();
+    progress.markVisited(m.id);
+    main.innerHTML = `<a class="back-btn" href="#/">← Workshop</a><article class="notebook"><h1>${escapeHtml(m.name)}</h1><p role="status">WebGL is unavailable in this browser. Enable hardware acceleration to interact with the 3D model. You can still read the lesson and take the quiz.</p><div>${m.lesson}</div><div id="fallback-quiz"></div><button class="btn" id="fallback-complete">Mark as completed</button></article>`;
+    mountQuiz(main.querySelector("#fallback-quiz"), m.id, m.quiz);
+    main.querySelector("#fallback-complete").onclick = (e) => {
+      progress.complete(m.id);
+      e.target.textContent = "Completed ✓";
+    };
+    return;
+  }
   progress.markVisited(m.id);
-  crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${m.name}</b>`;
+  crumbs.innerHTML = `<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>${escapeHtml(m.name)}</b>`;
 
   const accent = SUBJECT_ACCENT[m.subject];
   const accentStyle = accent ? `style="--accent:${accent}"` : "";
@@ -742,7 +873,7 @@ function renderModuleObject(m) {
     <div class="workbench">
       <div class="stage-column">
         <div class="stage-wrap">
-          <span class="module-eyebrow" ${accentStyle}>${m.tag}</span>
+          <span class="module-eyebrow" ${accentStyle}>${escapeHtml(m.tag)}</span>
           <div class="stage-tools">
             <button class="stage-tool" id="resetView" type="button" title="Reset view" aria-label="Reset view">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.46-3.54M13 3v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -756,7 +887,7 @@ function renderModuleObject(m) {
         ${illustrationHTML(m)}
       </div>
       <aside class="notebook" ${accentStyle}>
-        <h2>${m.name} ${badgeHTML(m.id)}</h2>
+        <h2>${escapeHtml(m.name)} ${badgeHTML(m.id)}</h2>
         <details class="lesson" open>
           <summary>Learn</summary>
           <div class="lesson-body">${m.lesson}</div>
@@ -765,6 +896,7 @@ function renderModuleObject(m) {
         <div class="presets" id="presets" hidden></div>
         <div class="panel" id="panel"></div>
         <div class="quiz-slot" id="quiz"></div>
+        <button class="btn" id="mark-completed">${progress.for(m.id).completed ? "Completed ✓" : "Mark as completed"}</button>
       </aside>
     </div>
     ${relatedHTML}
@@ -779,9 +911,17 @@ function renderModuleObject(m) {
   });
   main.querySelector("#fsToggle").addEventListener("click", () => {
     if (document.fullscreenElement) document.exitFullscreen?.();
-    else stageWrap.requestFullscreen?.().then(() => viewer.resize(stageWrap), () => {});
+    else
+      stageWrap.requestFullscreen?.().then(
+        () => viewer.resize(stageWrap),
+        () => {}
+      );
   });
 
+  main.querySelector("#mark-completed").onclick = (e) => {
+    progress.complete(m.id);
+    e.target.textContent = "Completed ✓";
+  };
   const panel = main.querySelector("#panel");
   panel.innerHTML = m.panelHTML();
   m.wire(panel);
@@ -829,7 +969,8 @@ function withTimeout(promise, ms = 12000) {
 async function renderSubmitPage() {
   const myToken = navToken;
   leaveModule();
-  crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Submit an instrument</b>';
+  crumbs.innerHTML =
+    '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Submit an instrument</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderSubmit } = await withTimeout(import("./pages/submit.js"));
@@ -845,7 +986,8 @@ async function renderSubmitPage() {
 async function renderReviewPage() {
   const myToken = navToken;
   leaveModule();
-  crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Review queue</b>';
+  crumbs.innerHTML =
+    '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Review queue</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
     const { renderReview } = await withTimeout(import("./pages/review.js"));
@@ -876,7 +1018,7 @@ async function renderCommunityListPage() {
 
 async function renderCommunityInstrument(subId) {
   const myToken = navToken;
-  ensureViewer();
+  leaveModule();
   crumbs.innerHTML = '<a href="#/">Workshop</a> <span aria-hidden="true">/</span> <b>Community</b>';
   main.innerHTML = '<p class="fact">Loading…</p>';
   try {
@@ -885,15 +1027,56 @@ async function renderCommunityInstrument(subId) {
     );
     const sub = await getSubmission(subId);
     if (myToken !== navToken) return;
-    if (!sub || sub.type !== "formula" || (sub.status !== "approved" && !isAdmin(currentUser))) {
+    if (!sub || (sub.status !== "approved" && !isAdmin(currentUser))) {
       leaveModule();
-      main.innerHTML = '<p class="fact">This instrument isn\'t available — it may still be in review, or not exist.</p>';
+      main.innerHTML =
+        '<p class="fact">This instrument isn\'t available — it may still be in review, or not exist.</p>';
       return;
     }
-    renderModuleObject(buildCommunityModule(sub));
+    if (sub.type === "formula") renderModuleObject(buildCommunityModule(sub));
+    else {
+      leaveModule();
+      const { mountContribution } = await import("./features/community-detail.js");
+      if (myToken !== navToken) return;
+      featureCleanup = mountContribution(main, sub);
+    }
   } catch {
     if (myToken !== navToken) return;
     chunkLoadError("That instrument");
+  }
+}
+
+const featureLoaders = {
+  instruments: () => import("./features/instruments.js"),
+  formula: () => import("./features/formula.js"),
+  dashboard: () => import("./features/dashboard.js"),
+  submit: () => import("./features/contribute.js"),
+  contributors: () => import("./features/community-detail.js"),
+};
+async function renderFeature(name, id) {
+  const token = navToken;
+  leaveModule();
+  crumbs.innerHTML = '<a href="#/">Workshop</a>';
+  main.innerHTML = '<p class="fact">Loading learning tools…</p>';
+  try {
+    const feature = await featureLoaders[name]();
+    if (token !== navToken) return;
+    const container = document.createElement("div");
+    main.replaceChildren(container);
+    const cleanup = await (name === "contributors" ? feature.mountProfile : feature.mount)(
+      container,
+      id,
+      { user: currentUser, signIn: () => requestSignIn() }
+    );
+    if (token !== navToken) {
+      cleanup?.();
+      return;
+    }
+    featureCleanup = cleanup;
+    focusMainAndScrollTop();
+  } catch (err) {
+    if (token === navToken)
+      main.innerHTML = `<p class="fact">${escapeHtml(err.message)}</p><a href="#/">Return to experiments</a>`;
   }
 }
 
@@ -903,10 +1086,15 @@ function route() {
   // Only "#/..." paths are routes; plain anchors like "#main" are left alone.
   if (raw && !raw.startsWith("#/")) return;
   navToken++;
+  featureCleanup?.();
+  featureCleanup = null;
   stopHeroOrbit(); // torn down on every navigation; renderHome() below recreates it if we're headed back there
   stopCarousel();
   const id = raw.replace(/^#\/?/, "");
-  if (id === "submit") renderSubmitPage();
+  const [section, ...rest] = id.split("/");
+  if (id === "submit/formula") renderSubmitPage();
+  else if (featureLoaders[section]) renderFeature(section, rest.join("/"));
+  else if (id === "submit") renderSubmitPage();
   else if (id === "review") renderReviewPage();
   else if (id === "community") renderCommunityListPage();
   else if (id.startsWith("community/")) renderCommunityInstrument(id.slice("community/".length));

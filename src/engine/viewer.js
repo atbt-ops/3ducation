@@ -41,7 +41,9 @@ export class Viewer {
 
   _bindPointer() {
     const c = this.canvas;
+    c.addEventListener("contextmenu", (e) => e.preventDefault());
     c.addEventListener("pointerdown", (e) => {
+      this._pan = e.button === 2 || e.shiftKey;
       this.dragging = true;
       this._moved = 0;
       this._last = { x: e.clientX, y: e.clientY };
@@ -53,6 +55,13 @@ export class Viewer {
       const dy = e.clientY - this._last.y;
       this._last = { x: e.clientX, y: e.clientY };
       this._moved += Math.abs(dx) + Math.abs(dy);
+      if (this._pan) {
+        const scale = this.radius * 0.002;
+        const right = new THREE.Vector3().setFromMatrixColumn(this.camera.matrix, 0);
+        const up = new THREE.Vector3().setFromMatrixColumn(this.camera.matrix, 1);
+        this.wantTarget.addScaledVector(right, -dx * scale).addScaledVector(up, dy * scale);
+        return;
+      }
       this.theta -= dx * 0.006;
       this.phi = Math.min(2.95, Math.max(0.25, this.phi - dy * 0.006));
     });

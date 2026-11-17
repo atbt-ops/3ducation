@@ -18,6 +18,11 @@ const FRIENDLY = {
   "auth/user-not-found": "No account found with that email.",
   "auth/too-many-requests": "Too many attempts — please wait a moment and try again.",
   "auth/popup-closed-by-user": "Sign-in was closed before finishing.",
+  "auth/popup-blocked": "Sign-in popup was blocked by your browser. Please allow popups for this site.",
+  "auth/cancelled-popup-request": "Only one sign-in window can be open at a time.",
+  "auth/unauthorized-domain": "This domain is not authorized in Firebase Console (Authentication > Settings > Authorized domains).",
+  "auth/operation-not-allowed": "Google sign-in is not enabled in your Firebase Console (Authentication > Sign-in method).",
+  "auth/account-exists-with-different-credential": "An account already exists with this email using a different sign-in method.",
   "auth/network-request-failed": "Network error — check your connection.",
 };
 
@@ -27,6 +32,8 @@ function friendly(err) {
 
 export async function signUp(name, email, password) {
   try {
+    if (!auth)
+      throw new Error("Cloud accounts are not configured yet. Local learning is available.");
     await authReady;
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     if (name) await updateProfile(cred.user, { displayName: name });
@@ -38,6 +45,8 @@ export async function signUp(name, email, password) {
 
 export async function signIn(email, password) {
   try {
+    if (!auth)
+      throw new Error("Cloud accounts are not configured yet. Local learning is available.");
     await authReady;
     const cred = await signInWithEmailAndPassword(auth, email, password);
     return { user: cred.user };
@@ -48,6 +57,8 @@ export async function signIn(email, password) {
 
 export async function signInGoogle() {
   try {
+    if (!auth)
+      throw new Error("Cloud accounts are not configured yet. Local learning is available.");
     await authReady;
     const cred = await signInWithPopup(auth, new GoogleAuthProvider());
     return { user: cred.user };
@@ -57,9 +68,13 @@ export async function signInGoogle() {
 }
 
 export function signOutUser() {
-  return signOut(auth);
+  return auth ? signOut(auth) : Promise.resolve();
 }
 
 export function onAuth(cb) {
+  if (!auth) {
+    queueMicrotask(() => cb(null));
+    return () => {};
+  }
   return onAuthStateChanged(auth, cb);
 }

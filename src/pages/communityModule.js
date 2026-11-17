@@ -42,7 +42,7 @@ export function buildCommunityModule(sub) {
       <p>${escapeHtml(sub.description)}</p>
       <p class="fact">Formula: <span class="mono">z = ${escapeHtml(sub.formula)}</span></p>
       <p class="fact">Submitted by ${author} — a community instrument, reviewed but not
-        written by the 3ducation team.</p>
+        written by the SparkLab team.</p>
     `,
     quiz: Array.isArray(sub.quiz) ? sub.quiz : [],
 

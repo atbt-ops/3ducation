@@ -16,14 +16,21 @@ function body(s) {
           : "No check-yourself quiz was added — that's fine, quizzes are optional."
       }</p>`;
   }
+  if (s.type === "resource")
+    return `<div class="resource-text">${escapeHtml(s.content || "")}</div><p><a href="#/community/${s.id}">Preview resource →</a></p>`;
   return `
-    <details><summary>View code (read-only, never executed)</summary>
+    <p><a href="#/community/${s.id}">Open isolated preview →</a></p><details><summary>Inspect source code</summary>
       <pre class="mono submission-code">${escapeHtml(s.code || "")}</pre>
     </details>`;
 }
 
 function card(s) {
-  const kind = s.type === "formula" ? "No-code formula" : "Developer code";
+  const kind =
+    s.type === "formula"
+      ? "No-code formula"
+      : s.type === "resource"
+        ? "Learning resource"
+        : "Developer code";
   const accent = SUBJECT_ACCENT[s.subject];
   return `
     <div class="submission-row" data-id="${s.id}" ${accent ? `style="--accent:${accent}"` : ""}>
@@ -32,7 +39,7 @@ function card(s) {
         <span class="badge is-visited">${escapeHtml(s.status)}</span>
       </div>
       <p class="fact">${kind} · ${escapeHtml(s.subject)} · classes ${s.gradeMin}–${s.gradeMax} ·
-        by ${escapeHtml(s.authorName || s.authorEmail || "unknown")}</p>
+        by ${escapeHtml(s.authorName || "Learner")}</p>
       <p class="fact">${escapeHtml(s.description)}</p>
       ${body(s)}
       ${
@@ -41,6 +48,7 @@ function card(s) {
              <input type="text" id="note-${s.id}" class="text-input" maxlength="300"></div>
            <div class="btn-row">
              <button class="btn primary" data-act="approve" data-id="${s.id}" type="button">Approve</button>
+             <button class="btn" data-act="changes" data-id="${s.id}" type="button">Request changes</button>
              <button class="btn" data-act="reject" data-id="${s.id}" type="button">Reject</button>
            </div>`
           : `<p class="fact">${s.reviewNote ? `Note: ${escapeHtml(s.reviewNote)}` : ""}</p>`
@@ -74,7 +82,7 @@ export async function renderReview(main, user) {
         <h2>How approving each type works</h2>
         <ul class="spot-list">
           <li><span class="spot-emoji" aria-hidden="true">🧮</span><span><strong>Formula:</strong> publishes immediately at <span class="mono">#/community</span> — it only ever runs through the same sandboxed expression engine Surface studio uses, so there's nothing to execute unsafely.</span></li>
-          <li><span class="spot-emoji" aria-hidden="true">💻</span><span><strong>Developer code:</strong> approving does <em>not</em> publish it — copy it into <span class="mono">src/modules/</span>, review it properly, add it to the registry, and deploy as a normal commit.</span></li>
+          <li><span class="spot-emoji" aria-hidden="true">💻</span><span><strong>Developer code:</strong> publishes to the community library. Preview the restricted Three.js simulation and review its educational content first.</span></li>
         </ul>
       </aside>
     </section>
@@ -104,12 +112,21 @@ export async function renderReview(main, user) {
     if (!btn) return;
     const id = btn.dataset.id;
     const note = main.querySelector(`#note-${id}`)?.value.trim() || "";
-    const status = btn.dataset.act === "approve" ? "approved" : "rejected";
+    const status =
+      btn.dataset.act === "approve"
+        ? "approved"
+        : btn.dataset.act === "changes"
+          ? "changes_requested"
+          : "rejected";
     btn.disabled = true;
     try {
       await reviewSubmission(id, status, note);
       load();
-    } catch {
+    } catch (err) {
+      const message = document.createElement("p");
+      message.setAttribute("role", "alert");
+      message.textContent = err.message;
+      btn.parentElement.after(message);
       btn.disabled = false;
     }
   });

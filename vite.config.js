@@ -1,8 +1,7 @@
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Deployed at https://atbt-ops.github.io/3ducation/
-const base = process.env.DEPLOY_BASE || "/3ducation/";
+const base = process.env.DEPLOY_BASE || "./";
 
 export default defineConfig({
   base,
@@ -24,25 +23,40 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
-      registerType: "autoUpdate",
-      // We register the service worker ourselves in main.js (via
-      // virtual:pwa-register) instead of the plugin's auto-injected script,
-      // because the auto-injected one only calls navigator.serviceWorker
-      // .register() — it never checks for updates or reloads a tab that's
-      // been open since before a deploy, which is what actually reloads
-      // stale content automatically. See main.js for the real logic.
+      registerType: "prompt",
+      // Registration, update prompts and download status live in the app shell.
       injectRegister: false,
       includeAssets: ["favicon.svg", "icons/apple-touch-icon.png"],
       workbox: {
         // three.js bundles are large; make sure they are precached for offline use.
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        globPatterns: ["**/*.{js,css,html,svg,png,jpg,jpeg,woff2}"],
+        globPatterns: ["**/*.{js,css,html,svg,png,jpg,jpeg,woff2,glb,gltf,bin}"],
+        cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "spark-font-styles",
+              expiration: { maxEntries: 8, maxAgeSeconds: 31536000 },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "spark-font-files",
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxEntries: 20, maxAgeSeconds: 31536000 },
+            },
+          },
+        ],
       },
       manifest: {
-        name: "3ducation — Science Lab",
-        short_name: "3ducation",
+        name: "SparkLab — Science Lab",
+        short_name: "SparkLab",
         description:
-          "A free, interactive 3D science lab: physics, chemistry, math and astronomy you can touch.",
+          "A free, interactive 3D science lab: physics, chemistry, biology and math you can touch.",
         theme_color: "#ffffff",
         background_color: "#ffffff",
         display: "standalone",

@@ -1,62 +1,85 @@
-// When signed in, mirrors local progress (visited/quiz scores) to Firestore
-// under progress/{uid} so it follows the user across devices. Signed-out
-// visitors are unaffected — everything still works from localStorage alone.
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 import { db } from "./db.js";
-import { progress } from "./state.js";
-
-let unsubscribeLocal = null;
-let currentUid = null;
-
-function mergeEntry(local, remote) {
-  if (!local) return remote;
-  if (!remote) return local;
-  return {
-    visited: !!(local.visited || remote.visited),
-    visitedAt: Math.max(local.visitedAt || 0, remote.visitedAt || 0),
-    quizCount: local.quizCount || remote.quizCount || 0,
-    quizBest: Math.max(local.quizBest || 0, remote.quizBest || 0),
-    quizAt: Math.max(local.quizAt || 0, remote.quizAt || 0),
-  };
+import {
+  readState,
+  writeState,
+  mergeStates,
+  subscribe,
+  setOwner,
+  getOwner,
+} from "./features/store.js";
+let uid = null,
+  unsubscribe = null,
+  timer = null,
+  generation = 0,
+  running = false,
+  applying = false;
+export let syncStatus = "Local only";
+function status(text) {
+  syncStatus = text;
+  dispatchEvent(new CustomEvent("spark-sync", { detail: text }));
 }
-
-function mergeAll(local, remote) {
-  const ids = new Set([...Object.keys(local), ...Object.keys(remote)]);
-  const merged = {};
-  for (const id of ids) merged[id] = mergeEntry(local[id], remote[id]);
-  return merged;
+function schedule() {
+  clearTimeout(timer);
+  timer = setTimeout(flush, 600);
 }
-
-/** Call once a user signs in: pulls + merges their cloud progress, then keeps pushing local changes. */
-export async function attachSync(uid) {
-  currentUid = uid;
-  const ref = doc(db, "progress", uid);
-  let remote = {};
-  try {
-    const snap = await getDoc(ref);
-    if (snap.exists()) remote = snap.data() || {};
-  } catch {
-    /* offline or blocked — fall back to local-only for this session */
+export async function flush() {
+  if (!uid || !db || running) return;
+  if (!navigator.onLine) {
+    status("Offline · changes saved on this device");
+    return;
   }
-
-  const merged = mergeAll(progress.all(), remote);
-  progress.replaceAll(merged); // before subscribing, so this doesn't loop back out
+  const account = uid,
+    token = generation;
+  running = true;
+  status("Syncing…");
   try {
-    await setDoc(ref, merged);
+    const local = readState();
+    const merged = await runTransaction(db, async (tx) => {
+      const ref = doc(db, "progress", account),
+        snap = await tx.get(ref);
+      const raw = snap.exists() ? snap.data() : {};
+      const remote = raw.version === 2 ? raw : { progress: raw };
+      const next = mergeStates({ ...local, drafts: {} }, { ...remote, drafts: {} });
+      if (JSON.stringify(next).length > 750000)
+        throw new Error(
+          "Cloud progress limit reached. Export and remove older saved visualizations."
+        );
+      tx.set(ref, next);
+      return next;
+    });
+    if (token !== generation || getOwner() !== account) return;
+    const current = readState();
+    applying = true;
+    writeState(mergeStates(current, merged));
+    applying = false;
+    status("Synced");
+    if (current.revision !== local.revision) schedule();
   } catch {
-    /* will retry on the next local change */
+    if (token === generation) status("Cloud unavailable · will retry");
+  } finally {
+    running = false;
+    if (token !== generation && uid) schedule();
   }
-
-  unsubscribeLocal?.();
-  unsubscribeLocal = progress.subscribe((data) => {
-    if (currentUid !== uid) return;
-    setDoc(doc(db, "progress", uid), data).catch(() => {});
+}
+export function attachSync(account) {
+  detachSync();
+  uid = account;
+  setOwner(account);
+  unsubscribe = subscribe(() => {
+    if (applying) return;
+    status("Changes waiting to sync");
+    schedule();
   });
+  flush();
 }
-
-/** Call on sign-out: stop pushing local changes to someone else's account. */
 export function detachSync() {
-  currentUid = null;
-  unsubscribeLocal?.();
-  unsubscribeLocal = null;
+  generation++;
+  uid = null;
+  clearTimeout(timer);
+  unsubscribe?.();
+  unsubscribe = null;
+  status("Local only");
 }
+addEventListener("online", flush);
+setInterval(flush, 30000);

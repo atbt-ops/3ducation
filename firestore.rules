@@ -1,52 +1,68 @@
 rules_version = '2';
-
-// Paste this into Firebase console → Firestore Database → Rules, then Publish.
-// (Or deploy with `firebase deploy --only firestore:rules` if you have the CLI
-// set up locally — this repo doesn't run that automatically.)
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Keep this in sync with ADMIN_EMAILS in src/firebase.js.
-    function isAdmin() {
-      return isSignedIn() && request.auth.token.email in ["thrilochanprasad@gmail.com"];
-    }
-
-    // Per-user progress mirror (visited / quiz scores). Only the owner can
-    // read or write their own doc.
+    function signed() { return request.auth != null; }
+    function admin() { return signed() && request.auth.token.get('admin', false) == true; }
+    function owner(uid) { return signed() && request.auth.uid == uid; }
     match /progress/{uid} {
-      allow read, write: if isSignedIn() && request.auth.uid == uid;
+      allow read: if owner(uid);
+      allow write: if owner(uid)
+        && request.resource.data.keys().hasOnly(['version','revision','resetAt','progress','saved','preferences','drafts'])
+        && request.resource.data.version == 2
+        && request.resource.data.revision is number && request.resource.data.resetAt is number
+        && request.resource.data.progress is map && request.resource.data.progress.size() <= 800
+        && request.resource.data.saved is map && request.resource.data.saved.size() <= 800
+        && request.resource.data.preferences is map && request.resource.data.preferences.size() <= 800
+        && request.resource.data.drafts is map && request.resource.data.drafts.size() <= 800;
     }
-
-    // Community instrument submissions. Anyone signed in can create one for
-    // themselves. Once approved, a submission is public (that's what powers
-    // #/community); until then, only its author or an admin can read it.
-    // Submitted "code" text is inert here — nothing in this app ever executes
-    // it; only "formula" submissions ever render as a live instrument, and
-    // only through the same sandboxed expression evaluator Surface studio uses.
-    match /submissions/{submissionId} {
-      allow create: if isSignedIn()
+    function validSubmission(d) {
+      return d.keys().hasOnly(['type','name','description','subject','gradeMin','gradeMax','formula','code','content','resourceUrl','image','quiz','authorUid','authorName','status','createdAt','updatedAt','reviewNote','reviewedAt'])
+        && d.type in ['resource','formula','code','module']
+        && d.name is string && d.name.size() >= 3 && d.name.size() <= 100
+        && d.description is string && d.description.size() >= 20 && d.description.size() <= 2000
+        && d.subject in ['Physics','Chemistry','Biology','Math','Mathematics','Earth Science','Astronomy']
+        && d.gradeMin is number && d.gradeMax is number && d.gradeMin >= 1 && d.gradeMax <= 12 && d.gradeMin <= d.gradeMax
+        && d.formula is string && d.formula.size() <= 300
+        && d.code is string && d.code.size() <= 20000
+        && d.content is string && d.content.size() <= 12000
+        && d.image is string && d.image.size() <= 180000
+        && (d.image == '' || d.image.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$'))
+        && d.resourceUrl is string && d.resourceUrl.size() <= 1000
+        && (d.resourceUrl == '' || d.resourceUrl.matches('^https://.*'))
+        && d.quiz is list && d.quiz.size() <= 5
+        && d.authorName is string && d.authorName.size() <= 80
+        && d.createdAt is timestamp && d.updatedAt is timestamp
+        && (d.type != 'resource' || d.content.size() >= 30)
+        && (d.type != 'code' || d.code.size() > 0)
+        && (d.type != 'formula' || d.formula.size() > 0);
+    }
+    match /submissions/{id} {
+      allow get: if (signed() && id.matches('^' + request.auth.uid + '__.*'))
+        || resource.data.status == 'approved' || owner(resource.data.authorUid) || admin();
+      allow list: if resource.data.status == 'approved' || owner(resource.data.authorUid) || admin();
+      allow create: if signed() && id.matches('^[A-Za-z0-9_-]{1,160}$') && id.matches('^' + request.auth.uid + '__.*')
         && request.resource.data.authorUid == request.auth.uid
-        && request.resource.data.status == "pending";
-
-      allow read: if resource.data.status == "approved"
-        || (isSignedIn() && (resource.data.authorUid == request.auth.uid || isAdmin()));
-
-      // Only an admin may change `status` (approve/reject). An author may
-      // still edit their own submission while it's pending, but the update
-      // must leave status as "pending" — they cannot self-approve.
-      allow update: if isAdmin()
-        || (isSignedIn()
-            && resource.data.authorUid == request.auth.uid
-            && resource.data.status == "pending"
-            && request.resource.data.status == "pending");
-
-      allow delete: if isAdmin()
-        || (isSignedIn()
-            && resource.data.authorUid == request.auth.uid
-            && resource.data.status == "pending");
+        && request.resource.data.status == 'pending'
+        && !request.resource.data.keys().hasAny(['reviewNote','reviewedAt'])
+        && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time
+        && validSubmission(request.resource.data);
+      allow update: if
+        (admin() && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewNote','reviewedAt'])
+          && request.resource.data.status in ['approved','rejected','changes_requested']
+          && request.resource.data.reviewNote is string && request.resource.data.reviewNote.size() <= 500
+          && request.resource.data.reviewedAt == request.time
+          && (request.resource.data.status != 'changes_requested' || request.resource.data.reviewNote.size() > 0))
+        || (owner(resource.data.authorUid) && resource.data.status == 'changes_requested'
+          && request.resource.data.authorUid == resource.data.authorUid
+          && request.resource.data.authorName == resource.data.authorName
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.reviewNote == resource.data.reviewNote
+          && !request.resource.data.keys().hasAny(['reviewedAt'])
+          && request.resource.data.status == 'pending'
+          && request.resource.data.updatedAt == request.time
+          && validSubmission(request.resource.data));
+      allow delete: if admin();
     }
   }
 }

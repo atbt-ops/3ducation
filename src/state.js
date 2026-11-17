@@ -1,79 +1,70 @@
-// Per-visitor progress, stored locally. No account, no server.
-const KEY = "3ducation.progress.v1";
-
-const listeners = new Set();
-
-function read() {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) || "{}") || {};
-  } catch {
-    return {};
-  }
-}
-
-function write(data) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(data));
-  } catch {
-    /* private mode / storage disabled — progress just won't persist */
-  }
-  listeners.forEach((fn) => fn(data));
-}
-
+import { readState, mutate, subscribe, writeState } from "./features/store.js";
 export const progress = {
-  all() {
-    return read();
+  all: () => readState().progress,
+  for: (id) => readState().progress[id] || { visited: false, quizBest: 0, quizCount: 0 },
+  markVisited(id) {
+    mutate((s) => {
+      s.progress[id] = { ...s.progress[id], visited: true, visitedAt: Date.now() };
+    });
   },
-  for(moduleId) {
-    return read()[moduleId] || { visited: false, quizBest: 0, quizCount: 0 };
+  complete(id) {
+    mutate((s) => {
+      s.progress[id] = {
+        ...s.progress[id],
+        visited: true,
+        completed: true,
+        completedAt: Date.now(),
+      };
+    });
   },
-  markVisited(moduleId) {
-    const data = read();
-    const entry = data[moduleId] || {};
-    entry.visited = true;
-    entry.visitedAt = Date.now();
-    data[moduleId] = entry;
-    write(data);
-  },
-  recordQuiz(moduleId, correct, total) {
-    const data = read();
-    const entry = data[moduleId] || {};
-    entry.visited = true;
-    entry.quizCount = total;
-    entry.quizBest = Math.max(entry.quizBest || 0, correct);
-    entry.quizAt = Date.now();
-    data[moduleId] = entry;
-    write(data);
+  recordQuiz(id, correct, total) {
+    if (
+      !Number.isInteger(correct) ||
+      !Number.isInteger(total) ||
+      total < 1 ||
+      correct < 0 ||
+      correct > total
+    )
+      return;
+    mutate((s) => {
+      const e = s.progress[id] || {};
+      const better = correct / total >= (e.quizBest || 0) / (e.quizCount || 1);
+      s.progress[id] = {
+        ...e,
+        visited: true,
+        quizAt: Date.now(),
+        quizBest: better ? correct : e.quizBest,
+        quizCount: better ? total : e.quizCount,
+        completed: e.completed || correct === total,
+        completedAt: correct === total ? Date.now() : e.completedAt || 0,
+      };
+    });
   },
   reset() {
-    write({});
+    mutate((s) => {
+      s.progress = {};
+      s.resetAt = Date.now();
+    });
   },
-  /** Wholesale replace (used by sync.js when merging in a signed-in account's data). */
   replaceAll(data) {
-    write(data || {});
+    const s = readState();
+    s.progress = data;
+    writeState(s);
   },
-  subscribe(fn) {
-    listeners.add(fn);
-    return () => listeners.delete(fn);
-  },
-  /** Module ids with an entry in `moduleIds`, most recently visited first — for a "continue exploring" row. */
-  recent(moduleIds, limit = 6) {
-    const data = read();
-    return moduleIds
-      .filter((id) => data[id]?.visitedAt)
-      .sort((a, b) => data[b].visitedAt - data[a].visitedAt)
+  subscribe: (fn) => subscribe((s) => fn(s.progress)),
+  recent(ids, limit = 6) {
+    const d = this.all();
+    return ids
+      .filter((id) => d[id]?.visitedAt)
+      .sort((a, b) => d[b].visitedAt - d[a].visitedAt)
       .slice(0, limit);
   },
-  summary(moduleIds) {
-    const data = read();
-    let visited = 0;
-    let mastered = 0;
-    for (const id of moduleIds) {
-      const e = data[id];
-      if (!e) continue;
-      if (e.visited) visited++;
-      if (e.quizCount && e.quizBest === e.quizCount) mastered++;
-    }
-    return { visited, mastered, total: moduleIds.length };
+  summary(ids) {
+    const d = this.all();
+    return {
+      visited: ids.filter((id) => d[id]?.visited).length,
+      mastered: ids.filter((id) => d[id]?.quizCount && d[id].quizBest === d[id].quizCount).length,
+      total: ids.length,
+    };
   },
 };

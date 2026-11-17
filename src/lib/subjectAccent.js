@@ -7,6 +7,4 @@ export const SUBJECT_ACCENT = {
   Chemistry: "var(--subj-chemistry)",
   Math: "var(--subj-math)",
   Biology: "var(--subj-biology)",
-  "Earth Science": "var(--subj-earth)",
-  Astronomy: "var(--subj-astronomy)",
 };

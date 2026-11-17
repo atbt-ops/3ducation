@@ -191,7 +191,7 @@ export async function renderSubmit(main, user, requestSignIn) {
         <h2>How review works</h2>
         <ul class="spot-list">
           <li><span class="spot-emoji" aria-hidden="true">🧮</span><span><strong>Formula:</strong> validated instantly by the same safe engine Surface studio uses — approved ones publish right away, no code review needed.</span></li>
-          <li><span class="spot-emoji" aria-hidden="true">💻</span><span><strong>Developer code:</strong> saved as text, never executed — a maintainer reads it and merges it in by hand if it's a good fit.</span></li>
+          <li><span class="spot-emoji" aria-hidden="true">💻</span><span><strong>Developer code:</strong> full modules are preserved as source for manual integration. For live isolated previews, use the <a href="#/submit">new developer studio</a>.</span></li>
         </ul>
       </aside>
     </section>
@@ -223,7 +223,8 @@ export async function renderSubmit(main, user, requestSignIn) {
 
     function refreshQuizAddBtn() {
       quizAddBtn.disabled = quizIds.length >= MAX_QUIZ;
-      quizAddBtn.textContent = quizIds.length >= MAX_QUIZ ? "Maximum 5 questions" : "+ Add a question";
+      quizAddBtn.textContent =
+        quizIds.length >= MAX_QUIZ ? "Maximum 5 questions" : "+ Add a question";
     }
 
     function addQuizBlock() {
@@ -249,7 +250,9 @@ export async function renderSubmit(main, user, requestSignIn) {
       const quiz = [];
       for (const qid of quizIds) {
         const q = main.querySelector(`#qq-${qid}`).value.trim();
-        const choices = [0, 1, 2, 3].map((ci) => main.querySelector(`#qc-${qid}-${ci}`).value.trim());
+        const choices = [0, 1, 2, 3].map((ci) =>
+          main.querySelector(`#qc-${qid}-${ci}`).value.trim()
+        );
         const checked = main.querySelector(`input[name="qans-${qid}"]:checked`);
         const explain = main.querySelector(`#qe-${qid}`).value.trim();
         const started = q || choices.some(Boolean) || checked || explain;
@@ -331,7 +334,15 @@ export async function renderSubmit(main, user, requestSignIn) {
         return;
       }
       try {
-        await createSubmission(user, { type: "code", name, subject, gradeMin, gradeMax, description, code });
+        await createSubmission(user, {
+          type: "module",
+          name,
+          subject,
+          gradeMin,
+          gradeMax,
+          description,
+          code,
+        });
         renderForm();
         loadMine();
       } catch {

@@ -1,28 +1,38 @@
 {
-  "name": "3ducation",
-  "version": "0.5.0",
+  "name": "sparklab",
+  "version": "0.6.0",
   "private": true,
   "description": "A free, interactive 3D science lab for the classroom and self-study.",
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "vite",
-    "build": "node scripts/gen-icons.mjs && vite build",
+    "dev": "node scripts/build-preview.mjs && vite",
+    "build": "node scripts/gen-icons.mjs && node scripts/build-preview.mjs && vite build",
     "preview": "vite preview",
     "icons": "node scripts/gen-icons.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "smoke": "node scripts/smoke.mjs",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:security": "firebase emulators:exec --only firestore --project demo-spark-enhanced \"node scripts/security-tests.mjs\""
   },
   "dependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
+    "acorn": "^8.19.0",
     "firebase": "^12.19.0",
     "three": "^0.160.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "esbuild": "^0.21.5",
     "eslint": "^9.21.0",
+    "firebase-tools": "^15.36.0",
     "globals": "^15.14.0",
     "prettier": "^3.5.2",
     "sharp": "^0.33.2",

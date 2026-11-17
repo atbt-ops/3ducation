@@ -5,6 +5,22 @@ import { progress } from "../state.js";
  * questions: [{ q, choices: string[], answer: number, explain: string }]
  */
 export function mountQuiz(container, moduleId, questions) {
+  questions = Array.isArray(questions)
+    ? questions
+        .filter(
+          (q) =>
+            q &&
+            typeof q.q === "string" &&
+            Array.isArray(q.choices) &&
+            q.choices.length >= 2 &&
+            q.choices.length <= 6 &&
+            q.choices.every((c) => typeof c === "string") &&
+            Number.isInteger(q.answer) &&
+            q.answer >= 0 &&
+            q.answer < q.choices.length
+        )
+        .slice(0, 20)
+    : [];
   if (!questions || !questions.length) {
     container.hidden = true;
     return;
